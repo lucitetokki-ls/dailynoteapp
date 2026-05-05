@@ -2,7 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, CalendarCheck2, CalendarRange, Layers3, Search, Settings } from "lucide-react";
+import {
+  BarChart3,
+  CalendarCheck2,
+  CalendarRange,
+  Layers3,
+  PenLine,
+  Search,
+  Settings,
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -16,6 +24,11 @@ const navItems = [
     href: "/review",
     label: "Review",
     icon: BarChart3,
+  },
+  {
+    href: "/writing",
+    label: "Writing",
+    icon: PenLine,
   },
   {
     href: "/category",
