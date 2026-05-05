@@ -4,18 +4,24 @@
   font-display: swap;
   font-family: "D2Coding";
   font-style: normal;
-  font-weight: 400;
+  font-weight: 100 699;
   src:
-    url("/fonts/D2Coding.woff2") format("woff2");
+    local("D2Coding"),
+    local("D2 coding"),
+    url("/fonts/D2Coding.woff2?v=20260506") format("woff2"),
+    url("/fonts/D2Coding.woff?v=20260506") format("woff");
 }
 
 @font-face {
   font-display: swap;
   font-family: "D2Coding";
   font-style: normal;
-  font-weight: 700;
+  font-weight: 700 900;
   src:
-    url("/fonts/D2CodingBold.woff2") format("woff2");
+    local("D2Coding Bold"),
+    local("D2 coding Bold"),
+    url("/fonts/D2CodingBold.woff2?v=20260506") format("woff2"),
+    url("/fonts/D2CodingBold.woff?v=20260506") format("woff");
 }
 
 :root {
@@ -37,6 +43,7 @@
   --paper: #fbfffd;
   --app-font:
     "D2Coding",
+    "D2 coding",
     ui-monospace,
     SFMono-Regular,
     Menlo,
@@ -49,8 +56,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-system);
-  --font-mono: var(--font-mono-system);
+  --font-sans: var(--app-font);
+  --font-mono: var(--app-font);
 }
 
 * {
@@ -61,7 +68,6 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--app-font);
-  font-synthesis-weight: none;
   min-height: 100vh;
   line-height: 1.55;
   overflow-x: hidden;

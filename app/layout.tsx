@@ -31,6 +31,22 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
+      <head>
+        <link
+          as="font"
+          crossOrigin="anonymous"
+          href="/fonts/D2Coding.woff2?v=20260506"
+          rel="preload"
+          type="font/woff2"
+        />
+        <link
+          as="font"
+          crossOrigin="anonymous"
+          href="/fonts/D2CodingBold.woff2?v=20260506"
+          rel="preload"
+          type="font/woff2"
+        />
+      </head>
       <body>{children}</body>
     </html>
   );
