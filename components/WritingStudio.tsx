@@ -107,7 +107,7 @@ export function WritingStudio() {
         </div>
 
         <textarea
-          className="survey-control min-h-[58dvh] w-full resize-y rounded-md border border-zinc-200 bg-zinc-50 px-3.5 py-3.5 text-base leading-7 text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white sm:min-h-[64dvh] sm:px-5 sm:py-5 sm:text-xl sm:leading-9"
+          className="survey-control min-h-[26rem] w-full resize-y rounded-md border border-zinc-200 bg-zinc-50 px-3.5 py-3.5 text-base leading-7 text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white sm:min-h-[34rem] sm:px-5 sm:py-5 sm:text-xl sm:leading-9"
           defaultValue={writingEntry.content}
           key={`${selectedDate}-${writingEntry.updatedAt}`}
           onBlur={(event) => saveWriting(event.currentTarget.value)}
