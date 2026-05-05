@@ -1,34 +1,5 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
 import "./globals.css";
-
-const d2Coding = localFont({
-  display: "swap",
-  preload: true,
-  src: [
-    {
-      path: "../public/fonts/D2Coding.woff2",
-      style: "normal",
-      weight: "400",
-    },
-    {
-      path: "../public/fonts/D2CodingBold.woff2",
-      style: "normal",
-      weight: "600",
-    },
-    {
-      path: "../public/fonts/D2CodingBold.woff2",
-      style: "normal",
-      weight: "700",
-    },
-    {
-      path: "../public/fonts/D2CodingBold.woff2",
-      style: "normal",
-      weight: "800",
-    },
-  ],
-  variable: "--font-d2coding",
-});
 
 export const metadata: Metadata = {
   title: {
@@ -59,8 +30,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html className={d2Coding.variable} lang="ko">
-      <body className={d2Coding.className}>{children}</body>
+    <html lang="ko">
+      <head>
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+        <link
+          href="https://cdn.jsdelivr.net/gh/fonts-archive/Pretendard/Pretendard.css"
+          rel="stylesheet"
+          type="text/css"
+        />
+      </head>
+      <body>{children}</body>
     </html>
   );
 }
