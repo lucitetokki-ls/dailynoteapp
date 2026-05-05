@@ -415,12 +415,15 @@ textarea:focus-visible {
   background-color: var(--panel-soft) !important;
   border: 2px solid var(--line) !important;
   box-shadow: inset 4px 4px 0 rgba(0, 200, 150, 0.09);
-  min-height: var(--control-height);
   transition:
     background-color 140ms ease,
     border-color 140ms ease,
     box-shadow 140ms ease,
     transform 120ms ease;
+}
+
+.survey-control:not(textarea) {
+  min-height: var(--control-height);
 }
 
 .survey-control:hover {
