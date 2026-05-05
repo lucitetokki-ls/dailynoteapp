@@ -44,6 +44,7 @@ export function DailyReflection({ dailyLog, onUpdateLog }: DailyReflectionProps)
             <>
               <button
                 className="survey-control flex h-10 w-10 items-center justify-center rounded-md text-emerald-700 transition hover:bg-emerald-50"
+                data-tooltip="회고 저장"
                 onClick={handleSave}
                 title="회고 저장"
                 type="button"
@@ -53,6 +54,7 @@ export function DailyReflection({ dailyLog, onUpdateLog }: DailyReflectionProps)
               {hasReflection ? (
                 <button
                   className="survey-control flex h-10 w-10 items-center justify-center rounded-md text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-950"
+                  data-tooltip="수정 취소"
                   onClick={() => {
                     setDraftReflection(dailyLog.dailyReflection);
                     setIsEditing(false);
@@ -67,6 +69,7 @@ export function DailyReflection({ dailyLog, onUpdateLog }: DailyReflectionProps)
           ) : (
             <button
               className="survey-control flex h-10 w-10 items-center justify-center rounded-md text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-950"
+              data-tooltip="회고 수정"
               onClick={() => setIsEditing(true)}
               title="회고 수정"
               type="button"

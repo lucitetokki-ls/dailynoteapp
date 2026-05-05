@@ -13,6 +13,7 @@ import {
 import { DailyReflection } from "@/components/DailyReflection";
 import { DailyImagePanel } from "@/components/DailyImagePanel";
 import { FixedDailyActions } from "@/components/FixedDailyActions";
+import { SyncToast } from "@/components/SyncToast";
 import { updateStoredDay, useStoredDay, useSupabaseSyncStatus } from "@/lib/daily-store";
 import { getActionForSlot, getFilledSlotCount } from "@/lib/slot-metrics";
 import {
@@ -109,6 +110,7 @@ export function TodayApp() {
 
   return (
     <div className="grid gap-5 pb-9 sm:gap-8 sm:pb-12">
+      <SyncToast syncStatus={syncStatus} />
       <header className="survey-hero grid gap-4 sm:gap-5">
         <div className="max-w-5xl pt-1 text-left">
           <p className="survey-kicker">
@@ -151,6 +153,7 @@ export function TodayApp() {
         <div className="mobile-date-bar flex min-w-0 flex-wrap items-center gap-2 sm:w-auto">
           <button
             className="survey-control flex h-11 w-11 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950"
+            data-tooltip="이전 날짜"
             onClick={() => setSelectedDate((currentDate) => addDaysToDateKey(currentDate, -1))}
             title="이전 날짜"
             type="button"
@@ -163,6 +166,7 @@ export function TodayApp() {
           </div>
           <button
             className="survey-control flex h-11 w-11 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950 disabled:cursor-not-allowed disabled:opacity-40"
+            data-tooltip="다음 날짜"
             disabled={isToday}
             onClick={() => setSelectedDate((currentDate) => addDaysToDateKey(currentDate, 1))}
             title="다음 날짜"
@@ -183,7 +187,7 @@ export function TodayApp() {
         <div className="mobile-sync-row flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto">
           <span
             className={cn(
-              "rounded-md border px-3 py-1.5 text-sm font-semibold",
+              "sync-status-pill rounded-md border px-3 py-1.5 text-sm font-semibold",
               syncStatus.status === "saved" &&
                 "border-emerald-200 bg-emerald-50 text-emerald-700",
               syncStatus.status === "saving" && "border-sky-200 bg-sky-50 text-sky-700",

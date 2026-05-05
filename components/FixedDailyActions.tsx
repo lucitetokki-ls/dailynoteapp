@@ -85,6 +85,7 @@ function FixedDailyActionCard({ action, slot, onUpdateSlot }: FixedDailyActionCa
   return (
     <article
       className="daily-slot-card survey-card grid grid-rows-[auto_1fr_auto] gap-3.5 rounded-lg border border-zinc-200 bg-white p-3.5 shadow-sm transition sm:min-h-[28rem] sm:gap-5 sm:p-5"
+      data-filled={isFilled}
       data-slot={slot}
     >
       <div className="daily-slot-card-header flex items-center justify-between gap-3">
@@ -155,6 +156,7 @@ function FixedDailyActionCard({ action, slot, onUpdateSlot }: FixedDailyActionCa
                 ? "border-amber-200 bg-amber-50 text-amber-600"
                 : "border-zinc-200 bg-white text-zinc-300 hover:text-zinc-500",
             )}
+            data-tooltip={`만족도 ${score}`}
             key={score}
             onClick={() => {
               setDraft((currentDraft) => ({
