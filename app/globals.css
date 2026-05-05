@@ -6,8 +6,7 @@
   font-style: normal;
   font-weight: 400;
   src:
-    url("https://cdn.jsdelivr.net/gh/joungkyun/font-d2coding@1.3.2/D2Coding.woff2") format("woff2"),
-    url("https://cdn.jsdelivr.net/gh/joungkyun/font-d2coding@1.3.2/D2Coding.woff") format("woff");
+    url("/fonts/D2Coding.woff2") format("woff2");
 }
 
 @font-face {
@@ -16,8 +15,7 @@
   font-style: normal;
   font-weight: 700;
   src:
-    url("https://cdn.jsdelivr.net/gh/joungkyun/font-d2coding@1.3.2/D2CodingBold.woff2") format("woff2"),
-    url("https://cdn.jsdelivr.net/gh/joungkyun/font-d2coding@1.3.2/D2CodingBold.woff") format("woff");
+    url("/fonts/D2CodingBold.woff2") format("woff2");
 }
 
 :root {
