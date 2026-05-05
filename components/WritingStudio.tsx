@@ -1,82 +1,27 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight, Save } from "lucide-react";
 
-import { updateStoredDay, useStoredDay, useSupabaseSyncStatus } from "@/lib/daily-store";
-import { getActionForSlot } from "@/lib/slot-metrics";
 import {
   addDaysToDateKey,
   cn,
-  createId,
   formatDisplayDate,
   getTodayDateKey,
 } from "@/lib/utils";
-import { slotMeta } from "@/types/daily-action";
-
-const writingSlot = "writing";
+import { useWritingEntry, useWritingSyncStatus, writeWritingEntry } from "@/lib/writing-store";
 
 export function WritingStudio() {
   const [todayDate] = useState(() => getTodayDateKey());
   const [selectedDate, setSelectedDate] = useState(todayDate);
-  const { actions } = useStoredDay(selectedDate);
-  const syncStatus = useSupabaseSyncStatus(selectedDate);
-  const writingAction = useMemo(() => getActionForSlot(actions, writingSlot), [actions]);
+  const writingEntry = useWritingEntry(selectedDate);
+  const syncStatus = useWritingSyncStatus(selectedDate);
   const editorRef = useRef<HTMLTextAreaElement | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const isToday = selectedDate === todayDate;
 
   function saveWriting(nextText = editorRef.current?.value ?? "") {
-    const now = new Date().toISOString();
-    const writingMeta = slotMeta[writingSlot];
-
-    updateStoredDay(selectedDate, (currentDay) => {
-      const existingAction = getActionForSlot(currentDay.actions, writingSlot);
-      const log = {
-        ...currentDay.dailyLog,
-        updatedAt: now,
-      };
-
-      if (!existingAction) {
-        return {
-          dailyLog: log,
-          actions: [
-            {
-              id: createId(),
-              dailyLogId: log.id,
-              slot: writingSlot,
-              category: writingMeta.category,
-              title: writingMeta.label,
-              description: nextText,
-              status: "done",
-              satisfaction: 3,
-              reflection: "",
-              createdAt: now,
-              updatedAt: now,
-            },
-            ...currentDay.actions,
-          ],
-        };
-      }
-
-      return {
-        dailyLog: log,
-        actions: currentDay.actions.map((action) =>
-          action.id === existingAction.id
-            ? {
-                ...action,
-                slot: writingSlot,
-                category: writingMeta.category,
-                title: writingMeta.label,
-                description: nextText,
-                status: "done",
-                updatedAt: now,
-              }
-            : action,
-        ),
-      };
-    });
-
+    writeWritingEntry(selectedDate, nextText);
     setHasUnsavedChanges(false);
   }
 
@@ -163,8 +108,8 @@ export function WritingStudio() {
 
         <textarea
           className="survey-control min-h-[62dvh] w-full resize-y rounded-md border border-zinc-200 bg-zinc-50 px-4 py-4 text-lg leading-8 text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white sm:min-h-[64dvh] sm:px-5 sm:py-5 sm:text-xl sm:leading-9"
-          defaultValue={writingAction?.description ?? ""}
-          key={`${selectedDate}-${writingAction?.id ?? "empty"}-${writingAction?.updatedAt ?? "new"}`}
+          defaultValue={writingEntry.content}
+          key={`${selectedDate}-${writingEntry.updatedAt}`}
           onBlur={(event) => saveWriting(event.currentTarget.value)}
           onChange={() => setHasUnsavedChanges(true)}
           placeholder="오늘의 작문을 여기에 작성하세요."

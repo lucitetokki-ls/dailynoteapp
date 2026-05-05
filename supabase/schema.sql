@@ -36,6 +36,14 @@ create table if not exists weekly_reflections (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists daily_writings (
+  id uuid primary key default gen_random_uuid(),
+  date date not null unique,
+  content text not null default '',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create table if not exists action_templates (
   id text primary key,
   category text not null check (category in ('diet_fitness', 'vibe_coding', 'writing')),
@@ -50,6 +58,7 @@ create unique index if not exists daily_actions_daily_log_id_slot_idx on daily_a
 create index if not exists daily_actions_category_idx on daily_actions(category);
 create index if not exists daily_actions_status_idx on daily_actions(status);
 create index if not exists daily_logs_date_idx on daily_logs(date desc);
+create index if not exists daily_writings_date_idx on daily_writings(date desc);
 
 create or replace function set_updated_at()
 returns trigger as $$
@@ -72,6 +81,11 @@ for each row execute function set_updated_at();
 drop trigger if exists weekly_reflections_set_updated_at on weekly_reflections;
 create trigger weekly_reflections_set_updated_at
 before update on weekly_reflections
+for each row execute function set_updated_at();
+
+drop trigger if exists daily_writings_set_updated_at on daily_writings;
+create trigger daily_writings_set_updated_at
+before update on daily_writings
 for each row execute function set_updated_at();
 
 drop trigger if exists action_templates_set_updated_at on action_templates;
