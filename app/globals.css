@@ -1,77 +1,5 @@
 @import "tailwindcss";
 
-@font-face {
-  font-display: swap;
-  font-family: "D2Coding";
-  font-style: normal;
-  font-weight: 400;
-  src:
-    local("D2Coding"),
-    local("D2 coding"),
-    url("/fonts/D2Coding.woff2?v=20260506mobile") format("woff2"),
-    url("/fonts/D2Coding.woff?v=20260506mobile") format("woff");
-}
-
-@font-face {
-  font-display: swap;
-  font-family: "D2Coding";
-  font-style: normal;
-  font-weight: 500;
-  src:
-    local("D2Coding"),
-    local("D2 coding"),
-    url("/fonts/D2Coding.woff2?v=20260506mobile") format("woff2"),
-    url("/fonts/D2Coding.woff?v=20260506mobile") format("woff");
-}
-
-@font-face {
-  font-display: swap;
-  font-family: "D2Coding";
-  font-style: normal;
-  font-weight: 600;
-  src:
-    local("D2Coding"),
-    local("D2 coding"),
-    url("/fonts/D2CodingBold.woff2?v=20260506mobile") format("woff2"),
-    url("/fonts/D2CodingBold.woff?v=20260506mobile") format("woff");
-}
-
-@font-face {
-  font-display: swap;
-  font-family: "D2Coding";
-  font-style: normal;
-  font-weight: 700;
-  src:
-    local("D2Coding Bold"),
-    local("D2 coding Bold"),
-    url("/fonts/D2CodingBold.woff2?v=20260506mobile") format("woff2"),
-    url("/fonts/D2CodingBold.woff?v=20260506mobile") format("woff");
-}
-
-@font-face {
-  font-display: swap;
-  font-family: "D2Coding";
-  font-style: normal;
-  font-weight: 800;
-  src:
-    local("D2Coding Bold"),
-    local("D2 coding Bold"),
-    url("/fonts/D2CodingBold.woff2?v=20260506mobile") format("woff2"),
-    url("/fonts/D2CodingBold.woff?v=20260506mobile") format("woff");
-}
-
-@font-face {
-  font-display: swap;
-  font-family: "D2Coding";
-  font-style: normal;
-  font-weight: 900;
-  src:
-    local("D2Coding Bold"),
-    local("D2 coding Bold"),
-    url("/fonts/D2CodingBold.woff2?v=20260506mobile") format("woff2"),
-    url("/fonts/D2CodingBold.woff?v=20260506mobile") format("woff");
-}
-
 :root {
   --background: #f4fffb;
   --foreground: #071310;
@@ -90,8 +18,7 @@
   --danger: #ff4d4d;
   --paper: #fbfffd;
   --app-font:
-    "D2Coding",
-    "D2 coding",
+    var(--font-d2coding),
     ui-monospace,
     SFMono-Regular,
     Menlo,
