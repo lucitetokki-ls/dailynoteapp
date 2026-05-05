@@ -35,14 +35,14 @@ export default function RootLayout({
         <link
           as="font"
           crossOrigin="anonymous"
-          href="/fonts/D2Coding.woff2?v=20260506"
+          href="/fonts/D2Coding.woff2?v=20260506mobile"
           rel="preload"
           type="font/woff2"
         />
         <link
           as="font"
           crossOrigin="anonymous"
-          href="/fonts/D2CodingBold.woff2?v=20260506"
+          href="/fonts/D2CodingBold.woff2?v=20260506mobile"
           rel="preload"
           type="font/woff2"
         />

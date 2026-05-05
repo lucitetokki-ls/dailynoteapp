@@ -147,8 +147,8 @@ export function TodayApp() {
         </div>
       </header>
 
-      <div className="survey-divider flex flex-wrap items-center justify-between gap-3 border-y border-zinc-200 py-3 sm:py-4">
-        <div className="flex min-w-0 flex-wrap items-center gap-2">
+      <div className="survey-divider grid gap-3 border-y border-zinc-200 py-3 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:py-4">
+        <div className="mobile-date-bar flex min-w-0 flex-wrap items-center gap-2 sm:w-auto">
           <button
             className="survey-control flex h-11 w-11 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950"
             onClick={() => setSelectedDate((currentDate) => addDaysToDateKey(currentDate, -1))}
@@ -157,7 +157,7 @@ export function TodayApp() {
           >
             <ChevronLeft aria-hidden="true" size={20} />
           </button>
-          <div className="survey-control flex min-h-11 items-center gap-2 rounded-md border border-zinc-200 bg-white px-4 text-base font-semibold text-zinc-700">
+          <div className="survey-control mobile-date-label flex min-h-11 items-center gap-2 rounded-md border border-zinc-200 bg-white px-4 text-base font-semibold text-zinc-700">
             <CalendarDays aria-hidden="true" size={18} />
             {formatDisplayDate(selectedDate)}
           </div>
@@ -172,7 +172,7 @@ export function TodayApp() {
           </button>
           {!isToday ? (
             <button
-              className="survey-control min-h-11 rounded-md border border-zinc-200 bg-white px-4 text-base font-semibold text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950"
+              className="survey-control col-span-3 min-h-11 rounded-md border border-zinc-200 bg-white px-4 text-base font-semibold text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950 sm:col-auto"
               onClick={() => setSelectedDate(todayDate)}
               type="button"
             >
@@ -180,7 +180,7 @@ export function TodayApp() {
             </button>
           ) : null}
         </div>
-        <div className="flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto">
+        <div className="mobile-sync-row flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto">
           <span
             className={cn(
               "rounded-md border px-3 py-1.5 text-sm font-semibold",
@@ -198,7 +198,7 @@ export function TodayApp() {
         </div>
       </div>
 
-      <div className="grid gap-5 sm:gap-8">
+      <div className="mobile-today-grid grid gap-5 sm:gap-8">
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_460px] xl:items-stretch">
           <DailyReflection
             dailyLog={dailyLog}
