@@ -87,14 +87,14 @@ function FixedDailyActionCard({ action, slot, onUpdateSlot }: FixedDailyActionCa
       className="daily-slot-card survey-card grid grid-rows-[auto_1fr_auto] gap-3.5 rounded-lg border border-zinc-200 bg-white p-3.5 shadow-sm transition sm:min-h-[28rem] sm:gap-5 sm:p-5"
       data-slot={slot}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-start gap-2.5 sm:gap-3">
-          <div className="survey-chip flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-700 sm:h-12 sm:w-12">
+      <div className="daily-slot-card-header flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-2.5">
+          <div className="survey-chip flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-700 sm:h-11 sm:w-11">
             <Icon aria-hidden="true" size={18} />
           </div>
           <div className="daily-slot-heading min-w-0">
-            <h3 className="text-xl font-semibold text-zinc-950 sm:text-2xl">{slotMeta[slot].label}</h3>
-            <p className="daily-slot-description mt-1 text-sm leading-6 text-zinc-500 sm:mt-1.5 sm:text-base sm:leading-7">
+            <h3 className="text-xl font-semibold leading-none text-zinc-950 sm:text-2xl">{slotMeta[slot].label}</h3>
+            <p className="daily-slot-description mt-1 text-sm leading-snug text-zinc-500 sm:mt-1 sm:text-base">
               {slotMeta[slot].description}
             </p>
           </div>
