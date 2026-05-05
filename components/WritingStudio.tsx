@@ -26,36 +26,36 @@ export function WritingStudio() {
   }
 
   return (
-    <div className="grid gap-5 pb-10 sm:gap-6 sm:pb-12">
+    <div className="grid gap-5 pb-9 sm:gap-6 sm:pb-12">
       <section className="survey-hero grid gap-4">
         <div className="text-left">
           <p className="survey-kicker">Writing</p>
-          <h1 className="survey-title mt-3 text-4xl font-semibold leading-tight text-zinc-950 sm:text-6xl">
+          <h1 className="survey-title mt-2.5 text-4xl font-semibold leading-tight text-zinc-950 sm:mt-3 sm:text-6xl">
             1일 1작문
           </h1>
-          <p className="mt-3 max-w-3xl text-base leading-7 text-zinc-600 sm:text-xl sm:leading-8">
+          <p className="mt-2.5 max-w-3xl text-[0.95rem] leading-7 text-zinc-600 sm:mt-3 sm:text-xl sm:leading-8">
             하루에 하나의 글을 남기는 전용 작성 공간입니다.
           </p>
         </div>
       </section>
 
-      <section className="survey-card grid gap-4 rounded-lg border border-zinc-200 bg-white p-4 shadow-sm sm:p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2">
+      <section className="survey-card grid gap-3.5 rounded-lg border border-zinc-200 bg-white p-3.5 shadow-sm sm:gap-4 sm:p-5">
+        <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
             <button
-              className="survey-control flex h-11 w-11 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950"
+              className="survey-control flex h-10 w-10 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950 sm:h-11 sm:w-11"
               onClick={() => setSelectedDate((currentDate) => addDaysToDateKey(currentDate, -1))}
               title="이전 날짜"
               type="button"
             >
               <ChevronLeft aria-hidden="true" size={20} />
             </button>
-            <div className="survey-control flex min-h-11 items-center gap-2 rounded-md border border-zinc-200 bg-white px-4 text-base font-semibold text-zinc-700">
+            <div className="survey-control flex min-h-10 items-center gap-2 rounded-md border border-zinc-200 bg-white px-3 text-sm font-semibold text-zinc-700 sm:min-h-11 sm:px-4 sm:text-base">
               <CalendarDays aria-hidden="true" size={18} />
               {formatDisplayDate(selectedDate)}
             </div>
             <button
-              className="survey-control flex h-11 w-11 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950 disabled:cursor-not-allowed disabled:opacity-40"
+              className="survey-control flex h-10 w-10 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950 disabled:cursor-not-allowed disabled:opacity-40 sm:h-11 sm:w-11"
               disabled={isToday}
               onClick={() => setSelectedDate((currentDate) => addDaysToDateKey(currentDate, 1))}
               title="다음 날짜"
@@ -65,7 +65,7 @@ export function WritingStudio() {
             </button>
             {!isToday ? (
               <button
-                className="survey-control min-h-11 rounded-md border border-zinc-200 bg-white px-4 text-base font-semibold text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950"
+                className="survey-control min-h-10 rounded-md border border-zinc-200 bg-white px-3 text-sm font-semibold text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950 sm:min-h-11 sm:px-4 sm:text-base"
                 onClick={() => setSelectedDate(todayDate)}
                 type="button"
               >
@@ -74,10 +74,10 @@ export function WritingStudio() {
             ) : null}
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto">
             <span
               className={cn(
-                "rounded-md border px-3 py-1.5 text-sm font-semibold",
+                "rounded-md border px-2.5 py-1.5 text-xs font-semibold sm:px-3 sm:text-sm",
                 hasUnsavedChanges && "border-amber-200 bg-amber-50 text-amber-700",
                 !hasUnsavedChanges &&
                   syncStatus.status === "saved" &&
@@ -96,7 +96,7 @@ export function WritingStudio() {
               {hasUnsavedChanges ? "저장 전" : syncStatus.message}
             </span>
             <button
-              className="survey-control flex min-h-11 items-center gap-2 rounded-md border border-zinc-200 bg-white px-4 text-base font-semibold text-zinc-700 transition hover:bg-zinc-50 hover:text-zinc-950"
+              className="survey-control flex min-h-10 items-center gap-2 rounded-md border border-zinc-200 bg-white px-3 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50 hover:text-zinc-950 sm:min-h-11 sm:px-4 sm:text-base"
               onClick={() => saveWriting()}
               type="button"
             >
@@ -107,7 +107,7 @@ export function WritingStudio() {
         </div>
 
         <textarea
-          className="survey-control min-h-[62dvh] w-full resize-y rounded-md border border-zinc-200 bg-zinc-50 px-4 py-4 text-lg leading-8 text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white sm:min-h-[64dvh] sm:px-5 sm:py-5 sm:text-xl sm:leading-9"
+          className="survey-control min-h-[58dvh] w-full resize-y rounded-md border border-zinc-200 bg-zinc-50 px-3.5 py-3.5 text-base leading-7 text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white sm:min-h-[64dvh] sm:px-5 sm:py-5 sm:text-xl sm:leading-9"
           defaultValue={writingEntry.content}
           key={`${selectedDate}-${writingEntry.updatedAt}`}
           onBlur={(event) => saveWriting(event.currentTarget.value)}

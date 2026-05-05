@@ -56,7 +56,7 @@ export function AppNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="mb-6 flex items-center gap-1.5 overflow-x-auto rounded-lg border-2 border-zinc-200 bg-white p-1.5 shadow-sm sm:mb-8 sm:gap-2">
+    <nav className="mb-5 flex items-center gap-1.5 overflow-x-auto rounded-lg border-2 border-zinc-200 bg-white p-1.5 shadow-sm sm:mb-8 sm:gap-2">
       {navItems.map((item) => {
         const Icon = item.icon;
         const isActive = pathname === item.href;
@@ -64,7 +64,7 @@ export function AppNav() {
         return (
           <Link
             className={cn(
-              "flex h-11 min-w-11 items-center justify-center gap-2.5 rounded-md px-3 text-base font-semibold text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 sm:h-12 sm:min-w-12 sm:px-4",
+              "flex h-10 min-w-10 items-center justify-center gap-2.5 rounded-md px-2.5 text-base font-semibold text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 sm:h-12 sm:min-w-12 sm:px-4",
               isActive && "bg-zinc-950 text-white hover:bg-zinc-950 hover:text-white",
             )}
             href={item.href}

@@ -29,10 +29,10 @@ export function DailyReflection({ dailyLog, onUpdateLog }: DailyReflectionProps)
 
   return (
     <section className="survey-card flex h-full flex-col rounded-lg border border-zinc-200 bg-white p-4 shadow-sm sm:p-5">
-      <div className="mb-4 flex items-start justify-between gap-4 sm:mb-5">
+      <div className="mb-4 flex items-start justify-between gap-3 sm:mb-5 sm:gap-4">
         <div>
-          <h2 className="text-2xl font-semibold text-zinc-950">오늘 회고</h2>
-          <p className="mt-1.5 text-base text-zinc-500">작성 후 언제든 다시 수정할 수 있습니다.</p>
+          <h2 className="text-xl font-semibold text-zinc-950 sm:text-2xl">오늘 회고</h2>
+          <p className="mt-1.5 text-sm leading-6 text-zinc-500 sm:text-base">작성 후 언제든 다시 수정할 수 있습니다.</p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           {hasReflection ? (
@@ -79,13 +79,13 @@ export function DailyReflection({ dailyLog, onUpdateLog }: DailyReflectionProps)
 
       {isEditing ? (
         <textarea
-          className="survey-control min-h-56 flex-1 w-full resize-y rounded-md border border-zinc-200 bg-zinc-50 px-4 py-3 text-lg leading-8 text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white sm:min-h-72"
+          className="survey-control min-h-48 flex-1 w-full resize-y rounded-md border border-zinc-200 bg-zinc-50 px-3.5 py-3 text-base leading-7 text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white sm:min-h-72 sm:px-4 sm:text-lg sm:leading-8"
           onChange={(event) => setDraftReflection(event.target.value)}
           placeholder="오늘의 행동에서 배운 점, 이어갈 점, 고칠 점"
           value={draftReflection}
         />
       ) : (
-        <div className="survey-control min-h-56 flex-1 whitespace-pre-wrap rounded-md border border-zinc-200 bg-zinc-50 px-4 py-3 text-lg leading-8 text-zinc-950 sm:min-h-72">
+        <div className="survey-control min-h-48 flex-1 whitespace-pre-wrap rounded-md border border-zinc-200 bg-zinc-50 px-3.5 py-3 text-base leading-7 text-zinc-950 sm:min-h-72 sm:px-4 sm:text-lg sm:leading-8">
           {dailyLog.dailyReflection}
         </div>
       )}

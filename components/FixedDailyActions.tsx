@@ -84,24 +84,24 @@ function FixedDailyActionCard({ action, slot, onUpdateSlot }: FixedDailyActionCa
 
   return (
     <article
-      className="daily-slot-card survey-card grid grid-rows-[auto_1fr_auto] gap-4 rounded-lg border border-zinc-200 bg-white p-4 shadow-sm transition sm:min-h-[28rem] sm:gap-5 sm:p-5"
+      className="daily-slot-card survey-card grid grid-rows-[auto_1fr_auto] gap-3.5 rounded-lg border border-zinc-200 bg-white p-3.5 shadow-sm transition sm:min-h-[28rem] sm:gap-5 sm:p-5"
       data-slot={slot}
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-start gap-3">
-          <div className="survey-chip flex h-12 w-12 shrink-0 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-700">
-            <Icon aria-hidden="true" size={20} />
+        <div className="flex min-w-0 items-start gap-2.5 sm:gap-3">
+          <div className="survey-chip flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-700 sm:h-12 sm:w-12">
+            <Icon aria-hidden="true" size={18} />
           </div>
           <div className="min-w-0">
-            <h3 className="text-2xl font-semibold text-zinc-950">{slotMeta[slot].label}</h3>
-            <p className="mt-1.5 text-base leading-7 text-zinc-500">
+            <h3 className="text-xl font-semibold text-zinc-950 sm:text-2xl">{slotMeta[slot].label}</h3>
+            <p className="mt-1 text-sm leading-6 text-zinc-500 sm:mt-1.5 sm:text-base sm:leading-7">
               {slotMeta[slot].description}
             </p>
           </div>
         </div>
         <span
           className={cn(
-            "shrink-0 rounded-md border px-2.5 py-1 text-sm font-semibold",
+            "shrink-0 rounded-md border px-2 py-0.5 text-xs font-semibold sm:px-2.5 sm:py-1 sm:text-sm",
             isFilled
               ? "border-zinc-200 bg-white text-zinc-600"
               : "border-zinc-200 bg-zinc-50 text-zinc-500",
@@ -111,11 +111,11 @@ function FixedDailyActionCard({ action, slot, onUpdateSlot }: FixedDailyActionCa
         </span>
       </div>
 
-      <div className="grid gap-4">
-        <label className="grid gap-2 text-base font-semibold text-zinc-700">
+      <div className="grid gap-3 sm:gap-4">
+        <label className="grid gap-2 text-sm font-semibold text-zinc-700 sm:text-base">
           행동 내용
           <textarea
-            className="survey-control daily-slot-input min-h-32 resize-y rounded-md border border-zinc-200 bg-zinc-50 px-4 py-3 text-lg leading-8 text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white"
+            className="survey-control daily-slot-input min-h-32 resize-y rounded-md border border-zinc-200 bg-zinc-50 px-3.5 py-3 text-base leading-7 text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white sm:px-4 sm:text-lg sm:leading-8"
             defaultValue={description}
             data-field="description"
             onBlur={(event) => {
@@ -128,10 +128,10 @@ function FixedDailyActionCard({ action, slot, onUpdateSlot }: FixedDailyActionCa
           />
         </label>
 
-        <label className="grid gap-2 text-base font-semibold text-zinc-700">
+        <label className="grid gap-2 text-sm font-semibold text-zinc-700 sm:text-base">
           짧은 회고
           <textarea
-            className="survey-control daily-slot-input min-h-24 resize-y rounded-md border border-zinc-200 bg-zinc-50 px-4 py-3 text-base leading-7 text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white"
+            className="survey-control daily-slot-input min-h-24 resize-y rounded-md border border-zinc-200 bg-zinc-50 px-3.5 py-3 text-base leading-7 text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white sm:px-4"
             defaultValue={reflection}
             data-field="reflection"
             onBlur={(event) => {
@@ -145,12 +145,12 @@ function FixedDailyActionCard({ action, slot, onUpdateSlot }: FixedDailyActionCa
         </label>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2.5">
-        <span className="mr-1 text-base font-semibold text-zinc-600">만족도</span>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="mr-1 text-sm font-semibold text-zinc-600 sm:text-base">만족도</span>
         {[1, 2, 3, 4, 5].map((score) => (
           <button
             className={cn(
-              "flex h-9 w-9 items-center justify-center rounded-md border transition",
+              "flex h-8 w-8 items-center justify-center rounded-md border transition sm:h-9 sm:w-9",
               score <= satisfaction
                 ? "border-amber-200 bg-amber-50 text-amber-600"
                 : "border-zinc-200 bg-white text-zinc-300 hover:text-zinc-500",
