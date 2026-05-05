@@ -84,7 +84,7 @@ function FixedDailyActionCard({ action, slot, onUpdateSlot }: FixedDailyActionCa
 
   return (
     <article
-      className="daily-slot-card survey-card grid min-h-[26rem] grid-rows-[auto_1fr_auto] gap-5 rounded-lg border border-zinc-200 bg-white p-4 shadow-sm transition sm:min-h-[30rem] sm:p-5"
+      className="daily-slot-card survey-card grid grid-rows-[auto_1fr_auto] gap-4 rounded-lg border border-zinc-200 bg-white p-4 shadow-sm transition sm:min-h-[28rem] sm:gap-5 sm:p-5"
       data-slot={slot}
     >
       <div className="flex items-start justify-between gap-3">
@@ -115,8 +115,9 @@ function FixedDailyActionCard({ action, slot, onUpdateSlot }: FixedDailyActionCa
         <label className="grid gap-2 text-base font-semibold text-zinc-700">
           행동 내용
           <textarea
-            className="survey-control daily-slot-input min-h-36 resize-y rounded-md border border-zinc-200 bg-zinc-50 px-4 py-3 text-lg leading-8 text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white"
+            className="survey-control daily-slot-input min-h-32 resize-y rounded-md border border-zinc-200 bg-zinc-50 px-4 py-3 text-lg leading-8 text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white"
             defaultValue={description}
+            data-field="description"
             onBlur={(event) => {
               const nextDescription = event.currentTarget.value;
               handleDescriptionInput(nextDescription);
@@ -130,8 +131,9 @@ function FixedDailyActionCard({ action, slot, onUpdateSlot }: FixedDailyActionCa
         <label className="grid gap-2 text-base font-semibold text-zinc-700">
           짧은 회고
           <textarea
-            className="survey-control daily-slot-input min-h-28 resize-y rounded-md border border-zinc-200 bg-zinc-50 px-4 py-3 text-base leading-7 text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white"
+            className="survey-control daily-slot-input min-h-24 resize-y rounded-md border border-zinc-200 bg-zinc-50 px-4 py-3 text-base leading-7 text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white"
             defaultValue={reflection}
+            data-field="reflection"
             onBlur={(event) => {
               const nextReflection = event.currentTarget.value;
               handleReflectionInput(nextReflection);

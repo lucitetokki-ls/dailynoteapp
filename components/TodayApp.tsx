@@ -108,46 +108,46 @@ export function TodayApp() {
   }
 
   return (
-    <div className="grid gap-8 pb-12">
-      <header className="survey-hero grid gap-5">
+    <div className="grid gap-6 pb-10 sm:gap-8 sm:pb-12">
+      <header className="survey-hero grid gap-4 sm:gap-5">
         <div className="max-w-5xl pt-1 text-left">
           <p className="survey-kicker">
             Lucitetokki Daily Action Log
           </p>
-          <h1 className="survey-title mt-3 text-5xl font-semibold leading-tight text-zinc-950 sm:text-6xl lg:text-7xl">
+          <h1 className="survey-title mt-3 text-4xl font-semibold leading-tight text-zinc-950 sm:text-6xl lg:text-7xl">
             苟日新, 日日新, 又日新
           </h1>
-          <p className="mt-4 max-w-4xl text-lg leading-8 text-zinc-600 sm:text-xl">
+          <p className="mt-3 max-w-4xl text-base leading-7 text-zinc-600 sm:mt-4 sm:text-xl sm:leading-8">
             진실로 날로 새로워지려면, 날마다 새로워지고 또 새로워져야 한다
           </p>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
-          <div className="survey-card survey-stat rounded-lg border border-zinc-200 bg-white p-3 shadow-sm">
-            <div className="flex items-center gap-2 text-sm font-semibold text-zinc-500 sm:text-base">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          <div className="survey-card survey-stat rounded-lg border border-zinc-200 bg-white p-2.5 shadow-sm sm:p-3">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 sm:gap-2 sm:text-base">
               <Target aria-hidden="true" size={18} />
               Slots
             </div>
-            <p className="mt-1.5 text-3xl font-semibold text-zinc-950 sm:text-4xl">{dailyActionSlots.length}</p>
+            <p className="mt-1.5 text-2xl font-semibold text-zinc-950 sm:text-4xl">{dailyActionSlots.length}</p>
           </div>
-          <div className="survey-card survey-stat rounded-lg border border-zinc-200 bg-white p-3 shadow-sm">
-            <div className="flex items-center gap-2 text-sm font-semibold text-zinc-500 sm:text-base">
+          <div className="survey-card survey-stat rounded-lg border border-zinc-200 bg-white p-2.5 shadow-sm sm:p-3">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 sm:gap-2 sm:text-base">
               <CheckCircle2 aria-hidden="true" size={18} />
               Filled
             </div>
-            <p className="mt-1.5 text-3xl font-semibold text-emerald-700 sm:text-4xl">{recordedSlotCount}</p>
+            <p className="mt-1.5 text-2xl font-semibold text-emerald-700 sm:text-4xl">{recordedSlotCount}</p>
           </div>
-          <div className="survey-card survey-stat rounded-lg border border-zinc-200 bg-white p-3 shadow-sm">
-            <div className="flex items-center gap-2 text-sm font-semibold text-zinc-500 sm:text-base">
+          <div className="survey-card survey-stat rounded-lg border border-zinc-200 bg-white p-2.5 shadow-sm sm:p-3">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 sm:gap-2 sm:text-base">
               <CircleDashed aria-hidden="true" size={18} />
               Rate
             </div>
-            <p className="mt-1.5 text-3xl font-semibold text-sky-700 sm:text-4xl">{completionRate}%</p>
+            <p className="mt-1.5 text-2xl font-semibold text-sky-700 sm:text-4xl">{completionRate}%</p>
           </div>
         </div>
       </header>
 
-      <div className="survey-divider flex flex-wrap items-center justify-between gap-3 border-y border-zinc-200 py-4">
+      <div className="survey-divider flex flex-wrap items-center justify-between gap-3 border-y border-zinc-200 py-3 sm:py-4">
         <div className="flex flex-wrap items-center gap-2">
           <button
             className="survey-control flex h-11 w-11 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950"
@@ -198,8 +198,8 @@ export function TodayApp() {
         </div>
       </div>
 
-      <div className="grid gap-8">
-        <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_460px] xl:items-stretch">
+      <div className="grid gap-6 sm:gap-8">
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_460px] xl:items-stretch">
           <DailyReflection
             dailyLog={dailyLog}
             key={`${dailyLog.id}-${dailyLog.updatedAt}`}

@@ -408,7 +408,11 @@ textarea:focus-visible {
 }
 
 .daily-slot-input {
-  min-height: clamp(8.5rem, 18vw, 11rem);
+  min-height: clamp(8rem, 18vw, 10.5rem);
+}
+
+.daily-slot-input[data-field="reflection"] {
+  min-height: clamp(6.5rem, 15vw, 8rem);
 }
 
 .slot-heat-cell {
@@ -437,10 +441,46 @@ textarea:focus-visible {
 
 @media (max-width: 640px) {
   .survey-title {
-    font-size: clamp(2.55rem, 13vw, 3.6rem);
+    font-size: clamp(2.2rem, 10.8vw, 3rem);
   }
 
   .survey-stat {
-    min-height: 6rem;
+    min-height: 5.2rem;
+  }
+
+  .survey-hero {
+    box-shadow: 5px 5px 0 rgba(0, 200, 150, 0.18);
+    padding: 1rem;
+  }
+
+  .survey-hero::before {
+    height: 0.55rem;
+    margin-bottom: 0.85rem;
+    width: min(14rem, 58vw);
+  }
+
+  .survey-card {
+    box-shadow:
+      5px 5px 0 rgba(7, 19, 16, 0.1),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.9) !important;
+  }
+
+  .survey-divider {
+    box-shadow: 4px 4px 0 rgba(0, 200, 150, 0.13);
+  }
+
+  .daily-slot-card:focus-within {
+    box-shadow:
+      5px 5px 0 rgba(0, 200, 150, 0.18),
+      0 0 0 3px rgba(101, 255, 210, 0.24) !important;
+    transform: none;
+  }
+
+  .daily-slot-input {
+    min-height: 8rem;
+  }
+
+  .daily-slot-input[data-field="reflection"] {
+    min-height: 6.25rem;
   }
 }
