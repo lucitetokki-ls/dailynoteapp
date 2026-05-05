@@ -482,6 +482,15 @@ textarea:focus-visible {
   background: #ff6fb1;
 }
 
+.daily-slot-heading {
+  transform: translateX(5px);
+}
+
+.daily-slot-description {
+  position: relative;
+  top: -5px;
+}
+
 .daily-slot-card:focus-within {
   box-shadow:
     9px 9px 0 rgba(0, 200, 150, 0.2),

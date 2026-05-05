@@ -92,9 +92,9 @@ function FixedDailyActionCard({ action, slot, onUpdateSlot }: FixedDailyActionCa
           <div className="survey-chip flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-700 sm:h-12 sm:w-12">
             <Icon aria-hidden="true" size={18} />
           </div>
-          <div className="min-w-0">
+          <div className="daily-slot-heading min-w-0">
             <h3 className="text-xl font-semibold text-zinc-950 sm:text-2xl">{slotMeta[slot].label}</h3>
-            <p className="mt-1 text-sm leading-6 text-zinc-500 sm:mt-1.5 sm:text-base sm:leading-7">
+            <p className="daily-slot-description mt-1 text-sm leading-6 text-zinc-500 sm:mt-1.5 sm:text-base sm:leading-7">
               {slotMeta[slot].description}
             </p>
           </div>
