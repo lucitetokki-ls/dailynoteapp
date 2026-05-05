@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+import { ExpandableText } from "@/components/ExpandableText";
 import { readStoredDay, useStoredDays } from "@/lib/daily-store";
 import {
   getActionForSlot,
@@ -255,9 +256,13 @@ export function MonthlyCalendar() {
                       {filled ? "Filled" : "Empty"}
                     </span>
                   </div>
-                  <p className="mt-1 line-clamp-2 text-sm leading-6 text-zinc-500">
-                    {action?.description || action?.reflection || slotMeta[slot].description}
-                  </p>
+                  <ExpandableText
+                    className="mt-1"
+                    fallback={slotMeta[slot].description}
+                    previewLines={2}
+                    text={[action?.description, action?.reflection].filter(Boolean).join("\n\n")}
+                    title={`${formatDisplayDate(selectedDate)} · ${slotMeta[slot].label}`}
+                  />
                 </div>
               );
             })}

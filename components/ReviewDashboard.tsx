@@ -2,6 +2,7 @@
 
 import { BarChart3, CheckCircle2, CircleDashed, Star } from "lucide-react";
 
+import { ExpandableText } from "@/components/ExpandableText";
 import { WeeklyReflectionPanel } from "@/components/WeeklyReflectionPanel";
 import { useRecentStoredDays } from "@/lib/daily-store";
 import {
@@ -148,9 +149,13 @@ export function ReviewDashboard() {
                       <SlotPill filled={fillMap[slot]} key={slot} slot={slot} />
                     ))}
                   </div>
-                  <p className="mt-3 line-clamp-2 text-base leading-7 text-zinc-500">
-                    {day.dailyLog.dailyReflection || "회고가 비어 있습니다."}
-                  </p>
+                  <ExpandableText
+                    className="mt-3"
+                    fallback="회고가 비어 있습니다."
+                    previewLines={2}
+                    text={day.dailyLog.dailyReflection}
+                    title={`${formatDisplayDate(day.dailyLog.date)} · Daily Reflection`}
+                  />
                 </div>
 
                 <div className="flex items-center justify-start lg:justify-end">

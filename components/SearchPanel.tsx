@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 
+import { ExpandableText } from "@/components/ExpandableText";
 import { useStoredDays } from "@/lib/daily-store";
 import { cn, formatDisplayDate } from "@/lib/utils";
 import {
@@ -127,9 +128,13 @@ export function SearchPanel() {
               </div>
               <div className="min-w-0">
                 <h3 className="truncate text-xl font-semibold text-zinc-950">{action.title}</h3>
-                <p className="mt-1.5 line-clamp-2 text-base leading-7 text-zinc-500">
-                  {action.reflection || action.description || "메모가 비어 있습니다."}
-                </p>
+                <ExpandableText
+                  className="mt-1.5"
+                  fallback="메모가 비어 있습니다."
+                  previewLines={2}
+                  text={[action.description, action.reflection].filter(Boolean).join("\n\n")}
+                  title={`${formatDisplayDate(action.date)} · ${action.title}`}
+                />
               </div>
               <div className="flex items-center justify-start lg:justify-end">
                 <span className="survey-chip rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-base font-semibold text-zinc-700">

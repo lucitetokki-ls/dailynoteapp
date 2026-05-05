@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { CheckCircle2, CircleDashed, XCircle } from "lucide-react";
 
+import { ExpandableText } from "@/components/ExpandableText";
 import { useStoredDays } from "@/lib/daily-store";
 import { calculateCompletionRate } from "@/lib/score";
 import { cn, formatDisplayDate } from "@/lib/utils";
@@ -103,9 +104,13 @@ export function CategoryHistory() {
                   <h2 className="truncate text-xl font-semibold text-zinc-950">
                     {action.title}
                   </h2>
-                  <p className="mt-1.5 text-base leading-7 text-zinc-500">
-                    {action.reflection || action.description || "메모가 비어 있습니다."}
-                  </p>
+                  <ExpandableText
+                    className="mt-1.5"
+                    fallback="메모가 비어 있습니다."
+                    previewLines={2}
+                    text={[action.description, action.reflection].filter(Boolean).join("\n\n")}
+                    title={`${formatDisplayDate(action.date)} · ${action.title}`}
+                  />
                 </div>
 
                 <div className="flex items-center justify-start lg:justify-end">
