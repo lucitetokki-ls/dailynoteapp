@@ -161,7 +161,7 @@ type FilterGroupProps = {
 
 function FilterGroup({ activeValue, items, onChange }: FilterGroupProps) {
   return (
-    <div className="grid grid-cols-4 gap-2">
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
       {items.map((item) => (
         <button
           className={cn(

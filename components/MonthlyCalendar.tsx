@@ -208,7 +208,7 @@ export function MonthlyCalendar() {
           })}
         </div>
 
-        <aside className="survey-card rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+        <aside className="survey-card order-first rounded-lg border border-zinc-200 bg-white p-5 shadow-sm md:order-none">
           <p className="text-base font-semibold text-zinc-500">선택 날짜</p>
           <h2 className="mt-2 text-2xl font-semibold text-zinc-950">
             {formatDisplayDate(selectedDate)}

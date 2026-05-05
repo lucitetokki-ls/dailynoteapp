@@ -15,6 +15,12 @@ import { dailyActionSlots, slotMeta, type DailyActionSlot } from "@/types/daily-
 
 const totalWindowDays = 7;
 const totalSlots = totalWindowDays * dailyActionSlots.length;
+const slotShortLabels: Record<DailyActionSlot, string> = {
+  diet: "식단",
+  fitness: "운동",
+  vibe_coding: "Coding",
+  writing: "작문",
+};
 
 export function ReviewDashboard() {
   const days = useRecentStoredDays(totalWindowDays);
@@ -59,7 +65,7 @@ export function ReviewDashboard() {
           </span>
         </div>
 
-        <div className="survey-card overflow-x-auto rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
+        <div className="survey-card hidden overflow-x-auto rounded-lg border border-zinc-200 bg-white p-4 shadow-sm md:block">
           <div className="min-w-[680px]">
             <div className="grid grid-cols-[120px_repeat(7,minmax(0,1fr))] gap-2">
               <div />
@@ -76,6 +82,44 @@ export function ReviewDashboard() {
               ))}
             </div>
           </div>
+        </div>
+
+        <div className="grid gap-2.5 md:hidden">
+          {days.map((day) => {
+            const filledCount = getFilledSlotCount(day.actions);
+            const fillMap = getSlotFillMap(day.actions);
+
+            return (
+              <article
+                className="survey-card grid gap-3 rounded-lg border border-zinc-200 bg-white p-3.5 shadow-sm"
+                key={`mobile-matrix-${day.dailyLog.date}`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-base font-semibold text-zinc-950">
+                    {formatDisplayDate(day.dailyLog.date)}
+                  </p>
+                  <span className="survey-chip rounded-md border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-sm font-semibold text-zinc-700">
+                    {filledCount}/4
+                  </span>
+                </div>
+                <div className="grid grid-cols-4 gap-2">
+                  {dailyActionSlots.map((slot) => (
+                    <span
+                      className={cn(
+                        "min-h-9 border border-zinc-200 px-1.5 py-2 text-center text-[0.72rem] font-semibold leading-tight",
+                        fillMap[slot]
+                          ? "bg-emerald-50 text-emerald-700"
+                          : "bg-zinc-50 text-zinc-400",
+                      )}
+                      key={`mobile-matrix-${day.dailyLog.date}-${slot}`}
+                    >
+                      {slotShortLabels[slot]}
+                    </span>
+                  ))}
+                </div>
+              </article>
+            );
+          })}
         </div>
       </section>
 
