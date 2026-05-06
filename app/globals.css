@@ -1,18 +1,23 @@
+@import "@fontsource/pretendard/400.css";
+@import "@fontsource/pretendard/500.css";
+@import "@fontsource/pretendard/600.css";
+@import "@fontsource/pretendard/700.css";
+@import "@fontsource/pretendard/800.css";
 @import "tailwindcss";
 
 :root {
-  --background: #f4fffb;
+  --background: #f7fffc;
   --foreground: #071310;
   --panel: #ffffff;
-  --panel-strong: #d9fff3;
-  --panel-soft: #edfff9;
+  --panel-strong: #e8fff8;
+  --panel-soft: #f2fffb;
   --line: #071310;
-  --line-soft: #79d9c1;
+  --line-soft: #9bdccd;
   --muted: #24463e;
   --muted-2: #5d7f76;
-  --acid: #65ffd2;
-  --mint: #00c896;
-  --mint-dark: #008f72;
+  --acid: #78f5d4;
+  --mint: #00b88a;
+  --mint-dark: #007c65;
   --pink: #ff6fb1;
   --sky: #00a3ff;
   --danger: #ff4d4d;
@@ -23,8 +28,8 @@
   --border-strong: #071310;
   --border-soft: #79d9c1;
   --focus-ring: rgba(0, 200, 150, 0.34);
-  --shadow-pop: 7px 7px 0 rgba(7, 19, 16, 0.11);
-  --shadow-glow: 0 18px 42px rgba(0, 200, 150, 0.13);
+  --shadow-pop: 5px 5px 0 rgba(7, 19, 16, 0.09);
+  --shadow-glow: 0 18px 38px rgba(0, 184, 138, 0.11);
   --control-height: 2.75rem;
   --app-font:
     "Pretendard",
@@ -310,23 +315,42 @@ textarea:focus-visible {
 
 .survey-hero {
   background:
-    linear-gradient(90deg, rgba(255, 255, 255, 0.78), rgba(101, 255, 210, 0.1)),
-    linear-gradient(rgba(7, 19, 16, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(7, 19, 16, 0.035) 1px, transparent 1px);
-  background-size: 100% 100%, 18px 18px, 18px 18px;
+    linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(242, 255, 251, 0.9)),
+    linear-gradient(90deg, rgba(120, 245, 212, 0.18), transparent 52%);
+  background-size: 100% 100%, 100% 100%;
   border: 2px solid var(--line);
-  box-shadow: 8px 8px 0 rgba(0, 200, 150, 0.2);
-  padding: 1.35rem;
-  padding-bottom: 1.4rem;
+  box-shadow:
+    5px 5px 0 rgba(7, 19, 16, 0.08),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.88);
+  padding: 1.05rem 1.15rem 1.15rem;
   position: relative;
   width: 100%;
 }
 
 .survey-hero::before {
-  background: linear-gradient(90deg, var(--mint), var(--acid), #ffffff);
-  border: 2px solid var(--line);
+  background: linear-gradient(90deg, var(--mint), var(--acid), rgba(255, 255, 255, 0.9));
   content: "";
   display: block;
+  height: 0.32rem;
+  margin-bottom: 0.8rem;
+  width: min(9rem, 46vw);
+}
+
+.today-hero {
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.78), rgba(120, 245, 212, 0.12)),
+    linear-gradient(rgba(7, 19, 16, 0.032) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(7, 19, 16, 0.032) 1px, transparent 1px);
+  background-size: 100% 100%, 18px 18px, 18px 18px;
+  box-shadow:
+    8px 8px 0 rgba(0, 184, 138, 0.18),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.88);
+  padding: 1.35rem;
+  padding-bottom: 1.4rem;
+}
+
+.today-hero::before {
+  border: 2px solid var(--line);
   height: 0.7rem;
   margin-bottom: 1.1rem;
   width: min(18rem, 62vw);
@@ -347,14 +371,30 @@ textarea:focus-visible {
   word-break: keep-all;
 }
 
+.survey-hero:not(.today-hero) .survey-title {
+  font-size: clamp(2rem, 3.2vw, 3rem);
+  line-height: 1.12;
+}
+
+.survey-hero:not(.today-hero) p:not(.survey-kicker) {
+  font-size: clamp(0.98rem, 1.3vw, 1.12rem);
+  line-height: 1.68;
+  max-width: 54rem;
+}
+
+.today-hero .survey-title {
+  font-size: clamp(2.35rem, 5.4vw, 4.5rem);
+  line-height: 1.08;
+}
+
 .survey-hero > div:first-child {
   margin-left: 0;
 }
 
 .survey-card {
   background:
-    linear-gradient(135deg, rgba(101, 255, 210, 0.16), transparent 38%),
-    linear-gradient(315deg, rgba(255, 255, 255, 0.9), rgba(237, 255, 249, 0.95)),
+    linear-gradient(135deg, rgba(120, 245, 212, 0.09), transparent 40%),
+    linear-gradient(315deg, rgba(255, 255, 255, 0.96), rgba(242, 255, 251, 0.92)),
     var(--panel) !important;
   border: 2px solid var(--line) !important;
   box-shadow:
@@ -369,14 +409,14 @@ textarea:focus-visible {
 
 .survey-card:hover {
   box-shadow:
-    8px 8px 0 rgba(7, 19, 16, 0.12),
+    6px 6px 0 rgba(7, 19, 16, 0.1),
     var(--shadow-glow),
     inset 0 0 0 1px rgba(255, 255, 255, 0.9) !important;
 }
 
 .survey-card-strong {
   background:
-    linear-gradient(135deg, rgba(0, 200, 150, 0.2), transparent 42%),
+    linear-gradient(135deg, rgba(0, 184, 138, 0.14), transparent 42%),
     linear-gradient(315deg, #ffffff, var(--panel-strong)) !important;
   border-color: var(--line) !important;
 }
@@ -388,15 +428,10 @@ textarea:focus-visible {
 }
 
 .survey-stat::after {
-  background: repeating-linear-gradient(
-    90deg,
-    var(--mint) 0 18px,
-    var(--foreground) 18px 22px,
-    var(--acid) 22px 40px
-  );
+  background: linear-gradient(90deg, var(--mint), var(--acid));
   bottom: 0;
   content: "";
-  height: 0.34rem;
+  height: 0.18rem;
   left: 0;
   position: absolute;
   width: 100%;
@@ -756,25 +791,50 @@ button.slot-heat-cell:hover {
     line-height: 1.18;
   }
 
+  .today-hero .survey-title {
+    font-size: clamp(2.15rem, 10vw, 2.85rem);
+  }
+
+  .survey-hero:not(.today-hero) .survey-title {
+    font-size: clamp(1.75rem, 7vw, 2.2rem);
+  }
+
   .survey-stat {
     min-height: 5.45rem;
   }
 
   .survey-hero {
     background:
-      linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(224, 255, 246, 0.82)),
-      linear-gradient(rgba(7, 19, 16, 0.026) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(7, 19, 16, 0.026) 1px, transparent 1px);
-    background-size: 100% 100%, 18px 18px, 18px 18px;
+      linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(242, 255, 251, 0.9)),
+      linear-gradient(90deg, rgba(120, 245, 212, 0.15), transparent 60%);
+    background-size: 100% 100%, 100% 100%;
     border-width: 2px !important;
     box-shadow:
-      4px 4px 0 rgba(0, 200, 150, 0.16),
+      3px 3px 0 rgba(7, 19, 16, 0.09),
       inset 0 0 0 1px rgba(255, 255, 255, 0.9);
-    padding: 1rem;
+    padding: 0.9rem;
     width: 100%;
   }
 
   .survey-hero::before {
+    height: 0.24rem;
+    margin-bottom: 0.6rem;
+    width: min(7.5rem, 46vw);
+  }
+
+  .today-hero {
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(224, 255, 246, 0.82)),
+      linear-gradient(rgba(7, 19, 16, 0.026) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(7, 19, 16, 0.026) 1px, transparent 1px);
+    background-size: 100% 100%, 18px 18px, 18px 18px;
+    box-shadow:
+      4px 4px 0 rgba(0, 184, 138, 0.14),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.9);
+    padding: 1rem;
+  }
+
+  .today-hero::before {
     height: 0.45rem;
     margin-bottom: 0.75rem;
     width: min(12rem, 54vw);
@@ -850,6 +910,19 @@ button.slot-heat-cell:hover {
     box-shadow:
       3px 3px 0 rgba(7, 19, 16, 0.12),
       inset 0 0 0 1px rgba(255, 255, 255, 0.85);
+    display: flex !important;
+    gap: 0.45rem !important;
+    grid-template-columns: none !important;
+    overflow-x: auto;
+    padding: 0.45rem !important;
+    scroll-padding-inline: 0.45rem;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mobile-nav::-webkit-scrollbar {
+    display: none;
   }
 
   .app-nav {
@@ -859,6 +932,15 @@ button.slot-heat-cell:hover {
   .mobile-nav-link {
     background: rgba(255, 255, 255, 0.72);
     box-shadow: inset 2px 2px 0 rgba(0, 200, 150, 0.06);
+    flex: 0 0 auto;
+    height: 3rem !important;
+    min-width: 4.85rem !important;
+    scroll-snap-align: start;
+  }
+
+  .mobile-nav-link span {
+    font-size: 0.68rem;
+    line-height: 1;
   }
 
   .mobile-nav-link[data-active="true"] {

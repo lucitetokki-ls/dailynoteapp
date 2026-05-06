@@ -111,7 +111,7 @@ export function TodayApp() {
   return (
     <div className="grid gap-5 pb-9 sm:gap-8 sm:pb-12">
       <SyncToast syncStatus={syncStatus} />
-      <header className="survey-hero grid gap-4 sm:gap-5">
+      <header className="survey-hero today-hero grid gap-4 sm:gap-5">
         <div className="max-w-5xl pt-1 text-left">
           <p className="survey-kicker">
             Lucitetokki Daily Action Log

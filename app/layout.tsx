@@ -31,14 +31,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <head>
-        <link rel="preconnect" href="https://cdn.jsdelivr.net" />
-        <link
-          href="https://cdn.jsdelivr.net/gh/fonts-archive/Pretendard/Pretendard.css"
-          rel="stylesheet"
-          type="text/css"
-        />
-      </head>
       <body>{children}</body>
     </html>
   );
