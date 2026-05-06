@@ -58,7 +58,7 @@ export function CategoryHistory() {
           </p>
           <div className="mt-1.5 flex items-end justify-between gap-3">
             <p className="text-3xl font-semibold text-zinc-950 sm:text-4xl">{categoryActions.length}</p>
-            <span className="survey-chip rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-lg font-semibold text-zinc-700">
+            <span className="category-rate-badge survey-chip rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-lg font-semibold text-zinc-700">
               {completionRate}%
             </span>
           </div>

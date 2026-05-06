@@ -146,8 +146,8 @@ function FixedDailyActionCard({ action, slot, onUpdateSlot }: FixedDailyActionCa
         </label>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="mr-1 text-sm font-semibold text-zinc-600 sm:text-base">만족도</span>
+      <div className="satisfaction-row flex flex-wrap items-center gap-2">
+        <span className="satisfaction-label mr-1 text-sm font-semibold text-zinc-600 sm:text-base">만족도</span>
         {[1, 2, 3, 4, 5].map((score) => (
           <button
             aria-label={`만족도 ${score}`}

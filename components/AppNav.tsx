@@ -17,37 +17,37 @@ import { cn } from "@/lib/utils";
 const navItems = [
   {
     href: "/",
-    label: "Dashboard",
+    label: "대시보드",
     icon: CalendarCheck2,
   },
   {
     href: "/review",
-    label: "Review",
+    label: "주간 리뷰",
     icon: BarChart3,
   },
   {
     href: "/writing",
-    label: "Writing",
+    label: "작문",
     icon: PenLine,
   },
   {
     href: "/category",
-    label: "Category",
+    label: "카테고리",
     icon: Layers3,
   },
   {
     href: "/calendar",
-    label: "Calendar",
+    label: "캘린더",
     icon: CalendarRange,
   },
   {
     href: "/search",
-    label: "Search",
+    label: "검색",
     icon: Search,
   },
   {
     href: "/settings",
-    label: "Settings",
+    label: "설정",
     icon: Settings,
   },
 ];
@@ -58,7 +58,7 @@ export function AppNav() {
   return (
     <nav
       aria-label="Main navigation"
-      className="mobile-nav app-nav mb-5 grid grid-cols-4 gap-1.5 rounded-lg border-2 border-zinc-200 bg-white p-1.5 shadow-sm sm:mb-8 sm:flex sm:items-center sm:gap-2 sm:overflow-x-auto"
+      className="mobile-nav mobile-terminal-nav app-nav mb-5 grid grid-cols-4 gap-1.5 rounded-lg border-2 border-zinc-200 bg-white p-1.5 shadow-sm sm:mb-8 sm:flex sm:items-center sm:gap-2 sm:overflow-x-auto"
     >
       {navItems.map((item) => {
         const Icon = item.icon;
@@ -78,7 +78,7 @@ export function AppNav() {
             title={item.label}
           >
             <Icon aria-hidden="true" size={19} />
-            <span>&quot;{item.label}&quot;</span>
+            <span>{item.label}</span>
           </Link>
         );
       })}
