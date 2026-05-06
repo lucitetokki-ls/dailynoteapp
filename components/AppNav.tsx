@@ -18,42 +18,49 @@ const navItems = [
   {
     href: "/",
     label: "대시보드",
+    mobileLabel: "대시",
     code: "DASH",
     icon: CalendarCheck2,
   },
   {
     href: "/review",
     label: "주간 리뷰",
+    mobileLabel: "리뷰",
     code: "REVW",
     icon: BarChart3,
   },
   {
     href: "/writing",
     label: "작문",
+    mobileLabel: "작문",
     code: "WRIT",
     icon: PenLine,
   },
   {
     href: "/category",
     label: "카테고리",
+    mobileLabel: "분류",
     code: "CATG",
     icon: Layers3,
   },
   {
     href: "/calendar",
     label: "캘린더",
+    mobileLabel: "달력",
     code: "CALN",
     icon: CalendarRange,
   },
   {
     href: "/search",
     label: "검색",
+    mobileLabel: "검색",
     code: "FIND",
     icon: Search,
   },
   {
     href: "/settings",
     label: "설정",
+    mobileLabel: "설정",
     code: "CONF",
     icon: Settings,
   },
@@ -95,6 +102,7 @@ export function AppNav() {
             </span>
             <span className="route-copy">
               <span className="route-label">{item.label}</span>
+              <span className="route-label-mobile">{item.mobileLabel}</span>
               <span className="route-code">{item.code}</span>
             </span>
             <Icon aria-hidden="true" className="route-icon" size={16} />
