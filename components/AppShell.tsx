@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import { AppNav } from "@/components/AppNav";
 import { useClientReady } from "@/lib/client-ready";
 
@@ -15,7 +17,7 @@ export function AppShell({ children }: AppShellProps) {
       <div className="app-frame min-h-dvh">
         <aside className="app-sidebar">
           <div className="app-brand">
-            <p className="app-brand-title">SYSTEM-01</p>
+            <p className="app-brand-title">ROUTINE</p>
             <p className="app-brand-subtitle">DAILY_LOG_V1.0</p>
           </div>
 
@@ -23,12 +25,19 @@ export function AppShell({ children }: AppShellProps) {
 
           <div className="app-sidebar-footer">
             <div className="app-user">
-              <div className="app-user-icon" aria-hidden="true">
-                LT
+              <div className="app-user-icon">
+                <Image
+                  alt="Lucite Tokki profile"
+                  className="app-user-image"
+                  height={64}
+                  priority={false}
+                  src="/lucitetokki-profile.png"
+                  width={64}
+                />
               </div>
               <div>
-                <p className="app-user-label">USER_STATUS</p>
-                <p className="app-user-name">ADMIN_01</p>
+                <p className="app-user-label">GRINDING</p>
+                <p className="app-user-name">LUCITE TOKKI</p>
               </div>
             </div>
             <div className="app-command">ACTION_LOOP_ACTIVE</div>

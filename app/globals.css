@@ -1087,7 +1087,7 @@ body::before {
 
 .app-frame {
   display: grid;
-  grid-template-columns: 20rem minmax(0, 1fr);
+  grid-template-columns: 16.5rem minmax(0, 1fr);
 }
 
 .app-sidebar {
@@ -1095,20 +1095,22 @@ body::before {
   border-right: 1px solid var(--line);
   display: flex;
   flex-direction: column;
+  height: 100dvh;
   min-height: 100dvh;
-  padding: 1.25rem;
+  overflow-y: auto;
+  padding: 1rem;
   position: sticky;
   top: 0;
 }
 
 .app-brand {
-  margin-bottom: 4rem;
+  margin-bottom: 3.5rem;
 }
 
 .app-brand-title {
   color: var(--line);
   font-family: var(--display-font);
-  font-size: clamp(2.2rem, 3.2vw, 3.95rem);
+  font-size: clamp(2.35rem, 3vw, 3.35rem);
   font-weight: 900;
   letter-spacing: -0.055em;
   line-height: 0.9;
@@ -1149,15 +1151,23 @@ body::before {
 
 .app-user-icon {
   align-items: center;
-  background: var(--surface-tint);
+  background: var(--acid);
   border: 1px solid var(--line);
   display: flex;
-  font-family: var(--tech-font);
-  font-size: 0.8rem;
-  font-weight: 600;
-  height: 3rem;
+  height: 3.25rem;
   justify-content: center;
-  width: 3rem;
+  overflow: hidden;
+  width: 3.25rem;
+}
+
+.app-user-image {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  transform: scale(1.55);
+  transform-origin: center 42%;
+  width: 100%;
 }
 
 .app-user-label {
@@ -1560,7 +1570,9 @@ input:focus {
   .app-sidebar {
     border-bottom: 1px solid var(--line);
     border-right: 0;
+    height: auto;
     min-height: auto;
+    overflow-y: visible;
     padding: 1rem;
     position: sticky;
     z-index: 40;
