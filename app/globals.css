@@ -932,40 +932,10 @@ button.slot-heat-cell:hover {
     display: none;
   }
 
-  .app-nav {
-    top: 0.65rem;
-  }
-
-  .mobile-nav-link {
-    background: rgba(255, 255, 255, 0.72);
-    box-shadow: inset 2px 2px 0 rgba(0, 200, 150, 0.06);
-    flex: 0 0 auto;
-    height: 3rem !important;
-    min-width: 4.85rem !important;
-    scroll-snap-align: start;
-  }
-
-  .mobile-nav-link span {
-    font-size: 0.68rem;
-    line-height: 1;
-  }
-
   button.survey-chip,
   .survey-chip.inline-flex,
-  .satisfaction-button,
   .slot-heat-cell {
     min-height: 2.75rem;
-  }
-
-  .satisfaction-button {
-    height: 2.75rem !important;
-    width: 2.75rem !important;
-  }
-
-  .mobile-nav-link[data-active="true"] {
-    background: linear-gradient(135deg, var(--acid), var(--mint)) !important;
-    color: var(--foreground) !important;
-    box-shadow: 3px 3px 0 rgba(7, 19, 16, 0.18);
   }
 
   .sync-toast {
