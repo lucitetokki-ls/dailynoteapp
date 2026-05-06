@@ -52,7 +52,7 @@ export function CategoryHistory() {
           </p>
         </div>
 
-        <div className="survey-card survey-stat rounded-lg border border-zinc-200 bg-white p-3 shadow-sm">
+        <div className="category-stat-card survey-card survey-stat rounded-lg border border-zinc-200 bg-white p-3 shadow-sm">
           <p className="text-base font-semibold text-zinc-500">
             {categoryMeta[selectedCategory].label}
           </p>
@@ -65,7 +65,7 @@ export function CategoryHistory() {
         </div>
       </header>
 
-      <div className="grid grid-cols-3 gap-2.5">
+      <div className="category-tabs grid grid-cols-3 gap-2.5">
         {actionCategories.map((category) => (
           <button
             className={cn(

@@ -74,14 +74,14 @@ export function ReviewDashboard() {
       </header>
 
       <section className="grid gap-4">
-        <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="review-section-heading flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="text-2xl font-semibold text-zinc-950">7일 로그 매트릭스</h2>
             <p className="mt-1.5 text-base text-zinc-500">
               행동의 흐름을 보는 보조 지도입니다.
             </p>
           </div>
-          <span className="rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-base font-semibold text-zinc-600">
+          <span className="review-density-badge rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-base font-semibold text-zinc-600">
             {weeklyRate}% density
           </span>
         </div>
@@ -112,7 +112,7 @@ export function ReviewDashboard() {
 
             return (
               <article
-                className="survey-card grid gap-3 rounded-lg border border-zinc-200 bg-white p-3.5 shadow-sm"
+                className="review-mobile-matrix-card survey-card grid gap-3 rounded-lg border border-zinc-200 bg-white p-3.5 shadow-sm"
                 key={`mobile-matrix-${day.dailyLog.date}`}
               >
                 <div className="flex items-center justify-between gap-3">
@@ -123,7 +123,7 @@ export function ReviewDashboard() {
                     {filledCount}/4
                   </span>
                 </div>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="review-mobile-slot-grid grid grid-cols-4 gap-2">
                   {dailyActionSlots.map((slot) => (
                     <TextDialogTrigger
                       ariaLabel={`${formatDisplayDate(day.dailyLog.date)} ${slotMeta[slot].label} 전문 보기`}

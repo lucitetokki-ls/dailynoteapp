@@ -1359,10 +1359,14 @@ body::before {
   font-family: var(--tech-font);
   font-size: 0.88rem !important;
   font-weight: 500;
+  inline-size: 100%;
   letter-spacing: 0.02em;
   line-height: 1.5 !important;
-  max-width: 64rem;
+  max-width: min(64rem, 100%);
+  min-width: 0;
+  overflow-wrap: anywhere;
   text-transform: uppercase;
+  word-break: normal;
 }
 
 .survey-kicker {
@@ -1379,6 +1383,7 @@ body::before {
 .survey-card {
   background: var(--panel) !important;
   border: 1px solid var(--line) !important;
+  transform: none !important;
 }
 
 .survey-card-strong,
@@ -1692,6 +1697,46 @@ input:focus {
     inline-size: min(calc(100vw - 2rem), 22rem) !important;
     max-inline-size: min(calc(100vw - 2rem), 22rem) !important;
     min-inline-size: 0 !important;
+  }
+
+  .category-stat-card,
+  .review-mobile-matrix-card {
+    inline-size: min(calc(100vw - 2rem), 22rem) !important;
+    max-inline-size: min(calc(100vw - 2rem), 22rem) !important;
+    min-inline-size: 0 !important;
+  }
+
+  .category-stat-card > .flex {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .category-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    inline-size: min(calc(100vw - 2rem), 22rem) !important;
+    max-inline-size: min(calc(100vw - 2rem), 22rem) !important;
+  }
+
+  .category-tabs > button:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .review-section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .review-density-badge {
+    align-self: flex-start;
+    max-width: 100%;
+  }
+
+  .review-mobile-slot-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .review-mobile-slot-grid > button {
+    min-height: 2.75rem;
   }
 
   .calendar-detail-stats {
