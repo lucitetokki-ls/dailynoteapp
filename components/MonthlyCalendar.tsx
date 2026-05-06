@@ -77,7 +77,7 @@ export function MonthlyCalendar() {
 
       <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
         <div className="survey-card survey-grid-panel hidden overflow-x-auto rounded-lg border border-zinc-200 bg-white p-3 shadow-sm sm:p-4 md:block">
-          <div className="min-w-[680px]">
+          <div className="min-w-[600px]">
             <div className="mb-3 grid grid-cols-7 gap-2">
               {weekdays.map((weekday) => (
                 <div
@@ -171,7 +171,7 @@ export function MonthlyCalendar() {
             return (
               <button
                 className={cn(
-                  "survey-card grid gap-3 rounded-lg border border-zinc-200 bg-white p-4 text-left shadow-sm",
+                  "calendar-mobile-day-card survey-card grid gap-3 rounded-lg border border-zinc-200 bg-white p-4 text-left shadow-sm",
                   isSelected && "border-zinc-950",
                 )}
                 key={dateKey}
@@ -208,12 +208,12 @@ export function MonthlyCalendar() {
           })}
         </div>
 
-        <aside className="survey-card order-first rounded-lg border border-zinc-200 bg-white p-5 shadow-sm md:order-none">
+        <aside className="calendar-detail-panel survey-card order-first rounded-lg border border-zinc-200 bg-white p-5 shadow-sm md:order-none">
           <p className="text-base font-semibold text-zinc-500">선택 날짜</p>
           <h2 className="mt-2 text-2xl font-semibold text-zinc-950">
             {formatDisplayDate(selectedDate)}
           </h2>
-          <div className="mt-5 grid grid-cols-2 gap-2">
+          <div className="calendar-detail-stats mt-5 grid grid-cols-2 gap-2">
             <div className="survey-chip rounded-md border border-zinc-200 bg-zinc-50 p-3">
               <p className="text-sm font-semibold text-zinc-500">Filled</p>
               <p className="mt-2 text-3xl font-semibold text-zinc-950">
@@ -236,7 +236,7 @@ export function MonthlyCalendar() {
               return (
                 <div
                   className={cn(
-                    "survey-chip rounded-md border p-3",
+                    "calendar-detail-slot survey-chip rounded-md border p-3",
                     filled
                       ? "border-emerald-200 bg-emerald-50"
                       : "border-zinc-200 bg-zinc-50",

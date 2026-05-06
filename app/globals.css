@@ -1055,6 +1055,8 @@ button.slot-heat-cell:hover {
   --shadow-pop: none;
   --shadow-glow: none;
   --control-height: 2.75rem;
+  --sidebar-width: 16.5rem;
+  --content-max: 78rem;
   --display-font:
     "Inter",
     "Pretendard",
@@ -1086,8 +1088,15 @@ body::before {
 }
 
 .app-frame {
+  background:
+    linear-gradient(
+      90deg,
+      var(--surface) 0 var(--sidebar-width),
+      var(--line) var(--sidebar-width) calc(var(--sidebar-width) + 1px),
+      var(--paper) calc(var(--sidebar-width) + 1px) 100%
+    );
   display: grid;
-  grid-template-columns: 16.5rem minmax(0, 1fr);
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
 }
 
 .app-sidebar {
@@ -1164,9 +1173,7 @@ body::before {
   display: block;
   height: 100%;
   object-fit: cover;
-  object-position: center top;
-  transform: scale(1.55);
-  transform-origin: center 42%;
+  object-position: center center;
   width: 100%;
 }
 
@@ -1201,7 +1208,10 @@ body::before {
 }
 
 .app-content {
+  margin-inline: auto;
+  max-width: var(--content-max);
   padding: 2.5rem;
+  width: 100%;
 }
 
 .app-nav {
@@ -1316,15 +1326,18 @@ body::before {
   border-bottom: 1px solid var(--line) !important;
   box-shadow: none !important;
   display: grid;
-  gap: 1.25rem;
-  margin-left: -2.5rem;
-  margin-right: -2.5rem;
-  margin-top: -2.5rem;
-  padding: 2rem 2.5rem 1.35rem !important;
+  gap: 1rem;
+  margin: 0;
+  min-width: 0;
+  padding: 0 0 1.35rem !important;
 }
 
 .survey-hero::before {
   display: none;
+}
+
+.survey-hero > * {
+  min-width: 0;
 }
 
 .survey-title,
@@ -1336,6 +1349,7 @@ body::before {
   font-weight: 900 !important;
   letter-spacing: -0.06em !important;
   line-height: 0.95 !important;
+  overflow-wrap: anywhere;
   text-transform: uppercase;
 }
 
@@ -1377,8 +1391,8 @@ body::before {
 }
 
 .survey-stat {
-  min-height: 10rem;
-  padding: 2rem !important;
+  min-height: 6.65rem;
+  padding: 1.35rem 1.5rem !important;
 }
 
 .survey-stat::after {
@@ -1393,10 +1407,10 @@ body::before {
 .survey-stat .text-3xl,
 .survey-stat .text-4xl {
   color: var(--line) !important;
-  font-size: clamp(2.8rem, 4.2vw, 4.25rem) !important;
+  font-size: clamp(1.55rem, 2.6vw, 2.65rem) !important;
   font-weight: 900 !important;
   letter-spacing: -0.055em;
-  line-height: 0.9 !important;
+  line-height: 1 !important;
 }
 
 .survey-control {
@@ -1506,10 +1520,20 @@ input:focus {
 
 .survey-grid-panel {
   background:
-    linear-gradient(var(--line-soft) 1px, transparent 1px),
-    linear-gradient(90deg, var(--line-soft) 1px, transparent 1px),
+    linear-gradient(rgba(17, 17, 17, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17, 17, 17, 0.045) 1px, transparent 1px),
     var(--panel) !important;
-  background-size: 32px 32px !important;
+  background-size: 40px 40px !important;
+}
+
+.survey-grid-panel button.survey-control {
+  background: rgba(249, 250, 247, 0.96) !important;
+}
+
+.survey-grid-panel button.survey-control.bg-zinc-950,
+.survey-grid-panel .bg-zinc-950 {
+  background: var(--line) !important;
+  color: #f1f1ed !important;
 }
 
 .slot-heat-cell {
@@ -1563,7 +1587,18 @@ input:focus {
 }
 
 @media (max-width: 900px) {
+  html,
+  body,
+  .app-shell,
+  .app-frame,
+  .app-main,
+  .app-content {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
   .app-frame {
+    background: var(--paper);
     display: block;
   }
 
@@ -1591,6 +1626,7 @@ input:focus {
   }
 
   .app-content {
+    max-width: none;
     padding: 1rem;
   }
 
@@ -1612,10 +1648,8 @@ input:focus {
   }
 
   .survey-hero {
-    margin-left: -1rem;
-    margin-right: -1rem;
-    margin-top: -1rem;
-    padding: 1.25rem 1rem !important;
+    margin: 0;
+    padding: 0 0 1rem !important;
   }
 
   .survey-title,
@@ -1625,21 +1659,55 @@ input:focus {
   }
 
   .survey-stat {
-    min-height: 7.5rem;
-    padding: 1.25rem !important;
+    min-height: 5.35rem;
+    padding: 1rem !important;
   }
 
   .today-stat-grid {
-    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    inline-size: min(calc(100vw - 2rem), 22rem) !important;
+    justify-self: start;
+    max-inline-size: min(calc(100vw - 2rem), 22rem) !important;
+    min-inline-size: 0 !important;
   }
 
   .today-stat-card {
-    min-width: 0;
+    inline-size: auto !important;
+    min-inline-size: 0 !important;
   }
 
   .today-stat-card:nth-child(3) {
-    grid-column: auto;
-    min-height: 5.75rem;
+    grid-column: 1 / -1;
+    min-height: 5.35rem;
+  }
+
+  .calendar-detail-panel {
+    inline-size: min(calc(100vw - 2rem), 22rem) !important;
+    max-inline-size: min(calc(100vw - 2rem), 22rem) !important;
+    min-width: 0;
+    padding: 1.25rem !important;
+  }
+
+  .calendar-mobile-day-card {
+    inline-size: min(calc(100vw - 2rem), 22rem) !important;
+    max-inline-size: min(calc(100vw - 2rem), 22rem) !important;
+    min-inline-size: 0 !important;
+  }
+
+  .calendar-detail-stats {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .calendar-detail-slot {
+    min-width: 0;
+  }
+
+  .calendar-detail-slot .flex {
+    align-items: flex-start;
+  }
+
+  .calendar-detail-slot .truncate {
+    min-width: 0;
   }
 
   .daily-slot-card > .grid,

@@ -31,7 +31,7 @@ export function AppShell({ children }: AppShellProps) {
                   className="app-user-image"
                   height={64}
                   priority={false}
-                  src="/lucitetokki-profile.png"
+                  src="/sideprofile.png"
                   width={64}
                 />
               </div>
