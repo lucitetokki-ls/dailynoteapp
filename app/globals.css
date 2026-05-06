@@ -1075,28 +1075,55 @@ body::before {
   display: flex;
   flex-direction: column;
   height: 100dvh;
+  isolation: isolate;
   min-height: 100dvh;
   overflow: hidden;
-  padding: 0.9rem;
+  padding: 0.9rem calc(0.9rem + 0.5rem) 0.9rem 0.9rem;
   position: sticky;
+  scrollbar-width: none;
   top: 0;
+}
+
+.app-sidebar::-webkit-scrollbar {
+  display: none;
+}
+
+.app-sidebar > * {
+  position: relative;
+  z-index: 1;
+}
+
+.app-sidebar::before {
+  background: var(--line);
+  bottom: 0;
+  content: "";
+  height: 1px;
+  left: 0;
+  position: fixed;
+  width: var(--sidebar-width);
+  z-index: 2;
 }
 
 .app-sidebar::after {
   background:
+    linear-gradient(var(--line), var(--line)) left / 1px 100% no-repeat,
     repeating-linear-gradient(
       -45deg,
       var(--line) 0 5px,
-      var(--acid) 5px 10px
+      var(--line) 5px 6px,
+      var(--acid) 6px 11px,
+      var(--acid) 11px 12px
     );
-  border-left: 1px solid var(--line);
   bottom: 0;
   content: "";
-  opacity: 0.9;
-  position: absolute;
-  right: 0;
+  height: 100dvh;
+  left: calc(var(--sidebar-width) - 0.5rem);
+  opacity: 0.95;
+  position: fixed;
+  right: auto;
   top: 0;
-  width: 0.42rem;
+  width: 0.5rem;
+  z-index: 0;
 }
 
 .app-brand {
@@ -1215,8 +1242,14 @@ body::before {
   gap: 1px !important;
   grid-template-columns: 1fr !important;
   margin-bottom: 1.2rem !important;
+  overflow: hidden !important;
   padding: 1px !important;
   position: static;
+  scrollbar-width: none;
+}
+
+.app-nav::-webkit-scrollbar {
+  display: none;
 }
 
 .route-index-caption {
@@ -1250,6 +1283,7 @@ body::before {
   justify-content: flex-start !important;
   letter-spacing: 0 !important;
   min-height: 3.18rem;
+  min-width: 0;
   padding: 0 !important;
   text-transform: uppercase;
 }
@@ -2022,16 +2056,21 @@ input:focus {
   }
 
   .app-sidebar::before {
+    background: transparent;
+    bottom: auto;
     color: var(--mint-dark);
     content: "☰";
     font-family: var(--display-font);
     font-size: 1.7rem;
     font-weight: 800;
+    height: auto;
     left: 1.25rem;
     line-height: 1;
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
+    width: auto;
+    z-index: 1;
   }
 
   .app-sidebar::after {
