@@ -1025,7 +1025,7 @@ button.slot-heat-cell:hover {
   --shadow-pop: none;
   --shadow-glow: none;
   --control-height: 2.75rem;
-  --sidebar-width: 16.5rem;
+  --sidebar-width: 13.75rem;
   --content-max: 78rem;
   --display-font:
     "Inter",
@@ -1076,20 +1076,39 @@ body::before {
   flex-direction: column;
   height: 100dvh;
   min-height: 100dvh;
-  overflow-y: auto;
-  padding: 1rem;
+  overflow: hidden;
+  padding: 0.9rem;
   position: sticky;
   top: 0;
 }
 
+.app-sidebar::after {
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      var(--line) 0 5px,
+      var(--acid) 5px 10px
+    );
+  border-left: 1px solid var(--line);
+  bottom: 0;
+  content: "";
+  opacity: 0.9;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 0.42rem;
+}
+
 .app-brand {
-  margin-bottom: 3.5rem;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 1.35rem;
+  padding-bottom: 1rem;
 }
 
 .app-brand-title {
   color: var(--line);
   font-family: var(--display-font);
-  font-size: clamp(2.35rem, 3vw, 3.35rem);
+  font-size: clamp(2.1rem, 2.55vw, 2.65rem);
   font-weight: 900;
   letter-spacing: -0.055em;
   line-height: 0.9;
@@ -1098,6 +1117,10 @@ body::before {
 .app-brand-subtitle,
 .app-user-label,
 .app-command,
+.route-index-caption,
+.route-number,
+.route-code,
+.route-status,
 .survey-kicker,
 .daily-slot-card label,
 .survey-stat div,
@@ -1111,21 +1134,21 @@ body::before {
 
 .app-brand-subtitle {
   color: var(--muted);
-  font-size: 0.9rem;
-  margin-top: 0.75rem;
+  font-size: 0.78rem;
+  margin-top: 0.65rem;
 }
 
 .app-sidebar-footer {
-  border-top: 1px solid var(--line-soft);
+  border: 1px solid var(--line);
   margin-top: auto;
-  padding-top: 1.25rem;
+  padding: 0.7rem;
 }
 
 .app-user {
   align-items: center;
   display: flex;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
+  gap: 0.6rem;
+  margin-bottom: 0.7rem;
 }
 
 .app-user-icon {
@@ -1133,10 +1156,10 @@ body::before {
   background: var(--acid);
   border: 1px solid var(--line);
   display: flex;
-  height: 3.25rem;
+  height: 2.7rem;
   justify-content: center;
   overflow: hidden;
-  width: 3.25rem;
+  width: 2.7rem;
 }
 
 .app-user-image {
@@ -1149,13 +1172,13 @@ body::before {
 
 .app-user-label {
   color: var(--line);
-  font-size: 0.68rem;
+  font-size: 0.6rem;
 }
 
 .app-user-name {
   color: var(--line);
   font-family: var(--tech-font);
-  font-size: 0.95rem;
+  font-size: 0.78rem;
   font-weight: 600;
   margin-top: 0.25rem;
 }
@@ -1166,11 +1189,11 @@ body::before {
   border: 2px solid var(--line);
   color: var(--line);
   display: flex;
-  font-size: 0.78rem;
+  font-size: 0.66rem;
   font-weight: 700;
   justify-content: center;
-  min-height: 3.25rem;
-  padding: 0.85rem 1rem;
+  min-height: 2.65rem;
+  padding: 0.65rem 0.5rem;
 }
 
 .app-main {
@@ -1185,34 +1208,100 @@ body::before {
 }
 
 .app-nav {
-  background: transparent !important;
-  border: 0 !important;
+  background: var(--line) !important;
+  border: 1px solid var(--line) !important;
   box-shadow: none !important;
-  display: flex !important;
-  flex-direction: column;
-  gap: 0.5rem !important;
-  margin-bottom: 2rem !important;
-  padding: 0 !important;
+  display: grid !important;
+  gap: 1px !important;
+  grid-template-columns: 1fr !important;
+  margin-bottom: 1.2rem !important;
+  padding: 1px !important;
   position: static;
 }
 
+.route-index-caption {
+  align-items: center;
+  background: var(--line);
+  color: var(--panel);
+  display: flex;
+  font-size: 0.62rem;
+  font-weight: 600;
+  grid-column: 1 / -1;
+  justify-content: space-between;
+  line-height: 1;
+  min-height: 1.85rem;
+  padding: 0.45rem 0.55rem;
+}
+
 .mobile-nav-link {
-  background: transparent !important;
+  align-items: stretch !important;
+  background: var(--panel) !important;
   border: 0 !important;
-  border-bottom: 2px solid transparent !important;
   box-shadow: none !important;
   color: var(--muted) !important;
+  display: grid !important;
   flex-direction: row !important;
   font-family: var(--tech-font);
-  font-size: 0.9rem !important;
+  font-size: 0.76rem !important;
   font-weight: 600 !important;
-  gap: 0.9rem !important;
+  gap: 0 !important;
+  grid-template-columns: 2.15rem minmax(0, 1fr) 1.55rem;
   height: auto !important;
   justify-content: flex-start !important;
   letter-spacing: 0 !important;
-  min-height: 2.85rem;
-  padding: 0.7rem 0.5rem !important;
+  min-height: 3.18rem;
+  padding: 0 !important;
   text-transform: uppercase;
+}
+
+.route-number {
+  align-items: center;
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+  color: var(--line);
+  display: flex;
+  font-size: 0.68rem;
+  justify-content: center;
+}
+
+.route-copy {
+  display: grid;
+  min-width: 0;
+  padding: 0.55rem 0.55rem 0.48rem;
+}
+
+.route-label {
+  color: var(--line);
+  font-family: var(--display-font);
+  font-size: 0.85rem;
+  font-weight: 800;
+  line-height: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.route-code {
+  color: var(--muted);
+  font-size: 0.52rem;
+  line-height: 1;
+  margin-top: 0.3rem;
+}
+
+.route-icon {
+  align-self: center;
+  justify-self: center;
+  stroke-width: 2.25;
+}
+
+.route-status {
+  background: var(--line);
+  color: var(--panel);
+  display: none;
+  font-size: 0.52rem;
+  grid-column: 1 / -1;
+  line-height: 1;
+  padding: 0.35rem 0.55rem;
 }
 
 .mobile-nav-link::before {
@@ -1221,9 +1310,21 @@ body::before {
 
 .mobile-nav-link:hover,
 .mobile-nav-link[data-active="true"] {
-  background: transparent !important;
-  border-bottom-color: var(--acid) !important;
+  background: var(--acid) !important;
   color: var(--line) !important;
+}
+
+.mobile-nav-link[data-active="true"] .route-number {
+  background: var(--line);
+  color: var(--acid);
+}
+
+.mobile-nav-link[data-active="true"] .route-code {
+  color: var(--line);
+}
+
+.mobile-nav-link[data-active="true"] .route-status {
+  display: block;
 }
 
 .mobile-nav-link svg {
@@ -1600,10 +1701,14 @@ input:focus {
     border-right: 0;
     height: auto;
     min-height: auto;
-    overflow-y: visible;
+    overflow: visible;
     padding: 1rem 1rem 0.9rem;
     position: sticky;
     z-index: 40;
+  }
+
+  .app-sidebar::after {
+    display: none;
   }
 
   .app-brand {
@@ -1640,11 +1745,16 @@ input:focus {
     display: none;
   }
 
+  .route-index-caption {
+    display: none;
+  }
+
   .mobile-nav-link {
     align-items: center !important;
     background: var(--panel) !important;
     border: 0 !important;
     border-radius: 0 !important;
+    display: flex !important;
     flex: initial !important;
     flex-direction: column !important;
     gap: 0.32rem !important;
@@ -1655,7 +1765,19 @@ input:focus {
     grid-column: span 3;
   }
 
-  .mobile-nav-link span {
+  .route-number,
+  .route-code,
+  .route-status {
+    display: none !important;
+  }
+
+  .route-copy {
+    display: block;
+    padding: 0;
+  }
+
+  .route-label {
+    display: block;
     font-size: clamp(0.64rem, 2.7vw, 0.76rem);
     letter-spacing: -0.01em !important;
     line-height: 1.05;
@@ -1677,7 +1799,7 @@ input:focus {
     box-shadow: none !important;
   }
 
-  .mobile-nav-link:nth-child(n + 5) {
+  .mobile-nav-link:nth-of-type(n + 5) {
     grid-column: span 4;
     min-height: 3.15rem;
   }
