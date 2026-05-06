@@ -261,7 +261,7 @@ function HeatmapRow({ slot, days }: HeatmapRowProps) {
 
         return (
           <TextDialogTrigger
-            aria-label={`${slotMeta[slot].label} ${day.dailyLog.date} ${
+            ariaLabel={`${slotMeta[slot].label} ${day.dailyLog.date} ${
               filled ? "logged 전문 보기" : "empty"
             }`}
             className="slot-heat-cell"

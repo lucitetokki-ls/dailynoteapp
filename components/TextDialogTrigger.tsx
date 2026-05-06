@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -25,7 +25,24 @@ export function TextDialogTrigger({
   children,
 }: TextDialogTriggerProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const titleId = useId();
   const content = text?.trim();
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen]);
 
   if (!content) {
     return (
@@ -55,6 +72,7 @@ export function TextDialogTrigger({
 
       {isOpen ? (
         <div
+          aria-labelledby={titleId}
           aria-modal="true"
           className="dialog-backdrop fixed inset-0 z-50 grid place-items-center bg-zinc-950/45 p-4 backdrop-blur-sm"
           onClick={() => setIsOpen(false)}
@@ -67,7 +85,10 @@ export function TextDialogTrigger({
             <div className="dialog-header flex items-start justify-between gap-4 border-b-2 border-zinc-900/80 bg-white px-4 py-3 sm:px-5">
               <div className="min-w-0">
                 <p className="survey-kicker">Full Text</p>
-                <h2 className="mt-1 truncate text-xl font-semibold text-zinc-950 sm:text-2xl">
+                <h2
+                  className="mt-1 truncate text-xl font-semibold text-zinc-950 sm:text-2xl"
+                  id={titleId}
+                >
                   {title}
                 </h2>
               </div>

@@ -56,7 +56,10 @@ export function AppNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="mobile-nav app-nav mb-5 grid grid-cols-4 gap-1.5 rounded-lg border-2 border-zinc-200 bg-white p-1.5 shadow-sm sm:mb-8 sm:flex sm:items-center sm:gap-2 sm:overflow-x-auto">
+    <nav
+      aria-label="Main navigation"
+      className="mobile-nav app-nav mb-5 grid grid-cols-4 gap-1.5 rounded-lg border-2 border-zinc-200 bg-white p-1.5 shadow-sm sm:mb-8 sm:flex sm:items-center sm:gap-2 sm:overflow-x-auto"
+    >
       {navItems.map((item) => {
         const Icon = item.icon;
         const isActive = pathname === item.href;

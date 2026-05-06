@@ -150,8 +150,10 @@ function FixedDailyActionCard({ action, slot, onUpdateSlot }: FixedDailyActionCa
         <span className="mr-1 text-sm font-semibold text-zinc-600 sm:text-base">만족도</span>
         {[1, 2, 3, 4, 5].map((score) => (
           <button
+            aria-label={`만족도 ${score}`}
+            aria-pressed={score <= satisfaction}
             className={cn(
-              "flex h-8 w-8 items-center justify-center rounded-md border transition sm:h-9 sm:w-9",
+              "satisfaction-button flex h-8 w-8 items-center justify-center rounded-md border transition sm:h-9 sm:w-9",
               score <= satisfaction
                 ? "border-amber-200 bg-amber-50 text-amber-600"
                 : "border-zinc-200 bg-white text-zinc-300 hover:text-zinc-500",
