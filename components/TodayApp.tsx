@@ -124,22 +124,22 @@ export function TodayApp() {
           </p>
         </div>
 
-        <div className="grid min-w-0 grid-cols-[repeat(3,minmax(0,1fr))] gap-2 sm:gap-3">
-          <div className="survey-card survey-stat min-w-0 rounded-lg border border-zinc-200 bg-white p-2 shadow-sm sm:p-3">
+        <div className="today-stat-grid grid min-w-0 grid-cols-[repeat(3,minmax(0,1fr))] gap-2 sm:gap-3">
+          <div className="today-stat-card survey-card survey-stat min-w-0 rounded-lg border border-zinc-200 bg-white p-2 shadow-sm sm:p-3">
             <div className="flex items-center gap-1 text-[0.7rem] font-semibold text-zinc-500 sm:gap-2 sm:text-base">
               <Target aria-hidden="true" size={16} />
               Slots
             </div>
             <p className="mt-1.5 text-2xl font-semibold text-zinc-950 sm:text-4xl">{dailyActionSlots.length}</p>
           </div>
-          <div className="survey-card survey-stat min-w-0 rounded-lg border border-zinc-200 bg-white p-2 shadow-sm sm:p-3">
+          <div className="today-stat-card survey-card survey-stat min-w-0 rounded-lg border border-zinc-200 bg-white p-2 shadow-sm sm:p-3">
             <div className="flex items-center gap-1 text-[0.7rem] font-semibold text-zinc-500 sm:gap-2 sm:text-base">
               <CheckCircle2 aria-hidden="true" size={16} />
               Filled
             </div>
             <p className="mt-1.5 text-2xl font-semibold text-emerald-700 sm:text-4xl">{recordedSlotCount}</p>
           </div>
-          <div className="survey-card survey-stat min-w-0 rounded-lg border border-zinc-200 bg-white p-2 shadow-sm sm:p-3">
+          <div className="today-stat-card survey-card survey-stat min-w-0 rounded-lg border border-zinc-200 bg-white p-2 shadow-sm sm:p-3">
             <div className="flex items-center gap-1 text-[0.7rem] font-semibold text-zinc-500 sm:gap-2 sm:text-base">
               <CircleDashed aria-hidden="true" size={16} />
               Rate

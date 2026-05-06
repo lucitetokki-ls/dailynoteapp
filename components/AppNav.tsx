@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 const navItems = [
   {
     href: "/",
-    label: "Today",
+    label: "Dashboard",
     icon: CalendarCheck2,
   },
   {
@@ -78,7 +78,7 @@ export function AppNav() {
             title={item.label}
           >
             <Icon aria-hidden="true" size={19} />
-            <span>{item.label}</span>
+            <span>&quot;{item.label}&quot;</span>
           </Link>
         );
       })}

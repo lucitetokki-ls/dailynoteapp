@@ -9,7 +9,9 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@fontsource/inter": "^5.2.8",
     "@fontsource/pretendard": "^5.2.5",
+    "@fontsource/space-grotesk": "^5.2.10",
     "@supabase/supabase-js": "^2.105.3",
     "lucide-react": "^1.14.0",
     "next": "16.2.4",
