@@ -12,6 +12,7 @@
 @import "tailwindcss";
 
 :root {
+  color-scheme: light;
   --background: #f7fffc;
   --foreground: #071310;
   --panel: #ffffff;
@@ -62,6 +63,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
+  color-scheme: light;
   font-family: var(--app-font);
   min-height: 100vh;
   line-height: 1.55;
@@ -72,6 +74,8 @@ body {
 }
 
 html {
+  background: var(--background);
+  color-scheme: light;
   scroll-behavior: smooth;
 }
 
@@ -98,6 +102,7 @@ body::before {
 button,
 input,
 textarea {
+  color-scheme: light;
   font-family: var(--app-font);
 }
 
@@ -1980,6 +1985,7 @@ input:focus {
 
 @media (max-width: 900px) {
   :root {
+    color-scheme: light;
     --background: oklch(98.5% 0.006 156);
     --foreground: oklch(18.5% 0.017 160);
     --panel: oklch(99.4% 0.004 156);
@@ -2010,11 +2016,13 @@ input:focus {
 
   html {
     background: var(--paper);
+    color-scheme: light;
   }
 
   body {
     background: var(--paper);
     color: var(--foreground);
+    color-scheme: light;
     font-family: var(--display-font) !important;
   }
 
@@ -2600,14 +2608,15 @@ input:focus {
 
 @media (max-width: 900px) {
   :root {
-    --stitch-paper: #fcf9f8;
+    color-scheme: light;
+    --stitch-paper: #fcfbf8;
     --stitch-white: #fffffe;
     --stitch-soft: #f9fafb;
     --stitch-mint: #98ffd9;
-    --stitch-mint-deep: #006c52;
+    --stitch-mint-deep: #111111;
     --stitch-ink: #111111;
-    --stitch-muted: #3e4944;
-    --stitch-faint: #bdc9c2;
+    --stitch-muted: #444441;
+    --stitch-faint: #d7d7d2;
     --background: var(--stitch-paper);
     --foreground: var(--stitch-ink);
     --panel: var(--stitch-white);
@@ -2616,24 +2625,29 @@ input:focus {
     --line: var(--stitch-ink);
     --line-soft: var(--stitch-faint);
     --muted: var(--stitch-muted);
-    --muted-2: #6e7a74;
+    --muted-2: #6a6a66;
     --acid: var(--stitch-mint);
     --mint: var(--stitch-mint);
     --mint-dark: var(--stitch-mint-deep);
     --paper: var(--stitch-paper);
     --surface: var(--stitch-soft);
     --surface-raised: var(--stitch-white);
-    --surface-tint: #e9fff7;
+    --surface-tint: #eafff7;
     --focus-ring: rgba(152, 255, 217, 0.76);
   }
 
   html,
   body,
+  input,
+  textarea,
+  select,
+  button,
   .app-shell,
   .app-frame,
   .app-sidebar {
     background: var(--stitch-paper) !important;
     color: var(--stitch-ink) !important;
+    color-scheme: light !important;
   }
 
   .app-sidebar {
@@ -2784,7 +2798,7 @@ input:focus {
   }
 
   .satisfaction-button[aria-pressed="true"] {
-    color: var(--stitch-mint-deep) !important;
+    color: var(--stitch-mint) !important;
   }
 
   .survey-grid-panel {
