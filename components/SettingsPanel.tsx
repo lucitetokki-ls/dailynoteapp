@@ -3,6 +3,7 @@
 import { ChangeEvent, useRef } from "react";
 import { Database, Download, RotateCcw, ShieldAlert, Trash2, Upload } from "lucide-react";
 
+import { SupabaseDiagnosticsPanel } from "@/components/SupabaseDiagnosticsPanel";
 import { SupabaseStatusCard } from "@/components/SupabaseStatusCard";
 import {
   clearAllStoredDays,
@@ -170,6 +171,7 @@ export function SettingsPanel() {
       </header>
 
       <SupabaseStatusCard />
+      <SupabaseDiagnosticsPanel />
 
       <section className="grid gap-4 lg:grid-cols-3">
         <ActionPanel

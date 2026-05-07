@@ -2,8 +2,8 @@
 
 import { BarChart3, CheckCircle2, CircleDashed, Star } from "lucide-react";
 
+import { ActionDialogTrigger } from "@/components/ActionDialogTrigger";
 import { ExpandableText } from "@/components/ExpandableText";
-import { TextDialogTrigger } from "@/components/TextDialogTrigger";
 import { WeeklyReflectionPanel } from "@/components/WeeklyReflectionPanel";
 import { useRecentStoredDays } from "@/lib/daily-store";
 import {
@@ -23,21 +23,6 @@ const slotShortLabels: Record<DailyActionSlot, string> = {
   vibe_coding: "Coding",
   writing: "작문",
 };
-
-function getActionText(day: ReturnType<typeof useRecentStoredDays>[number], slot: DailyActionSlot) {
-  const action = getActionForSlot(day.actions, slot);
-
-  if (!action) {
-    return "";
-  }
-
-  return [
-    action.description.trim() ? `행동 내용\n${action.description.trim()}` : "",
-    action.reflection.trim() ? `지금 회고\n${action.reflection.trim()}` : "",
-  ]
-    .filter(Boolean)
-    .join("\n\n");
-}
 
 function getActionTitle(day: ReturnType<typeof useRecentStoredDays>[number], slot: DailyActionSlot) {
   return `${formatDisplayDate(day.dailyLog.date)} · ${slotMeta[slot].label}`;
@@ -125,7 +110,8 @@ export function ReviewDashboard() {
                 </div>
                 <div className="review-mobile-slot-grid grid grid-cols-4 gap-2">
                   {dailyActionSlots.map((slot) => (
-                    <TextDialogTrigger
+                    <ActionDialogTrigger
+                      action={getActionForSlot(day.actions, slot)}
                       ariaLabel={`${formatDisplayDate(day.dailyLog.date)} ${slotMeta[slot].label} 전문 보기`}
                       className={cn(
                         "min-h-9 border border-zinc-200 px-1.5 py-2 text-center text-[0.72rem] font-semibold leading-tight transition",
@@ -133,12 +119,13 @@ export function ReviewDashboard() {
                           ? "bg-emerald-50 text-emerald-700 hover:bg-white"
                           : "bg-zinc-50 text-zinc-400",
                       )}
+                      dataFilled={fillMap[slot]}
+                      date={day.dailyLog.date}
                       key={`mobile-matrix-${day.dailyLog.date}-${slot}`}
-                      text={getActionText(day, slot)}
                       title={getActionTitle(day, slot)}
                     >
                       {slotShortLabels[slot]}
-                    </TextDialogTrigger>
+                    </ActionDialogTrigger>
                   ))}
                 </div>
               </article>
@@ -260,18 +247,19 @@ function HeatmapRow({ slot, days }: HeatmapRowProps) {
         const filled = getSlotFillMap(day.actions)[slot];
 
         return (
-          <TextDialogTrigger
+          <ActionDialogTrigger
+            action={getActionForSlot(day.actions, slot)}
             ariaLabel={`${slotMeta[slot].label} ${day.dailyLog.date} ${
               filled ? "logged 전문 보기" : "empty"
             }`}
             className="slot-heat-cell"
             dataFilled={filled}
+            date={day.dailyLog.date}
             key={`${slot}-${day.dailyLog.date}`}
-            text={getActionText(day, slot)}
             title={`${day.dailyLog.date} · ${slotMeta[slot].label}`}
           >
             <span className="sr-only">{slotMeta[slot].label}</span>
-          </TextDialogTrigger>
+          </ActionDialogTrigger>
         );
       })}
     </>
@@ -286,7 +274,8 @@ type SlotPillProps = {
 
 function SlotPill({ slot, filled, day }: SlotPillProps) {
   return (
-    <TextDialogTrigger
+    <ActionDialogTrigger
+      action={getActionForSlot(day.actions, slot)}
       ariaLabel={`${formatDisplayDate(day.dailyLog.date)} ${slotMeta[slot].label} 전문 보기`}
       className={cn(
         "rounded-md border px-2.5 py-1 text-sm font-semibold transition",
@@ -294,11 +283,11 @@ function SlotPill({ slot, filled, day }: SlotPillProps) {
           ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-white"
           : "border-zinc-200 bg-zinc-50 text-zinc-400",
       )}
-      text={getActionText(day, slot)}
+      date={day.dailyLog.date}
       title={getActionTitle(day, slot)}
     >
       {slotMeta[slot].label}
-    </TextDialogTrigger>
+    </ActionDialogTrigger>
   );
 }
 

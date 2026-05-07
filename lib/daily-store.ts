@@ -248,6 +248,42 @@ export function updateStoredDay(
   writeStoredDay(date, updater(readStoredDay(date)));
 }
 
+export function updateStoredAction(
+  date: string,
+  actionId: string,
+  updates: Partial<DailyAction>,
+) {
+  const now = new Date().toISOString();
+
+  updateStoredDay(date, (currentDay) => ({
+    dailyLog: {
+      ...currentDay.dailyLog,
+      updatedAt: now,
+    },
+    actions: currentDay.actions.map((action) =>
+      action.id === actionId
+        ? {
+            ...action,
+            ...updates,
+            updatedAt: now,
+          }
+        : action,
+    ),
+  }));
+}
+
+export function deleteStoredAction(date: string, actionId: string) {
+  const now = new Date().toISOString();
+
+  updateStoredDay(date, (currentDay) => ({
+    dailyLog: {
+      ...currentDay.dailyLog,
+      updatedAt: now,
+    },
+    actions: currentDay.actions.filter((action) => action.id !== actionId),
+  }));
+}
+
 export function readAllStoredDays() {
   if (!canReadBrowserStore()) {
     return [];
