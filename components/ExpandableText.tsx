@@ -3,6 +3,7 @@
 import { useEffect, useId, useState } from "react";
 import { Maximize2, X } from "lucide-react";
 
+import { blockDialogReopen, canOpenDialog, stopDialogEvent } from "@/lib/dialog-guard";
 import { cn } from "@/lib/utils";
 
 type ExpandableTextProps = {
@@ -38,6 +39,7 @@ export function ExpandableText({
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
+        blockDialogReopen();
         setIsOpen(false);
       }
     }
@@ -46,6 +48,19 @@ export function ExpandableText({
 
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen]);
+
+  function openDialog() {
+    if (!canOpenDialog()) {
+      return;
+    }
+
+    setIsOpen(true);
+  }
+
+  function closeDialog() {
+    blockDialogReopen();
+    setIsOpen(false);
+  }
 
   return (
     <>
@@ -63,7 +78,7 @@ export function ExpandableText({
           <button
             aria-label={`${title} 전문 보기`}
             className="survey-chip inline-flex h-9 w-fit items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-2.5 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50"
-            onClick={() => setIsOpen(true)}
+            onClick={openDialog}
             type="button"
           >
             <Maximize2 aria-hidden="true" size={14} />
@@ -77,12 +92,14 @@ export function ExpandableText({
           aria-labelledby={titleId}
           aria-modal="true"
           className="dialog-backdrop fixed inset-0 z-50 grid place-items-center bg-zinc-950/45 p-4 backdrop-blur-sm"
-          onClick={() => setIsOpen(false)}
+          onClick={closeDialog}
+          onPointerDown={(event) => event.stopPropagation()}
           role="dialog"
         >
           <div
             className="dialog-panel survey-card max-h-[82vh] w-full max-w-2xl overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm"
             onClick={(event) => event.stopPropagation()}
+            onPointerDown={(event) => event.stopPropagation()}
           >
             <div className="dialog-header flex items-start justify-between gap-4 border-b-2 border-zinc-900/80 bg-white px-4 py-3 sm:px-5">
               <div className="min-w-0">
@@ -98,7 +115,11 @@ export function ExpandableText({
                 aria-label="닫기"
                 className="survey-control flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-700 transition hover:bg-zinc-50"
                 data-tooltip="닫기"
-                onClick={() => setIsOpen(false)}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  closeDialog();
+                }}
+                onPointerDown={stopDialogEvent}
                 type="button"
               >
                 <X aria-hidden="true" size={18} />

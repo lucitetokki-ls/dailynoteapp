@@ -4,6 +4,7 @@ import { useEffect, useId, useState } from "react";
 import { Check, Pencil, Star, Trash2, X } from "lucide-react";
 
 import { deleteStoredAction, updateStoredAction } from "@/lib/daily-store";
+import { blockDialogReopen, canOpenDialog, stopDialogEvent } from "@/lib/dialog-guard";
 import { cn } from "@/lib/utils";
 import type { DailyAction } from "@/types/daily-action";
 
@@ -44,6 +45,7 @@ export function ActionDialogTrigger({
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
+        blockDialogReopen();
         setIsOpen(false);
       }
     }
@@ -80,7 +82,7 @@ export function ActionDialogTrigger({
   }
 
   function openDialog() {
-    if (!action) {
+    if (!action || !canOpenDialog()) {
       return;
     }
 
@@ -97,6 +99,12 @@ export function ActionDialogTrigger({
     }
 
     deleteStoredAction(date, action.id);
+    blockDialogReopen();
+    setIsOpen(false);
+  }
+
+  function closeDialog() {
+    blockDialogReopen();
     setIsOpen(false);
   }
 
@@ -118,12 +126,14 @@ export function ActionDialogTrigger({
           aria-labelledby={titleId}
           aria-modal="true"
           className="dialog-backdrop fixed inset-0 z-50 grid place-items-center bg-zinc-950/45 p-4 backdrop-blur-sm"
-          onClick={() => setIsOpen(false)}
+          onClick={closeDialog}
+          onPointerDown={(event) => event.stopPropagation()}
           role="dialog"
         >
           <div
             className="dialog-panel survey-card max-h-[84vh] w-full max-w-2xl overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm"
             onClick={(event) => event.stopPropagation()}
+            onPointerDown={(event) => event.stopPropagation()}
           >
             <div className="dialog-header flex items-start justify-between gap-4 border-b-2 border-zinc-900/80 bg-white px-4 py-3 sm:px-5">
               <div className="min-w-0">
@@ -141,7 +151,11 @@ export function ActionDialogTrigger({
                     aria-label="수정 저장"
                     className="survey-control flex h-10 w-10 items-center justify-center rounded-md border border-zinc-200 bg-white text-emerald-700 transition hover:bg-emerald-50"
                     data-tooltip="저장"
-                    onClick={handleSave}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      handleSave();
+                    }}
+                    onPointerDown={stopDialogEvent}
                     type="button"
                   >
                     <Check aria-hidden="true" size={18} />
@@ -151,7 +165,11 @@ export function ActionDialogTrigger({
                     aria-label="수정"
                     className="survey-control flex h-10 w-10 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-700 transition hover:bg-zinc-50"
                     data-tooltip="수정"
-                    onClick={() => setIsEditing(true)}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setIsEditing(true);
+                    }}
+                    onPointerDown={stopDialogEvent}
                     type="button"
                   >
                     <Pencil aria-hidden="true" size={18} />
@@ -161,7 +179,11 @@ export function ActionDialogTrigger({
                   aria-label="삭제"
                   className="survey-control flex h-10 w-10 items-center justify-center rounded-md border border-red-200 bg-white text-red-700 transition hover:bg-red-50"
                   data-tooltip="삭제"
-                  onClick={handleDelete}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleDelete();
+                  }}
+                  onPointerDown={stopDialogEvent}
                   type="button"
                 >
                   <Trash2 aria-hidden="true" size={18} />
@@ -170,7 +192,11 @@ export function ActionDialogTrigger({
                   aria-label="닫기"
                   className="survey-control flex h-10 w-10 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-700 transition hover:bg-zinc-50"
                   data-tooltip="닫기"
-                  onClick={() => setIsOpen(false)}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    closeDialog();
+                  }}
+                  onPointerDown={stopDialogEvent}
                   type="button"
                 >
                   <X aria-hidden="true" size={18} />
@@ -209,7 +235,11 @@ export function ActionDialogTrigger({
                             : "border-zinc-200 bg-white text-zinc-300 hover:text-zinc-500",
                         )}
                         key={score}
-                        onClick={() => setDraftSatisfaction(score)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setDraftSatisfaction(score);
+                        }}
+                        onPointerDown={stopDialogEvent}
                         type="button"
                       >
                         <Star
