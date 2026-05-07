@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 
+import { EmptyState } from "@/components/EmptyState";
 import { ExpandableText } from "@/components/ExpandableText";
 import { useStoredDays } from "@/lib/daily-store";
 import { cn, formatDisplayDate } from "@/lib/utils";
@@ -61,7 +62,7 @@ export function SearchPanel() {
           행동 기록 검색
         </h1>
         <p className="mt-4 max-w-4xl text-lg leading-8 text-zinc-600">
-          행동 제목, 메모, 회고를 한 번에 찾아봅니다.
+          행동 내용, 짧은 회고, 오늘 회고를 한 번에 찾아봅니다.
         </p>
       </header>
 
@@ -73,7 +74,7 @@ export function SearchPanel() {
             <input
               className="h-full min-w-0 flex-1 bg-transparent text-lg text-zinc-950 outline-none placeholder:text-zinc-400"
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="예: 걷기, 회고, partial"
+              placeholder="식단, 운동, 작문, 회고"
               value={query}
             />
           </div>
@@ -144,9 +145,10 @@ export function SearchPanel() {
             </article>
           ))
         ) : (
-          <div className="survey-card rounded-lg border border-dashed border-zinc-300 bg-white/70 p-8 text-lg text-zinc-500">
-            조건에 맞는 기록이 없습니다.
-          </div>
+          <EmptyState
+            title="검색 결과 없음"
+            description="검색어, 카테고리, 상태 필터를 조금 넓혀서 다시 확인하세요."
+          />
         )}
       </section>
     </div>

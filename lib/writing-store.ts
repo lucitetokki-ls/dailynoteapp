@@ -9,6 +9,7 @@ import type { WritingEntry } from "@/types/writing-entry";
 const writingStoragePrefix = "daily-note-writing:";
 const writingStoreEventName = "daily-note-writing-store-change";
 const writingSyncEventName = "daily-note-writing-sync-change";
+const writingDatePattern = /^\d{4}-\d{2}-\d{2}$/;
 
 let writingSnapshotVersion = 0;
 let writingSyncVersion = 0;
@@ -187,6 +188,32 @@ export function readWritingEntry(date: string): WritingEntry {
   return readWritingEntryFromLocalStorage(date);
 }
 
+export function readAllWritingEntries() {
+  if (typeof window === "undefined") {
+    return [];
+  }
+
+  const entries: WritingEntry[] = [];
+
+  for (let index = 0; index < window.localStorage.length; index += 1) {
+    const key = window.localStorage.key(index);
+
+    if (!key?.startsWith(writingStoragePrefix)) {
+      continue;
+    }
+
+    const date = key.slice(writingStoragePrefix.length);
+
+    if (!writingDatePattern.test(date)) {
+      continue;
+    }
+
+    entries.push(readWritingEntryFromLocalStorage(date));
+  }
+
+  return entries.sort((first, second) => second.date.localeCompare(first.date));
+}
+
 export function writeWritingEntry(date: string, content: string) {
   const currentEntry = readWritingEntry(date);
   const now = new Date().toISOString();
@@ -264,6 +291,12 @@ export function useWritingEntry(date = getTodayDateKey()) {
     void syncWritingEntryFromSupabase(date);
   }, [date]);
   return readWritingEntry(date);
+}
+
+export function useWritingEntries() {
+  useSyncExternalStore(subscribeToWritingEntry, getWritingSnapshot, getServerSnapshot);
+
+  return readAllWritingEntries();
 }
 
 export function useWritingSyncStatus(date: string) {

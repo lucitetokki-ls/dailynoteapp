@@ -10,8 +10,8 @@ import {
   Target,
 } from "lucide-react";
 
-import { DailyReflection } from "@/components/DailyReflection";
 import { DailyImagePanel } from "@/components/DailyImagePanel";
+import { DailyReflection } from "@/components/DailyReflection";
 import { FixedDailyActions } from "@/components/FixedDailyActions";
 import { SyncToast } from "@/components/SyncToast";
 import { updateStoredDay, useStoredDay, useSupabaseSyncStatus } from "@/lib/daily-store";
@@ -109,13 +109,11 @@ export function TodayApp() {
   }
 
   return (
-    <div className="grid gap-5 pb-9 sm:gap-8 sm:pb-12">
+    <div className="today-page grid gap-5 pb-9 sm:gap-8 sm:pb-12">
       <SyncToast syncStatus={syncStatus} />
       <header className="survey-hero today-hero grid gap-4 sm:gap-5">
         <div className="max-w-5xl pt-1 text-left">
-          <p className="survey-kicker">
-            Lucitetokki Daily Action Log
-          </p>
+          <p className="survey-kicker">Lucitetokki Daily Action Log</p>
           <h1 className="survey-title mt-2.5 text-4xl font-semibold leading-tight text-zinc-950 sm:mt-3 sm:text-6xl lg:text-7xl">
             苟日新, 日日新, 又日新
           </h1>
@@ -125,31 +123,13 @@ export function TodayApp() {
         </div>
 
         <div className="today-stat-grid grid min-w-0 grid-cols-[repeat(3,minmax(0,1fr))] gap-2 sm:gap-3">
-          <div className="today-stat-card survey-card survey-stat min-w-0 rounded-lg border border-zinc-200 bg-white p-2 shadow-sm sm:p-3">
-            <div className="flex items-center gap-1 text-[0.7rem] font-semibold text-zinc-500 sm:gap-2 sm:text-base">
-              <Target aria-hidden="true" size={16} />
-              Slots
-            </div>
-            <p className="mt-1.5 text-2xl font-semibold text-zinc-950 sm:text-4xl">{dailyActionSlots.length}</p>
-          </div>
-          <div className="today-stat-card survey-card survey-stat min-w-0 rounded-lg border border-zinc-200 bg-white p-2 shadow-sm sm:p-3">
-            <div className="flex items-center gap-1 text-[0.7rem] font-semibold text-zinc-500 sm:gap-2 sm:text-base">
-              <CheckCircle2 aria-hidden="true" size={16} />
-              Filled
-            </div>
-            <p className="mt-1.5 text-2xl font-semibold text-emerald-700 sm:text-4xl">{recordedSlotCount}</p>
-          </div>
-          <div className="today-stat-card survey-card survey-stat min-w-0 rounded-lg border border-zinc-200 bg-white p-2 shadow-sm sm:p-3">
-            <div className="flex items-center gap-1 text-[0.7rem] font-semibold text-zinc-500 sm:gap-2 sm:text-base">
-              <CircleDashed aria-hidden="true" size={16} />
-              Rate
-            </div>
-            <p className="mt-1.5 text-2xl font-semibold text-sky-700 sm:text-4xl">{completionRate}%</p>
-          </div>
+          <StatCard icon={Target} label="Slots" value={dailyActionSlots.length.toString()} />
+          <StatCard icon={CheckCircle2} label="Filled" value={recordedSlotCount.toString()} />
+          <StatCard icon={CircleDashed} label="Rate" value={`${completionRate}%`} accent />
         </div>
       </header>
 
-      <div className="survey-divider grid gap-3 border-y border-zinc-200 py-3 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:py-4">
+      <div className="survey-divider mobile-date-sync-panel grid gap-3 border-y border-zinc-200 py-3 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:py-4">
         <div className="mobile-date-bar flex min-w-0 flex-wrap items-center gap-2 sm:w-auto">
           <button
             className="survey-control flex h-11 w-11 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950"
@@ -184,7 +164,7 @@ export function TodayApp() {
             </button>
           ) : null}
         </div>
-        <div className="mobile-sync-row flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto">
+        <div className="mobile-sync-row sync-status-cluster flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto">
           <span
             className={cn(
               "sync-status-pill rounded-md border px-3 py-1.5 text-sm font-semibold",
@@ -198,7 +178,9 @@ export function TodayApp() {
           >
             {syncStatus.message}
           </span>
-          <p className="w-full min-w-0 flex-none text-sm leading-6 text-zinc-500 sm:w-auto sm:text-base">입력칸에서 나오면 자동 저장됩니다.</p>
+          <p className="w-full min-w-0 flex-none text-sm leading-6 text-zinc-500 sm:w-auto sm:text-base">
+            입력은 자동 저장됩니다. 오류가 나면 로컬 기록은 유지됩니다.
+          </p>
         </div>
       </div>
 
@@ -217,6 +199,27 @@ export function TodayApp() {
           onUpdateSlot={updateSlot}
         />
       </div>
+    </div>
+  );
+}
+
+type StatCardProps = {
+  icon: React.ComponentType<{ "aria-hidden": true; size: number }>;
+  label: string;
+  value: string;
+  accent?: boolean;
+};
+
+function StatCard({ icon: Icon, label, value, accent = false }: StatCardProps) {
+  return (
+    <div className="today-stat-card survey-card survey-stat min-w-0 rounded-lg border border-zinc-200 bg-white p-2 shadow-sm sm:p-3">
+      <div className="flex items-center gap-1 text-[0.7rem] font-semibold text-zinc-500 sm:gap-2 sm:text-base">
+        <Icon aria-hidden={true} size={16} />
+        {label}
+      </div>
+      <p className={cn("mt-1.5 text-2xl font-semibold sm:text-4xl", accent ? "text-sky-700" : "text-zinc-950")}>
+        {value}
+      </p>
     </div>
   );
 }

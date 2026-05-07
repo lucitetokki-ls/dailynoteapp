@@ -3,6 +3,7 @@
 import Image from "next/image";
 
 import { AppNav } from "@/components/AppNav";
+import { MobileThemeToggle } from "@/components/MobileThemeToggle";
 import { useClientReady } from "@/lib/client-ready";
 
 type AppShellProps = {
@@ -20,6 +21,7 @@ export function AppShell({ children }: AppShellProps) {
             <p className="app-brand-title">ROUTINE</p>
             <p className="app-brand-subtitle">DAILY_LOG_V1.0</p>
           </div>
+          <MobileThemeToggle />
 
           <AppNav />
 

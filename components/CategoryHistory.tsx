@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { CheckCircle2, CircleDashed, XCircle } from "lucide-react";
 
+import { EmptyState } from "@/components/EmptyState";
 import { ExpandableText } from "@/components/ExpandableText";
 import { useStoredDays } from "@/lib/daily-store";
 import { calculateCompletionRate } from "@/lib/score";
@@ -48,7 +49,7 @@ export function CategoryHistory() {
             카테고리별 행동 히스토리
           </h1>
           <p className="mt-4 max-w-4xl text-lg leading-8 text-zinc-600">
-            한 영역에서 행동이 얼마나 이어졌는지 확인합니다.
+            각 영역에서 어떤 행동을 이어왔는지 확인합니다.
           </p>
         </div>
 
@@ -123,9 +124,10 @@ export function CategoryHistory() {
             );
           })
         ) : (
-          <div className="survey-card rounded-lg border border-dashed border-zinc-300 bg-white/70 p-8 text-lg text-zinc-500">
-            이 카테고리에는 아직 기록된 행동이 없습니다.
-          </div>
+          <EmptyState
+            title="아직 기록 없음"
+            description="선택한 카테고리에 저장된 행동이 없습니다."
+          />
         )}
       </section>
     </div>
