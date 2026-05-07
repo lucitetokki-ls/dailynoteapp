@@ -12,17 +12,14 @@ import {
   categoryMeta,
   statusMeta,
   type ActionCategory,
-  type ActionStatus,
 } from "@/types/daily-action";
 
 type CategoryFilter = "all" | ActionCategory;
-type StatusFilter = "all" | ActionStatus;
 
 export function SearchPanel() {
   const days = useStoredDays();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<CategoryFilter>("all");
-  const [status, setStatus] = useState<StatusFilter>("all");
 
   const results = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -37,7 +34,6 @@ export function SearchPanel() {
       )
       .filter((action) => {
         const matchesCategory = category === "all" || action.category === category;
-        const matchesStatus = status === "all" || action.status === status;
         const haystack = [
           action.title,
           action.description,
@@ -49,10 +45,10 @@ export function SearchPanel() {
           .join(" ")
           .toLowerCase();
 
-        return matchesCategory && matchesStatus && (!normalizedQuery || haystack.includes(normalizedQuery));
+        return matchesCategory && (!normalizedQuery || haystack.includes(normalizedQuery));
       })
       .sort((first, second) => second.createdAt.localeCompare(first.createdAt));
-  }, [category, days, query, status]);
+  }, [category, days, query]);
 
   return (
     <div className="grid gap-8 pb-12">
@@ -80,7 +76,7 @@ export function SearchPanel() {
           </div>
         </label>
 
-        <div className="mt-5 grid gap-3 lg:grid-cols-2">
+        <div className="search-filter-grid mt-5">
           <FilterGroup
             activeValue={category}
             items={[
@@ -91,16 +87,6 @@ export function SearchPanel() {
               })),
             ]}
             onChange={(value) => setCategory(value as CategoryFilter)}
-          />
-          <FilterGroup
-            activeValue={status}
-            items={[
-              { label: "All", value: "all" },
-              { label: "Done", value: "done" },
-              { label: "Partial", value: "partial" },
-              { label: "Skipped", value: "skipped" },
-            ]}
-            onChange={(value) => setStatus(value as StatusFilter)}
           />
         </div>
       </section>
@@ -147,7 +133,7 @@ export function SearchPanel() {
         ) : (
           <EmptyState
             title="검색 결과 없음"
-            description="검색어, 카테고리, 상태 필터를 조금 넓혀서 다시 확인하세요."
+            description="검색어와 카테고리를 조금 넓혀서 다시 확인하세요."
           />
         )}
       </section>

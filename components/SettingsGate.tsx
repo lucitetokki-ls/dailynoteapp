@@ -34,9 +34,15 @@ export function SettingsGate({ children }: SettingsGateProps) {
   }
 
   return (
-    <div className="settings-gate grid min-h-[55vh] place-items-center">
-      <section className="settings-gate-panel survey-card max-w-xl rounded-lg border border-zinc-200 bg-white p-6 text-center shadow-sm sm:p-8">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center border border-zinc-950 bg-emerald-50 text-zinc-950">
+    <div className="settings-gate">
+      <header className="settings-gate-hero survey-hero">
+        <p className="survey-kicker">Settings</p>
+        <h1 className="survey-title mt-3">Access Control</h1>
+        <p className="mt-4">설정 페이지는 암호 확인 후 진입합니다.</p>
+      </header>
+
+      <section className="settings-gate-panel survey-card">
+        <div className="settings-gate-icon">
           <LockKeyhole aria-hidden="true" size={24} />
         </div>
         <p className="survey-kicker mt-5">Settings Locked</p>
@@ -47,7 +53,7 @@ export function SettingsGate({ children }: SettingsGateProps) {
           설정 페이지에 접근하려면 암호가 필요합니다.
         </p>
         <button
-          className="survey-control mt-6 min-h-12 border border-zinc-950 bg-white px-5 text-base font-semibold text-zinc-950 transition hover:bg-emerald-50"
+          className="settings-gate-button survey-control"
           onClick={requestPassword}
           type="button"
         >
