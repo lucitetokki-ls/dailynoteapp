@@ -51,7 +51,7 @@ export function SearchPanel() {
   }, [category, days, query]);
 
   return (
-    <div className="grid gap-8 pb-12">
+    <div className="search-panel grid gap-8 pb-12">
       <header className="survey-hero">
         <p className="survey-kicker">Search</p>
         <h1 className="survey-title mt-3 max-w-5xl text-5xl font-semibold leading-tight text-zinc-950 sm:text-6xl">
