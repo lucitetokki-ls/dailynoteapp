@@ -1,152 +1,212 @@
 ---
-name: Terminal Protocol 01
+name: Lucitetokki Daily Action Log Design System
+register: product
+theme: neo-brutal personal operating system
 colors:
-  surface: '#f9f9f9'
-  surface-dim: '#dadada'
-  surface-bright: '#f9f9f9'
-  surface-container-lowest: '#ffffff'
-  surface-container-low: '#f3f3f3'
-  surface-container: '#eeeeee'
-  surface-container-high: '#e8e8e8'
-  surface-container-highest: '#e2e2e2'
-  on-surface: '#1b1b1b'
-  on-surface-variant: '#4c4546'
-  inverse-surface: '#303030'
-  inverse-on-surface: '#f1f1f1'
-  outline: '#7e7576'
-  outline-variant: '#cfc4c5'
-  surface-tint: '#5e5e5e'
-  primary: '#000000'
-  on-primary: '#ffffff'
-  primary-container: '#1b1b1b'
-  on-primary-container: '#848484'
-  inverse-primary: '#c6c6c6'
-  secondary: '#5c5f5d'
-  on-secondary: '#ffffff'
-  secondary-container: '#e1e3e0'
-  on-secondary-container: '#626563'
-  tertiary: '#000000'
-  on-tertiary: '#ffffff'
-  tertiary-container: '#002116'
-  on-tertiary-container: '#249474'
-  error: '#ba1a1a'
-  on-error: '#ffffff'
-  error-container: '#ffdad6'
-  on-error-container: '#93000a'
-  primary-fixed: '#e2e2e2'
-  primary-fixed-dim: '#c6c6c6'
-  on-primary-fixed: '#1b1b1b'
-  on-primary-fixed-variant: '#474747'
-  secondary-fixed: '#e1e3e0'
-  secondary-fixed-dim: '#c5c7c4'
-  on-secondary-fixed: '#191c1b'
-  on-secondary-fixed-variant: '#444746'
-  tertiary-fixed: '#8ff6cf'
-  tertiary-fixed-dim: '#73d9b4'
-  on-tertiary-fixed: '#002116'
-  on-tertiary-fixed-variant: '#00513c'
-  background: '#f9f9f9'
-  on-background: '#1b1b1b'
-  surface-variant: '#e2e2e2'
+  paper: "#fcfbf8"
+  white: "#fffffe"
+  black: "#111111"
+  mint: "#98ffd9"
+  mint-deep: "#111111"
+  muted: "#444441"
+  faint: "#d7d7d2"
+  soft: "#f9fafb"
 typography:
-  h1:
-    fontFamily: Inter
-    fontSize: 64px
-    fontWeight: '800'
-    lineHeight: '1.0'
-    letterSpacing: -0.04em
-  h2:
-    fontFamily: Inter
-    fontSize: 32px
-    fontWeight: '700'
-    lineHeight: '1.1'
-    letterSpacing: -0.02em
-  h3:
-    fontFamily: Inter
-    fontSize: 24px
-    fontWeight: '700'
-    lineHeight: '1.2'
-  body-lg:
-    fontFamily: Inter
-    fontSize: 18px
-    fontWeight: '400'
-    lineHeight: '1.6'
-  body-md:
-    fontFamily: Inter
-    fontSize: 16px
-    fontWeight: '400'
-    lineHeight: '1.5'
-  technical-label:
-    fontFamily: Space Grotesk
-    fontSize: 12px
-    fontWeight: '500'
-    lineHeight: '1.0'
-    letterSpacing: 0.1em
-  quoted-label:
-    fontFamily: Space Grotesk
-    fontSize: 14px
-    fontWeight: '600'
-    lineHeight: '1.0'
-  status-number:
-    fontFamily: Inter
-    fontSize: 48px
-    fontWeight: '900'
-    lineHeight: '1.0'
+  primary:
+    family: "Pretendard"
+    usage: "Korean-first product UI, body copy, mobile UI, forms"
+  display:
+    family: "Inter, Pretendard"
+    usage: "large Latin labels, desktop product headings, brand wordmarks"
+  technical:
+    family: "Space Grotesk, Pretendard"
+    usage: "kickers, route codes, chips, compact metadata"
 spacing:
-  unit: 4px
-  xs: 4px
-  sm: 8px
-  md: 16px
-  lg: 32px
-  xl: 64px
-  gutter: 1px
+  base: 4px
+  compact: 8px
+  panel: 20px-32px
+  desktop-canvas-margin: 40px
+  mobile-side-padding: 20px
+radius: 0px
+border: 1px solid black
 ---
 
-## Brand & Style
-The brand identity is rooted in **Neo-Brutalism** and **Industrial Futurism**. It evokes the feeling of a mission-critical terminal or a high-precision digital logbook. The aesthetic is intentionally "unrefined" yet highly structured, prioritizing raw functionality and data density over decorative softness.
+# Design System
 
-The target audience consists of power users, engineers, and researchers who value speed, systematic organization, and a "high-tech/low-life" aesthetic. The emotional response should be one of discipline, focus, and authoritative clarity. The UI utilizes heavy 1px and 2px borders, monochromatic surfaces with high-visibility accents, and monospaced technical labels to create a digital workspace that feels like a physical piece of hardware.
+Lucitetokki Daily Action Log is a personal operating system for daily execution. The interface should feel like a sharp paper terminal: bright, disciplined, high-contrast, and slightly mechanical, without becoming dark, heavy, or decorative.
 
-## Colors
-The palette is dominated by **Industrial Black** (#000000) and **Paper White** (#F9FAF7), creating a high-contrast foundation that ensures maximum readability. 
+The visual direction is not a generic wellness tracker. It is a daily control panel for one person who wants to write down what was actually done.
 
-- **Primary:** Pure Black is used for all structural borders, primary text, and high-impact containers.
-- **Accent (Mint):** A high-visibility "Accent Mint" (#98FFD8) is used sparingly for status indicators, primary actions, and progress highlights. It acts as the primary "active" state color.
-- **Secondary/Neutral:** A range of greys (Ghost Grey and Secondary Grey) are used for technical metadata and decorative grid lines to reduce visual noise in non-essential areas.
-- **Functional Patterns:** Diagonal stripes (Mint/Black) are used for specific "Active" or "System" states to provide a tactile, industrial warning-tape feel.
+## Design Intent
+
+- **Physical feel:** printed dashboard, terminal index, field log, technical worksheet.
+- **Emotional tone:** disciplined, private, focused, a little severe, but still bright.
+- **Primary palette:** mint, white, black.
+- **Design register:** product UI. The design supports repeated daily use, so clarity wins over spectacle.
+- **Core tension:** make the app visually memorable, but keep input friction low.
+
+## Color
+
+Use a restrained mint/white/black system.
+
+- **Paper background:** `#fcfbf8`
+- **Panel surface:** `#fffffe`
+- **Ink / border:** `#111111`
+- **Primary mint:** `#98ffd9`
+- **Muted copy:** `#444441`
+- **Faint divider:** `#d7d7d2`
+- **Soft panel:** `#f9fafb`
+- **Danger:** saturated red only for errors or destructive feedback
+
+Rules:
+
+- Mint is for active states, primary status, selected filters, sync pills, and filled cells.
+- Black is for borders, text, section dividers, selected dark states, and structural rhythm.
+- White/off-white is the dominant surface.
+- Avoid random green tones. If it reads green rather than mint, replace it.
+- Avoid decorative gradients, soft glows, glass effects, and pastel card clutter.
+- Desktop may use black/mint diagonal striping as a sidebar motif. Mobile should stay flatter and cleaner.
 
 ## Typography
-The typography system uses a dual-font approach to distinguish between content and system metadata.
 
-- **Inter:** The primary workhorse for headlines and body content. It is used in heavy weights (800-900) for large numerical data and daily headers to create a "printed" look.
-- **Space Grotesk:** Reserved for technical labels, status codes, and button text. Its geometric quirks reinforce the "technical" and "futuristic" brand personality.
-- **Formatting:** All system labels should be uppercase with increased letter spacing. Quoted labels (e.g., "DASHBOARD") are used for navigation items to simulate directory paths or string values.
+This is a Korean-first app. Pretendard must be reliable across desktop and mobile.
 
-## Layout & Spacing
-The layout follows a **Rigid Grid** philosophy. Content is contained within strict borders, often sharing edges to create a "paneled" look.
+- **Pretendard:** default UI font, especially for Korean text and mobile.
+- **Inter:** acceptable for desktop Latin-heavy display text and the ROUTINE wordmark.
+- **Space Grotesk:** acceptable for technical micro-labels, route codes, and uppercase system text.
 
-- **Grid:** A 1px "Gutter" is used between grid items (achieved by using a black background behind white panels) to create crisp, hair-line divisions.
-- **Structure:** A fixed-width left sidebar (64 units) houses navigation, while the main canvas utilizes a fluid-width header and multi-column grid sections for data display.
-- **Rhythm:** Spacing follows a 4px base unit. Internal padding within panels is generous (32px) to offset the density of the borders and technical labels.
+Rules:
 
-## Elevation & Depth
-This system rejects shadows entirely in favor of **Structural Layering** and **Bold Borders**.
+- Do not scale fonts purely by viewport width except within controlled mobile hero clamps.
+- Korean headings must remain readable and not wrap awkwardly.
+- Mobile headings should be compact enough to let the user reach the actual record area quickly.
+- Technical labels can be uppercase, but body copy should remain natural Korean.
+- Keep letter spacing at `0` for Korean body text. Use tracking only for short Latin technical labels.
 
-- **Flat Depth:** Hierarchy is established through background color shifts (Paper White vs. Surface Muted) and border weight.
-- **Active States:** Active cards or focused inputs may increase border weight from 1px to 2px or introduce the Mint accent color.
-- **Dividers:** Horizontal and vertical 1px lines are the primary tool for separating information. There is no concept of "z-index" shadows; depth is strictly 2D, resembling a technical blueprint.
+## Layout
 
-## Shapes
-The shape language is strictly **Geometric and Sharp**. 
+The layout uses rigid panels, not soft cards.
 
-- **Corner Radius:** Every element—including buttons, input fields, and containers—has a 0px border radius. 
-- **Icons:** Icons are used within square, bordered frames or as raw symbols without background housing.
-- **Decorative Elements:** 45-degree diagonal stripes are used as a secondary shape motif to indicate "filling" or "active" status in status blocks.
+Desktop:
 
-## Components
-- **Buttons:** Sharp-edged boxes with 2px borders. Primary buttons use the Accent Mint background with black text. Hover states invert the colors or switch to black backgrounds with white text.
-- **Input Fields:** Minimalist design featuring only a bottom border (1px). Focus states increase the bottom border to 2px. Labels are positioned above the input in a small, technical font.
-- **Cards/Panels:** Defined by a 1px primary border. They consist of a "Header" section with a muted background and a "Body" section for content.
-- **Navigation Tabs:** Text-based with a heavy bottom border (Accent Mint) for active states. Links are often prefixed with "quoted" strings or icons.
-- **Status Indicators:** Large, bold numerals paired with technical labels. High-importance stats use the Accent Mint background.
-- **Icons:** Material Symbols Outlined, used with a standard weight (400) and no fill, except for rating systems where "Fill" is used to indicate value.
+- Fixed left sidebar.
+- Main content starts at a consistent x-position.
+- Page hero, metrics, forms, and section bodies should align to the same width.
+- Sidebar is a product navigation rail, not a marketing decoration.
+- Use large desktop headings, but keep metric cards compact.
+
+Mobile:
+
+- Fixed top brand bar.
+- Fixed bottom navigation.
+- No fake hamburger menu. If an icon looks interactive, it must be interactive.
+- Use `20px` side padding.
+- Keep page heroes shallow. Mobile users should see the first useful control quickly.
+- Prefer two-column controls for small filter sets.
+- Avoid horizontal scrolling except when explicitly designed.
+
+## Shape And Borders
+
+- Radius: `0px`.
+- Borders: mostly `1px solid #111111`.
+- Avoid nested card-in-card styling.
+- Prefer full-width panels, dividers, and grid sections over floating cards.
+- Shadows are not the main depth system. If used, keep them minimal and structural.
+
+## Core Components
+
+### App Shell
+
+- Desktop: left sidebar with ROUTINE brand, numbered routes, profile block, and mint/black technical accent.
+- Mobile: top brand bar and bottom tab bar.
+- Active navigation uses mint fill or strong black contrast.
+- Mobile nav labels should be short Korean labels.
+
+### Page Hero
+
+- Kicker: small technical label.
+- Title: large, heavy, direct.
+- Supporting copy: one sentence, not a feature explanation.
+- On mobile, hero height must be compressed.
+
+### Survey Card / Panel
+
+- White surface, black border.
+- Used for forms, status groups, search panels, calendar detail, empty states.
+- Internal spacing should vary by density: compact stats, generous text input.
+
+### Daily Slot Cards
+
+- Four fixed daily slots: diet, fitness, Vibe Coding, writing.
+- The user records only completed actions.
+- No Done / Partial / Skipped controls in Today.
+- Each slot should feel like a designated input field, not an open-ended task list.
+
+### Writing Studio
+
+- A dedicated long-form writing area.
+- It is intentionally separate from Today's short writing summary.
+- The editor should feel spacious and quiet compared with the dashboard.
+
+### Review And Calendar
+
+- Review is for rhythm and memory, not guilt tracking.
+- Calendar shows daily history with compact previews.
+- Long text should be expandable through a professional "full text" interaction, not by stretching every card.
+
+### Search
+
+- Search is a utility surface.
+- Use query + category filters only unless there is a real need for more.
+- Empty state copy should guide broadening the search without sounding like an error.
+
+### Settings Gate
+
+- Settings access can be gated with a light client-side prompt for personal use.
+- The lock screen should still use the same page hero and panel language as the rest of the app.
+
+## Interaction
+
+- Primary actions should be obvious and bordered.
+- Focus states must be visible.
+- Textareas must be comfortable on mobile, with `16px` minimum font size to avoid zoom issues.
+- Touch targets should be at least 44px high.
+- Toasts and sync states should be informative, not dominant.
+- If a visual element looks like a button, it should be clickable.
+
+## Mobile Rules
+
+- Mobile must not inherit desktop density blindly.
+- Force the light mint/white/black theme unless a deliberate mobile dark toggle is implemented.
+- If dark mode exists, it should use black/mint/white only, not random greens or slate tones.
+- Top header should not contain non-functional menu icons.
+- Bottom nav should remain stable and visible.
+- Mobile hero headings should generally stay under `3rem`.
+
+## Anti-Patterns
+
+Do not use:
+
+- Generic SaaS gradients.
+- Glassmorphism.
+- Rounded pill-heavy UI.
+- Random emoji menus.
+- Decorative hamburger icons.
+- Big hero metric templates.
+- Identical decorative card grids.
+- Overly soft beige wellness-app styling.
+- Dark terminal theme as the default mobile experience.
+- Status tracking that makes the app about whether the user recorded, rather than what the user did.
+
+## Reuse Notes For Future Projects
+
+This design system works well for:
+
+- Personal dashboards.
+- Daily logs.
+- Study trackers.
+- Writing systems.
+- Lightweight operating systems for one user.
+- Apps where the user wants discipline, not social engagement.
+
+For a different domain, preserve the structure but change the domain language. The strongest reusable parts are the fixed app shell, technical labels, sharp borders, mint active state, compact mobile hero, and designated input slots.
