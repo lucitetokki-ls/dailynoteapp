@@ -1170,6 +1170,10 @@ body::before {
   margin-top: 0.65rem;
 }
 
+.app-mobile-brand-logo {
+  display: none;
+}
+
 .app-sidebar-footer {
   border: 1px solid var(--line);
   margin-top: auto;
@@ -3158,14 +3162,52 @@ input:focus {
 
 @media (max-width: 900px) {
   .app-brand {
+    align-items: center !important;
+    display: flex !important;
+    flex: 0 1 auto !important;
+    justify-content: center !important;
+    min-width: 0 !important;
     padding-left: 0 !important;
     padding-right: 0 !important;
+  }
+
+  .app-brand-title {
+    display: none !important;
   }
 
   .app-brand-subtitle,
   .app-brand-subtitle::after {
     content: none !important;
     display: none !important;
+  }
+
+  .app-mobile-brand-logo {
+    display: block;
+    height: 2.75rem;
+    inline-size: clamp(9.5rem, 48vw, 11.25rem);
+    max-inline-size: calc(100vw - 10.75rem);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .app-mobile-brand-image {
+    display: block;
+    height: 100%;
+    inline-size: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .app-mobile-brand-image-dark {
+    display: none;
+  }
+
+  html[data-mobile-theme="dark"] .app-mobile-brand-image-light {
+    display: none;
+  }
+
+  html[data-mobile-theme="dark"] .app-mobile-brand-image-dark {
+    display: block;
   }
 
   .search-filter-grid,

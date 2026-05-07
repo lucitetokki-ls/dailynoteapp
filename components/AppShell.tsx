@@ -20,6 +20,24 @@ export function AppShell({ children }: AppShellProps) {
           <div className="app-brand">
             <p className="app-brand-title">ROUTINE</p>
             <p className="app-brand-subtitle">DAILY_LOG_V1.0</p>
+            <div className="app-mobile-brand-logo" aria-hidden="true">
+              <Image
+                alt=""
+                className="app-mobile-brand-image app-mobile-brand-image-light"
+                height={887}
+                priority
+                src="/mobiletitle.png"
+                width={1774}
+              />
+              <Image
+                alt=""
+                className="app-mobile-brand-image app-mobile-brand-image-dark"
+                height={887}
+                priority
+                src="/mobiletitledark.png"
+                width={1774}
+              />
+            </div>
           </div>
           <MobileThemeToggle />
 
