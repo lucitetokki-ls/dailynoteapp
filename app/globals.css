@@ -3182,6 +3182,7 @@ input:focus {
   }
 
   .app-mobile-brand-logo {
+    border-radius: 0.45rem;
     display: block;
     height: 2.75rem;
     inline-size: clamp(9.5rem, 48vw, 11.25rem);
@@ -3237,5 +3238,34 @@ input:focus {
     max-inline-size: 100% !important;
     min-inline-size: 0 !important;
     width: 100% !important;
+  }
+
+  .mobile-theme-toggle {
+    min-height: 2.875rem !important;
+    min-width: 5.75rem !important;
+  }
+
+  .mobile-theme-toggle-button {
+    min-height: 2.75rem !important;
+    min-width: 2.625rem !important;
+  }
+
+  .satisfaction-row {
+    gap: 0.2rem !important;
+    grid-template-columns: minmax(3.25rem, 1fr) repeat(5, 2.75rem) !important;
+  }
+
+  .satisfaction-button {
+    height: 2.75rem !important;
+    min-height: 2.75rem !important;
+    min-width: 2.75rem !important;
+    width: 2.75rem !important;
+  }
+
+  .calendar-detail-slot button[type="button"],
+  .search-panel button[type="button"].text-left,
+  .review-mobile-slot-grid button[type="button"],
+  .survey-chip.inline-flex[type="button"] {
+    min-height: 2.75rem !important;
   }
 }
