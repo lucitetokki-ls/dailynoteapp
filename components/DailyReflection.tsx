@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Check, Pencil, X } from "lucide-react";
 
 import type { DailyLog } from "@/types/daily-log";
@@ -14,18 +14,93 @@ export function DailyReflection({ dailyLog, onUpdateLog }: DailyReflectionProps)
   const hasReflection = dailyLog.dailyReflection.trim().length > 0;
   const [isEditing, setIsEditing] = useState(!hasReflection);
   const [draftReflection, setDraftReflection] = useState(dailyLog.dailyReflection);
+  const [isDirty, setIsDirty] = useState(false);
   const updatedAt = new Intl.DateTimeFormat("ko-KR", {
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date(dailyLog.updatedAt));
 
+  useEffect(() => {
+    if (isDirty) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setDraftReflection(dailyLog.dailyReflection);
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [dailyLog.dailyReflection, isDirty]);
+
+  const persistDraft = useCallback((closeAfterSave = false) => {
+    const nextReflection = draftReflection.trim();
+
+    if (nextReflection !== dailyLog.dailyReflection) {
+      onUpdateLog({
+        dailyMood: dailyLog.dailyMood,
+        dailyReflection: nextReflection,
+      });
+    }
+
+    setIsDirty(false);
+
+    if (closeAfterSave) {
+      setIsEditing(false);
+    }
+  }, [dailyLog.dailyMood, dailyLog.dailyReflection, draftReflection, onUpdateLog]);
+
+  useEffect(() => {
+    if (!isDirty) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      persistDraft();
+    }, 900);
+
+    return () => window.clearTimeout(timer);
+  }, [isDirty, persistDraft]);
+
   function handleSave() {
-    onUpdateLog({
-      dailyMood: dailyLog.dailyMood,
-      dailyReflection: draftReflection.trim(),
-    });
+    persistDraft(true);
+  }
+
+  function handleCancel() {
+    setDraftReflection(dailyLog.dailyReflection);
+    setIsDirty(false);
     setIsEditing(false);
   }
+
+  function handleReflectionChange(value: string) {
+    setDraftReflection(value);
+    setIsDirty(true);
+  }
+
+  function handleReflectionBlur() {
+    if (isDirty) {
+      persistDraft();
+    }
+  }
+
+  function handleEdit() {
+    setDraftReflection(dailyLog.dailyReflection);
+    setIsDirty(false);
+    setIsEditing(true);
+  }
+
+  function getSaveLabel() {
+    if (isDirty) {
+      return "입력 중";
+    }
+
+    if (hasReflection) {
+      return `저장 ${updatedAt}`;
+    }
+
+    return null;
+  }
+
+  const saveLabel = getSaveLabel();
 
   return (
     <section className="survey-card flex h-full flex-col rounded-lg border border-zinc-200 bg-white p-4 shadow-sm sm:p-5">
@@ -35,9 +110,9 @@ export function DailyReflection({ dailyLog, onUpdateLog }: DailyReflectionProps)
           <p className="mt-1.5 text-sm leading-6 text-zinc-500 sm:text-base">작성 후 언제든 다시 수정할 수 있습니다.</p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          {hasReflection ? (
+          {saveLabel ? (
             <span className="hidden rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-sm font-semibold text-emerald-700 sm:inline">
-              저장 {updatedAt}
+              {saveLabel}
             </span>
           ) : null}
           {isEditing ? (
@@ -55,10 +130,7 @@ export function DailyReflection({ dailyLog, onUpdateLog }: DailyReflectionProps)
                 <button
                   className="survey-control flex h-10 w-10 items-center justify-center rounded-md text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-950"
                   data-tooltip="수정 취소"
-                  onClick={() => {
-                    setDraftReflection(dailyLog.dailyReflection);
-                    setIsEditing(false);
-                  }}
+                  onClick={handleCancel}
                   title="수정 취소"
                   type="button"
                 >
@@ -70,7 +142,7 @@ export function DailyReflection({ dailyLog, onUpdateLog }: DailyReflectionProps)
             <button
               className="survey-control flex h-10 w-10 items-center justify-center rounded-md text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-950"
               data-tooltip="회고 수정"
-              onClick={() => setIsEditing(true)}
+              onClick={handleEdit}
               title="회고 수정"
               type="button"
             >
@@ -84,7 +156,8 @@ export function DailyReflection({ dailyLog, onUpdateLog }: DailyReflectionProps)
         <textarea
           aria-label="오늘 회고 입력"
           className="survey-control min-h-48 flex-1 w-full resize-y rounded-md border border-zinc-200 bg-zinc-50 px-3.5 py-3 text-base leading-7 text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white sm:min-h-72 sm:px-4 sm:text-lg sm:leading-8"
-          onChange={(event) => setDraftReflection(event.target.value)}
+          onBlur={handleReflectionBlur}
+          onChange={(event) => handleReflectionChange(event.target.value)}
           placeholder="오늘의 행동에서 배운 점, 이어갈 점, 고칠 점"
           value={draftReflection}
         />

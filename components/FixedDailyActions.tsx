@@ -35,7 +35,7 @@ export function FixedDailyActions({ actions, dateKey, onUpdateSlot }: FixedDaily
           return (
             <FixedDailyActionCard
               action={action}
-              key={`${dateKey}-${slot}-${action?.id ?? "empty"}-${action?.updatedAt ?? "draft"}`}
+              key={`${dateKey}-${slot}`}
               onUpdateSlot={onUpdateSlot}
               slot={slot}
             />
@@ -59,6 +59,20 @@ function FixedDailyActionCard({ action, slot, onUpdateSlot }: FixedDailyActionCa
   const [satisfaction, setSatisfaction] = useState(action?.satisfaction ?? 3);
   const [isDirty, setIsDirty] = useState(false);
   const isFilled = Boolean(description.trim() || reflection.trim());
+
+  useEffect(() => {
+    if (isDirty) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setDescription(action?.description ?? "");
+      setReflection(action?.reflection ?? "");
+      setSatisfaction(action?.satisfaction ?? 3);
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [action?.description, action?.id, action?.reflection, action?.satisfaction, isDirty]);
 
   useEffect(() => {
     if (!isDirty) {

@@ -40,6 +40,8 @@ create table if not exists daily_writings (
   id uuid primary key default gen_random_uuid(),
   date date not null unique,
   content text not null default '',
+  content_markdown text not null default '',
+  content_json jsonb,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -54,19 +56,32 @@ create table if not exists action_templates (
 );
 
 create index if not exists daily_actions_daily_log_id_idx on daily_actions(daily_log_id);
-create unique index if not exists daily_actions_daily_log_id_slot_idx on daily_actions(daily_log_id, slot) where slot is not null;
+drop index if exists daily_actions_daily_log_id_slot_idx;
+alter table daily_actions drop constraint if exists daily_actions_daily_log_id_slot_key;
+alter table daily_actions add constraint daily_actions_daily_log_id_slot_key unique (daily_log_id, slot);
 create index if not exists daily_actions_category_idx on daily_actions(category);
 create index if not exists daily_actions_status_idx on daily_actions(status);
 create index if not exists daily_logs_date_idx on daily_logs(date desc);
 create index if not exists daily_writings_date_idx on daily_writings(date desc);
 
+alter table daily_writings add column if not exists content_markdown text not null default '';
+alter table daily_writings add column if not exists content_json jsonb;
+
+update daily_writings
+set content_markdown = content
+where content_markdown = ''
+  and content <> '';
+
 create or replace function set_updated_at()
-returns trigger as $$
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
 begin
   new.updated_at = now();
   return new;
 end;
-$$ language plpgsql;
+$$;
 
 drop trigger if exists daily_logs_set_updated_at on daily_logs;
 create trigger daily_logs_set_updated_at
@@ -92,3 +107,67 @@ drop trigger if exists action_templates_set_updated_at on action_templates;
 create trigger action_templates_set_updated_at
 before update on action_templates
 for each row execute function set_updated_at();
+
+alter table daily_logs enable row level security;
+alter table daily_actions enable row level security;
+alter table weekly_reflections enable row level security;
+alter table daily_writings enable row level security;
+alter table action_templates enable row level security;
+
+grant usage on schema public to anon, authenticated;
+grant select, insert, update, delete on daily_logs to anon, authenticated;
+grant select, insert, update, delete on daily_actions to anon, authenticated;
+grant select, insert, update, delete on weekly_reflections to anon, authenticated;
+grant select, insert, update, delete on daily_writings to anon, authenticated;
+grant select, insert, update, delete on action_templates to anon, authenticated;
+
+revoke truncate, references, trigger on daily_logs from anon, authenticated;
+revoke truncate, references, trigger on daily_actions from anon, authenticated;
+revoke truncate, references, trigger on weekly_reflections from anon, authenticated;
+revoke truncate, references, trigger on daily_writings from anon, authenticated;
+revoke truncate, references, trigger on action_templates from anon, authenticated;
+
+-- The app currently writes directly from the browser with the publishable/anon key.
+-- Replace these public policies with user-scoped policies after adding real auth.
+drop policy if exists "anon full access daily_logs" on daily_logs;
+drop policy if exists "Allow public access daily_logs" on daily_logs;
+create policy "Allow public access daily_logs"
+on daily_logs for all
+to anon, authenticated
+using (true)
+with check (true);
+
+drop policy if exists "anon full access daily_actions" on daily_actions;
+drop policy if exists "Allow public access daily_actions" on daily_actions;
+create policy "Allow public access daily_actions"
+on daily_actions for all
+to anon, authenticated
+using (true)
+with check (true);
+
+drop policy if exists "anon full access weekly_reflections" on weekly_reflections;
+drop policy if exists "Allow public access weekly_reflections" on weekly_reflections;
+create policy "Allow public access weekly_reflections"
+on weekly_reflections for all
+to anon, authenticated
+using (true)
+with check (true);
+
+drop policy if exists "Allow public read daily_writings" on daily_writings;
+drop policy if exists "Allow public insert daily_writings" on daily_writings;
+drop policy if exists "Allow public update daily_writings" on daily_writings;
+drop policy if exists "Allow public delete daily_writings" on daily_writings;
+drop policy if exists "Allow public access daily_writings" on daily_writings;
+create policy "Allow public access daily_writings"
+on daily_writings for all
+to anon, authenticated
+using (true)
+with check (true);
+
+drop policy if exists "anon full access action_templates" on action_templates;
+drop policy if exists "Allow public access action_templates" on action_templates;
+create policy "Allow public access action_templates"
+on action_templates for all
+to anon, authenticated
+using (true)
+with check (true);

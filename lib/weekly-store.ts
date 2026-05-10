@@ -2,7 +2,7 @@
 
 import { useEffect, useSyncExternalStore } from "react";
 
-import { isSupabaseConfigured, supabase } from "@/lib/supabase";
+import { isSupabaseConfigured, retrySupabaseMutation, supabase } from "@/lib/supabase";
 import { createStableUuid, getWeekKey } from "@/lib/utils";
 import type { WeeklyReflection } from "@/types/weekly-reflection";
 
@@ -53,6 +53,23 @@ function canReadBrowserWeeklyStore() {
 function writeWeeklyReflectionLocally(reflection: WeeklyReflection) {
   window.localStorage.setItem(getStorageKey(reflection.weekKey), JSON.stringify(reflection));
   emitStoreChange();
+}
+
+function hasWeeklyReflectionContent(reflection: WeeklyReflection) {
+  return Boolean(
+    reflection.wins.trim() || reflection.blockers.trim() || reflection.nextFocus.trim(),
+  );
+}
+
+function shouldKeepLocalWeeklyReflection(
+  localReflection: WeeklyReflection,
+  remoteReflection: WeeklyReflection,
+) {
+  return Boolean(
+    hasWeeklyReflectionContent(localReflection) &&
+      (!hasWeeklyReflectionContent(remoteReflection) ||
+        localReflection.updatedAt > remoteReflection.updatedAt),
+  );
 }
 
 function mapWeeklyReflectionRow(row: WeeklyReflectionRow): WeeklyReflection {
@@ -137,9 +154,20 @@ export function writeWeeklyReflection(reflection: WeeklyReflection) {
   writeWeeklyReflectionLocally(reflection);
 
   if (supabase) {
-    void supabase
-      .from("weekly_reflections")
-      .upsert(mapWeeklyReflectionToRow(reflection), { onConflict: "id" });
+    const client = supabase;
+
+    void retrySupabaseMutation(async () => {
+      const { error } = await client
+        .from("weekly_reflections")
+        .upsert(mapWeeklyReflectionToRow(reflection), { onConflict: "week_key" });
+
+      if (error) {
+        console.warn("Failed to save weekly reflection to Supabase", error.message);
+        return { ok: false, message: error.message };
+      }
+
+      return { ok: true };
+    });
   }
 }
 
@@ -192,11 +220,19 @@ async function syncWeeklyReflectionFromSupabase(weekKey: string) {
 
   if (error) {
     console.warn("Failed to fetch weekly reflection from Supabase", error.message);
+    loadedWeekKeys.delete(weekKey);
     return;
   }
 
   if (data) {
-    writeWeeklyReflectionLocally(mapWeeklyReflectionRow(data));
+    const remoteReflection = mapWeeklyReflectionRow(data);
+    const localReflection = readWeeklyReflection(weekKey);
+
+    if (shouldKeepLocalWeeklyReflection(localReflection, remoteReflection)) {
+      return;
+    }
+
+    writeWeeklyReflectionLocally(remoteReflection);
   }
 }
 
@@ -215,12 +251,21 @@ async function syncAllWeeklyReflectionsFromSupabase() {
 
   if (error) {
     console.warn("Failed to fetch weekly reflections from Supabase", error.message);
+    loadedAllWeeklyReflections = false;
     return;
   }
 
   (data ?? []).forEach((row) => {
+    const remoteReflection = mapWeeklyReflectionRow(row);
+    const localReflection = readWeeklyReflection(row.week_key);
+
     loadedWeekKeys.add(row.week_key);
-    writeWeeklyReflectionLocally(mapWeeklyReflectionRow(row));
+
+    if (shouldKeepLocalWeeklyReflection(localReflection, remoteReflection)) {
+      return;
+    }
+
+    writeWeeklyReflectionLocally(remoteReflection);
   });
 }
 
@@ -262,9 +307,20 @@ export function clearAllWeeklyReflections() {
   emitStoreChange();
 
   if (supabase) {
-    void supabase
-      .from("weekly_reflections")
-      .delete()
-      .neq("id", "00000000-0000-0000-0000-000000000000");
+    const client = supabase;
+
+    void retrySupabaseMutation(async () => {
+      const { error } = await client
+        .from("weekly_reflections")
+        .delete()
+        .neq("id", "00000000-0000-0000-0000-000000000000");
+
+      if (error) {
+        console.warn("Failed to delete weekly reflections from Supabase", error.message);
+        return { ok: false, message: error.message };
+      }
+
+      return { ok: true };
+    });
   }
 }

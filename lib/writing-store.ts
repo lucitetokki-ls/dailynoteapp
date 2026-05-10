@@ -1,8 +1,14 @@
 "use client";
 
 import { useEffect, useSyncExternalStore } from "react";
+import type { JSONContent } from "@tiptap/core";
 
-import { isSupabaseConfigured, supabase } from "@/lib/supabase";
+import {
+  isSupabaseConfigured,
+  retrySupabaseMutation,
+  supabase,
+  type SupabaseMutationResult,
+} from "@/lib/supabase";
 import { createStableUuid, getTodayDateKey } from "@/lib/utils";
 import type { WritingEntry } from "@/types/writing-entry";
 
@@ -14,6 +20,7 @@ const writingDatePattern = /^\d{4}-\d{2}-\d{2}$/;
 let writingSnapshotVersion = 0;
 let writingSyncVersion = 0;
 const loadedWritingDates = new Set<string>();
+let loadedAllWritingEntries = false;
 const writingSyncStatuses = new Map<string, WritingSyncStatus>();
 
 export type WritingSyncStatus = {
@@ -32,9 +39,51 @@ type WritingEntryRow = {
   id: string;
   date: string;
   content: string;
+  content_json?: JSONContent | null;
+  content_markdown?: string | null;
   created_at: string;
   updated_at: string;
 };
+
+export type WritingEntryDraft = {
+  content: string;
+  contentJson?: JSONContent | null;
+  contentMarkdown?: string;
+};
+
+function isJsonContent(value: unknown): value is JSONContent {
+  return Boolean(value && typeof value === "object" && !Array.isArray(value));
+}
+
+function getWritingContent(entry: Pick<WritingEntry, "content" | "contentMarkdown">) {
+  return selectWritingContent(entry.contentMarkdown, entry.content);
+}
+
+function selectWritingContent(preferred: string | null | undefined, fallback: string | null | undefined) {
+  return preferred?.trim() ? preferred : fallback ?? preferred ?? "";
+}
+
+function hasWritingContent(entry: Pick<WritingEntry, "content" | "contentMarkdown" | "contentJson">) {
+  return Boolean(entry.contentJson) || getWritingContent(entry).trim().length > 0;
+}
+
+function normalizeWritingEntry(
+  entry: Partial<WritingEntry> | null | undefined,
+  date: string,
+): WritingEntry {
+  const fallback = createDefaultWritingEntry(date);
+  const contentMarkdown = selectWritingContent(entry?.contentMarkdown, entry?.content);
+
+  return {
+    id: entry?.id ?? fallback.id,
+    date: entry?.date ?? fallback.date,
+    content: contentMarkdown,
+    contentJson: isJsonContent(entry?.contentJson) ? entry.contentJson : null,
+    contentMarkdown,
+    createdAt: entry?.createdAt ?? fallback.createdAt,
+    updatedAt: entry?.updatedAt ?? fallback.updatedAt,
+  };
+}
 
 function getWritingStorageKey(date: string) {
   return `${writingStoragePrefix}${date}`;
@@ -62,20 +111,28 @@ function setWritingSyncStatus(date: string, nextStatus: WritingSyncStatus) {
 }
 
 function mapWritingEntryRow(row: WritingEntryRow): WritingEntry {
+  const contentMarkdown = selectWritingContent(row.content_markdown, row.content);
+
   return {
     id: row.id,
     date: row.date,
-    content: row.content,
+    content: contentMarkdown,
+    contentJson: isJsonContent(row.content_json) ? row.content_json : null,
+    contentMarkdown,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
 }
 
-function mapWritingEntryToRow(entry: WritingEntry): WritingEntryRow {
+function mapWritingEntryToRow(entry: WritingEntry) {
+  const contentMarkdown = getWritingContent(entry);
+
   return {
     id: entry.id,
     date: entry.date,
-    content: entry.content,
+    content: contentMarkdown,
+    content_json: entry.contentJson ?? null,
+    content_markdown: contentMarkdown,
     created_at: entry.createdAt,
     updated_at: entry.updatedAt,
   };
@@ -88,6 +145,8 @@ export function createDefaultWritingEntry(date: string): WritingEntry {
     id: createStableUuid(`daily-writing:${date}`),
     date,
     content: "",
+    contentJson: null,
+    contentMarkdown: "",
     createdAt: fallbackTimestamp,
     updatedAt: fallbackTimestamp,
   };
@@ -105,20 +164,20 @@ function readWritingEntryFromLocalStorage(date: string): WritingEntry {
   }
 
   try {
-    return JSON.parse(raw) as WritingEntry;
+    return normalizeWritingEntry(JSON.parse(raw) as Partial<WritingEntry>, date);
   } catch {
     return createDefaultWritingEntry(date);
   }
 }
 
 function writeWritingEntryLocally(date: string, entry: WritingEntry) {
-  window.localStorage.setItem(getWritingStorageKey(date), JSON.stringify(entry));
+  window.localStorage.setItem(getWritingStorageKey(date), JSON.stringify(normalizeWritingEntry(entry, date)));
   emitWritingStoreChange();
 }
 
 async function fetchWritingEntryFromSupabase(date: string) {
   if (!supabase) {
-    return null;
+    return undefined;
   }
 
   const { data, error } = await supabase
@@ -149,10 +208,18 @@ async function syncWritingEntryFromSupabase(date: string) {
 
   const remoteEntry = await fetchWritingEntryFromSupabase(date);
 
+  if (remoteEntry === undefined) {
+    loadedWritingDates.delete(date);
+    return;
+  }
+
   if (remoteEntry) {
     const localEntry = readWritingEntryFromLocalStorage(date);
 
-    if (!remoteEntry.content.trim() && localEntry.content.trim()) {
+    if (
+      hasWritingContent(localEntry) &&
+      (!hasWritingContent(remoteEntry) || localEntry.updatedAt > remoteEntry.updatedAt)
+    ) {
       return;
     }
 
@@ -160,10 +227,45 @@ async function syncWritingEntryFromSupabase(date: string) {
   }
 }
 
-async function persistWritingEntryToSupabase(entry: WritingEntry): Promise<{
-  ok: boolean;
-  message?: string;
-}> {
+async function syncAllWritingEntriesFromSupabase() {
+  if (!isSupabaseConfigured || !supabase || loadedAllWritingEntries) {
+    return;
+  }
+
+  loadedAllWritingEntries = true;
+
+  const { data, error } = await supabase
+    .from("daily_writings")
+    .select("*")
+    .order("date", { ascending: false })
+    .returns<WritingEntryRow[]>();
+
+  if (error) {
+    console.warn("Failed to fetch daily writings from Supabase", error.message);
+    loadedAllWritingEntries = false;
+    return;
+  }
+
+  (data ?? []).forEach((row) => {
+    const remoteEntry = mapWritingEntryRow(row);
+    const localEntry = readWritingEntryFromLocalStorage(remoteEntry.date);
+
+    loadedWritingDates.add(remoteEntry.date);
+
+    if (
+      hasWritingContent(localEntry) &&
+      (!hasWritingContent(remoteEntry) || localEntry.updatedAt > remoteEntry.updatedAt)
+    ) {
+      return;
+    }
+
+    writeWritingEntryLocally(remoteEntry.date, remoteEntry);
+  });
+}
+
+async function persistWritingEntryToSupabase(
+  entry: WritingEntry,
+): Promise<SupabaseMutationResult> {
   if (!supabase) {
     return { ok: true };
   }
@@ -214,12 +316,23 @@ export function readAllWritingEntries() {
   return entries.sort((first, second) => second.date.localeCompare(first.date));
 }
 
-export function writeWritingEntry(date: string, content: string) {
+export function writeWritingEntry(date: string, nextContent: string | WritingEntryDraft) {
   const currentEntry = readWritingEntry(date);
   const now = new Date().toISOString();
+  const draft =
+    typeof nextContent === "string"
+      ? {
+          content: nextContent,
+          contentJson: null,
+          contentMarkdown: nextContent,
+        }
+      : nextContent;
+  const contentMarkdown = draft.contentMarkdown ?? draft.content;
   const nextEntry: WritingEntry = {
     ...currentEntry,
-    content,
+    content: contentMarkdown,
+    contentJson: draft.contentJson ?? null,
+    contentMarkdown,
     updatedAt: now,
   };
 
@@ -240,13 +353,61 @@ export function writeWritingEntry(date: string, content: string) {
     updatedAt: now,
   });
 
-  void persistWritingEntryToSupabase(nextEntry).then((result) => {
+  void retrySupabaseMutation(() => persistWritingEntryToSupabase(nextEntry)).then((result) => {
     setWritingSyncStatus(date, {
       status: result.ok ? "saved" : "error",
       message: result.ok ? "Supabase 저장됨" : result.message || "Supabase 저장 실패",
       updatedAt: new Date().toISOString(),
     });
   });
+}
+
+export function writeWritingEntries(entries: WritingEntry[]) {
+  entries.forEach((entry) => {
+    const normalizedEntry = normalizeWritingEntry(entry, entry.date);
+
+    writeWritingEntryLocally(normalizedEntry.date, normalizedEntry);
+
+    if (isSupabaseConfigured) {
+      void retrySupabaseMutation(() => persistWritingEntryToSupabase(normalizedEntry));
+    }
+  });
+}
+
+export function clearAllWritingEntries() {
+  if (typeof window !== "undefined") {
+    const keysToRemove: string[] = [];
+
+    for (let index = 0; index < window.localStorage.length; index += 1) {
+      const key = window.localStorage.key(index);
+      const date = key?.slice(writingStoragePrefix.length);
+
+      if (key?.startsWith(writingStoragePrefix) && date && writingDatePattern.test(date)) {
+        keysToRemove.push(key);
+      }
+    }
+
+    keysToRemove.forEach((key) => window.localStorage.removeItem(key));
+    emitWritingStoreChange();
+  }
+
+  if (supabase) {
+    const client = supabase;
+
+    void retrySupabaseMutation(async () => {
+      const { error } = await client
+        .from("daily_writings")
+        .delete()
+        .neq("id", "00000000-0000-0000-0000-000000000000");
+
+      if (error) {
+        console.warn("Failed to delete daily writings from Supabase", error.message);
+        return { ok: false, message: error.message };
+      }
+
+      return { ok: true };
+    });
+  }
 }
 
 function subscribeToWritingEntry(onStoreChange: () => void) {
@@ -295,6 +456,9 @@ export function useWritingEntry(date = getTodayDateKey()) {
 
 export function useWritingEntries() {
   useSyncExternalStore(subscribeToWritingEntry, getWritingSnapshot, getServerSnapshot);
+  useEffect(() => {
+    void syncAllWritingEntriesFromSupabase();
+  }, []);
 
   return readAllWritingEntries();
 }

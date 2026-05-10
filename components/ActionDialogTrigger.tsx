@@ -34,6 +34,7 @@ export function ActionDialogTrigger({
   const [draftDescription, setDraftDescription] = useState(action?.description ?? "");
   const [draftReflection, setDraftReflection] = useState(action?.reflection ?? "");
   const [draftSatisfaction, setDraftSatisfaction] = useState(action?.satisfaction ?? 3);
+  const [isDeleteConfirming, setIsDeleteConfirming] = useState(false);
   const titleId = useId();
   const content = [action?.description, action?.reflection].filter(Boolean).join("\n\n").trim();
   const displayText = content || fallback;
@@ -78,6 +79,7 @@ export function ActionDialogTrigger({
       reflection: draftReflection.trim(),
       satisfaction: draftSatisfaction,
     });
+    setIsDeleteConfirming(false);
     setIsEditing(false);
   }
 
@@ -90,11 +92,12 @@ export function ActionDialogTrigger({
     setDraftReflection(action.reflection);
     setDraftSatisfaction(action.satisfaction);
     setIsEditing(false);
+    setIsDeleteConfirming(false);
     setIsOpen(true);
   }
 
   function handleDelete() {
-    if (!action || !window.confirm("이 행동 기록을 삭제할까요?")) {
+    if (!action) {
       return;
     }
 
@@ -105,6 +108,7 @@ export function ActionDialogTrigger({
 
   function closeDialog() {
     blockDialogReopen();
+    setIsDeleteConfirming(false);
     setIsOpen(false);
   }
 
@@ -167,6 +171,7 @@ export function ActionDialogTrigger({
                     data-tooltip="수정"
                     onClick={(event) => {
                       event.stopPropagation();
+                      setIsDeleteConfirming(false);
                       setIsEditing(true);
                     }}
                     onPointerDown={stopDialogEvent}
@@ -181,7 +186,7 @@ export function ActionDialogTrigger({
                   data-tooltip="삭제"
                   onClick={(event) => {
                     event.stopPropagation();
-                    handleDelete();
+                    setIsDeleteConfirming(true);
                   }}
                   onPointerDown={stopDialogEvent}
                   type="button"
@@ -203,6 +208,37 @@ export function ActionDialogTrigger({
                 </button>
               </div>
             </div>
+            {isDeleteConfirming ? (
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-red-200 bg-red-50 px-4 py-3 sm:px-5">
+                <p className="text-sm font-semibold text-red-800">
+                  이 행동 기록을 삭제합니다.
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    className="survey-control min-h-10 rounded-md border border-red-300 bg-red-600 px-3 text-sm font-semibold text-white transition hover:bg-red-700"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      handleDelete();
+                    }}
+                    onPointerDown={stopDialogEvent}
+                    type="button"
+                  >
+                    삭제 실행
+                  </button>
+                  <button
+                    className="survey-control min-h-10 rounded-md border border-zinc-200 bg-white px-3 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setIsDeleteConfirming(false);
+                    }}
+                    onPointerDown={stopDialogEvent}
+                    type="button"
+                  >
+                    취소
+                  </button>
+                </div>
+              </div>
+            ) : null}
             <div className="max-h-[64vh] overflow-y-auto px-4 py-4 sm:px-5 sm:py-5">
               {isEditing ? (
                 <div className="grid gap-4">
