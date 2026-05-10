@@ -188,7 +188,7 @@ export function TodayApp() {
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_460px] xl:items-stretch">
           <DailyReflection
             dailyLog={dailyLog}
-            key={`${dailyLog.id}-${dailyLog.updatedAt}`}
+            key={dailyLog.id}
             onUpdateLog={updateDailyLog}
           />
           <DailyImagePanel />

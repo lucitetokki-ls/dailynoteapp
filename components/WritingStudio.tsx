@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight, Save } from "lucide-react";
 
 import {
@@ -10,13 +10,37 @@ import {
   getTodayDateKey,
 } from "@/lib/utils";
 import { EmptyState } from "@/components/EmptyState";
-import { ExpandableText } from "@/components/ExpandableText";
 import {
+  RichWritingEditor,
+  RichWritingPreview,
+  type RichWritingChange,
+} from "@/components/RichWritingEditor";
+import {
+  readWritingEntry,
   useWritingEntries,
   useWritingEntry,
   useWritingSyncStatus,
   writeWritingEntry,
 } from "@/lib/writing-store";
+import type { WritingEntry } from "@/types/writing-entry";
+
+function createDraftFromEntry(entry: WritingEntry): RichWritingChange {
+  const contentMarkdown = getEntryContent(entry);
+
+  return {
+    content: contentMarkdown,
+    contentJson: entry.contentJson ?? null,
+    contentMarkdown,
+  };
+}
+
+function getEntryContent(entry: WritingEntry) {
+  return entry.contentMarkdown?.trim() ? entry.contentMarkdown : entry.content;
+}
+
+function hasEntryContent(entry: WritingEntry) {
+  return Boolean(entry.contentJson) || getEntryContent(entry).trim().length > 0;
+}
 
 export function WritingStudio() {
   const [todayDate] = useState(() => getTodayDateKey());
@@ -24,41 +48,118 @@ export function WritingStudio() {
   const writingEntry = useWritingEntry(selectedDate);
   const writingEntries = useWritingEntries();
   const syncStatus = useWritingSyncStatus(selectedDate);
-  const editorRef = useRef<HTMLTextAreaElement | null>(null);
   const saveTimerRef = useRef<number | null>(null);
+  const pendingSaveRef = useRef<{ date: string; draft: RichWritingChange } | null>(null);
+  const writingEntryRef = useRef(writingEntry);
+  const [draft, setDraft] = useState(() => createDraftFromEntry(writingEntry));
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const isToday = selectedDate === todayDate;
-  const recentEntries = writingEntries.filter((entry) => entry.content.trim()).slice(0, 6);
+  const writingSourceKey = `${selectedDate}:${writingEntry.updatedAt}`;
+  const recentEntries = writingEntries.filter(hasEntryContent).slice(0, 6);
+  const writingStats = useMemo(() => {
+    const contentMarkdown = draft.contentMarkdown;
+    const plainText = contentMarkdown
+      .replace(/```[\s\S]*?```/g, " ")
+      .replace(/`([^`]+)`/g, "$1")
+      .replace(/[#>*_\-[\]()]/g, " ")
+      .trim();
+
+    return {
+      characters: contentMarkdown.length,
+      lines: contentMarkdown.length > 0 ? contentMarkdown.split(/\r\n|\r|\n/).length : 0,
+      words: plainText ? plainText.split(/\s+/).length : 0,
+    };
+  }, [draft]);
 
   useEffect(() => {
     return () => {
       if (saveTimerRef.current) {
         window.clearTimeout(saveTimerRef.current);
       }
+
+      const pendingSave = pendingSaveRef.current;
+
+      if (pendingSave) {
+        writeWritingEntry(pendingSave.date, pendingSave.draft);
+      }
     };
   }, []);
 
-  function saveWriting(nextText = editorRef.current?.value ?? "") {
+  useEffect(() => {
+    writingEntryRef.current = writingEntry;
+  });
+
+  useEffect(() => {
+    if (pendingSaveRef.current?.date === selectedDate) {
+      return;
+    }
+
+    setDraft(createDraftFromEntry(writingEntryRef.current));
+    setHasUnsavedChanges(false);
+  }, [selectedDate, writingSourceKey]);
+
+  function flushPendingWriting() {
+    const pendingSave = pendingSaveRef.current;
+
     if (saveTimerRef.current) {
       window.clearTimeout(saveTimerRef.current);
       saveTimerRef.current = null;
     }
-    writeWritingEntry(selectedDate, nextText);
+
+    if (!pendingSave) {
+      return;
+    }
+
+    writeWritingEntry(pendingSave.date, pendingSave.draft);
+    pendingSaveRef.current = null;
     setHasUnsavedChanges(false);
   }
 
-  function scheduleWritingSave(nextText: string) {
+  function saveWriting(nextDraft = draft) {
+    if (saveTimerRef.current) {
+      window.clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = null;
+    }
+
+    writeWritingEntry(selectedDate, nextDraft);
+    pendingSaveRef.current = null;
+    setHasUnsavedChanges(false);
+  }
+
+  function scheduleWritingSave(nextDraft: RichWritingChange) {
+    setDraft(nextDraft);
     setHasUnsavedChanges(true);
+    pendingSaveRef.current = {
+      date: selectedDate,
+      draft: nextDraft,
+    };
 
     if (saveTimerRef.current) {
       window.clearTimeout(saveTimerRef.current);
     }
 
     saveTimerRef.current = window.setTimeout(() => {
-      writeWritingEntry(selectedDate, nextText);
+      const pendingSave = pendingSaveRef.current;
+
+      if (pendingSave) {
+        writeWritingEntry(pendingSave.date, pendingSave.draft);
+      }
+
+      pendingSaveRef.current = null;
       setHasUnsavedChanges(false);
       saveTimerRef.current = null;
     }, 1100);
+  }
+
+  function selectDate(nextDate: string) {
+    flushPendingWriting();
+    setDraft(createDraftFromEntry(readWritingEntry(nextDate)));
+    setHasUnsavedChanges(false);
+    setSelectedDate(nextDate);
+  }
+
+  function shiftSelectedDate(amount: number) {
+    selectDate(addDaysToDateKey(selectedDate, amount));
   }
 
   return (
@@ -80,7 +181,7 @@ export function WritingStudio() {
           <div className="flex min-w-0 flex-wrap items-center gap-2">
             <button
               className="survey-control flex h-10 w-10 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950 sm:h-11 sm:w-11"
-              onClick={() => setSelectedDate((currentDate) => addDaysToDateKey(currentDate, -1))}
+              onClick={() => shiftSelectedDate(-1)}
               title="이전 날짜"
               type="button"
             >
@@ -93,7 +194,7 @@ export function WritingStudio() {
             <button
               className="survey-control flex h-10 w-10 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950 disabled:cursor-not-allowed disabled:opacity-40 sm:h-11 sm:w-11"
               disabled={isToday}
-              onClick={() => setSelectedDate((currentDate) => addDaysToDateKey(currentDate, 1))}
+              onClick={() => shiftSelectedDate(1)}
               title="다음 날짜"
               type="button"
             >
@@ -102,7 +203,7 @@ export function WritingStudio() {
             {!isToday ? (
               <button
                 className="survey-control min-h-10 rounded-md border border-zinc-200 bg-white px-3 text-sm font-semibold text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950 sm:min-h-11 sm:px-4 sm:text-base"
-                onClick={() => setSelectedDate(todayDate)}
+                onClick={() => selectDate(todayDate)}
                 type="button"
               >
                 오늘
@@ -142,15 +243,21 @@ export function WritingStudio() {
           </div>
         </div>
 
-        <textarea
-          aria-label={`${formatDisplayDate(selectedDate)} 작문 입력`}
-          className="survey-control writing-editor min-h-[26rem] w-full resize-y rounded-md border border-zinc-200 bg-zinc-50 px-3.5 py-3.5 text-base leading-7 text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white sm:min-h-[34rem] sm:px-5 sm:py-5 sm:text-xl sm:leading-9"
-          defaultValue={writingEntry.content}
-          key={`${selectedDate}-${writingEntry.updatedAt}`}
-          onBlur={(event) => saveWriting(event.currentTarget.value)}
-          onChange={(event) => scheduleWritingSave(event.currentTarget.value)}
-          placeholder="오늘의 작문을 여기에 작성하세요."
-          ref={editorRef}
+        <div className="writing-stat-strip" aria-label="Writing statistics">
+          <span>{writingStats.characters} chars</span>
+          <span>{writingStats.words} words</span>
+          <span>{writingStats.lines} lines</span>
+          <span>Rich</span>
+        </div>
+
+        <RichWritingEditor
+          ariaLabel={`${formatDisplayDate(selectedDate)} 리치 작문 입력`}
+          contentJson={draft.contentJson}
+          fallbackMarkdown={draft.contentMarkdown || draft.content}
+          key={selectedDate}
+          onBlur={() => saveWriting()}
+          onChange={scheduleWritingSave}
+          sourceKey={writingSourceKey}
         />
       </section>
 
@@ -171,16 +278,15 @@ export function WritingStudio() {
               >
                 <button
                   className="survey-chip w-fit rounded-md border border-zinc-200 bg-white px-3 py-2 text-left text-base font-semibold text-zinc-700 transition hover:bg-zinc-50"
-                  onClick={() => setSelectedDate(entry.date)}
+                  onClick={() => selectDate(entry.date)}
                   type="button"
                 >
                   {formatDisplayDate(entry.date)}
                 </button>
-                <ExpandableText
-                  fallback="작문 내용이 비어 있습니다."
-                  previewLines={2}
-                  text={entry.content}
-                  title={`${formatDisplayDate(entry.date)} · 1일 1작문`}
+                <RichWritingPreview
+                  compact
+                  contentJson={entry.contentJson}
+                  fallbackMarkdown={getEntryContent(entry)}
                 />
               </article>
             ))}

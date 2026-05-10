@@ -3,10 +3,15 @@
 import { useMemo, useState } from "react";
 import { Activity, CheckCircle2, Database, Play, XCircle } from "lucide-react";
 
-import { readAllStoredDays } from "@/lib/daily-store";
-import { isSupabaseConfigured, supabase } from "@/lib/supabase";
-import { readAllWeeklyReflections } from "@/lib/weekly-store";
-import { readAllWritingEntries } from "@/lib/writing-store";
+import { useStoredDays } from "@/lib/daily-store";
+import {
+  isSupabaseConfigured,
+  requiredSupabaseTables,
+  supabase,
+  supabaseConfigIssue,
+} from "@/lib/supabase";
+import { useWeeklyReflections } from "@/lib/weekly-store";
+import { useWritingEntries } from "@/lib/writing-store";
 import { cn } from "@/lib/utils";
 
 type DiagnosticStatus = "idle" | "running" | "ok" | "error";
@@ -17,24 +22,35 @@ type DiagnosticItem = {
   status: DiagnosticStatus;
 };
 
-const tableNames = [
-  "daily_logs",
-  "daily_actions",
-  "weekly_reflections",
-  "daily_writings",
-  "action_templates",
-] as const;
+function createProbeId() {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function createProbeDate() {
+  const day = String((Date.now() % 27) + 1).padStart(2, "0");
+
+  return `2099-12-${day}`;
+}
 
 export function SupabaseDiagnosticsPanel() {
   const [items, setItems] = useState<DiagnosticItem[]>([]);
   const [isRunning, setIsRunning] = useState(false);
+  const storedDays = useStoredDays();
+  const writingEntries = useWritingEntries();
+  const weeklyReflections = useWeeklyReflections();
   const localSummary = useMemo(
     () => ({
-      days: readAllStoredDays().length,
-      writings: readAllWritingEntries().filter((entry) => entry.content.trim()).length,
-      weeks: readAllWeeklyReflections().length,
+      days: storedDays.length,
+      writings: writingEntries.filter(
+        (entry) => entry.contentJson || (entry.contentMarkdown ?? entry.content).trim(),
+      ).length,
+      weeks: weeklyReflections.length,
     }),
-    [],
+    [storedDays, weeklyReflections, writingEntries],
   );
 
   async function runDiagnostics() {
@@ -45,7 +61,7 @@ export function SupabaseDiagnosticsPanel() {
         label: "ENV",
         message: isSupabaseConfigured
           ? "Supabase URL / publishable key configured"
-          : "Supabase env vars missing",
+          : supabaseConfigIssue || "Supabase env vars missing",
         status: isSupabaseConfigured ? "ok" : "error",
       },
       {
@@ -62,8 +78,10 @@ export function SupabaseDiagnosticsPanel() {
       return;
     }
 
-    for (const tableName of tableNames) {
-      const { count, error } = await supabase
+    const client = supabase;
+
+    for (const tableName of requiredSupabaseTables) {
+      const { count, error } = await client
         .from(tableName)
         .select("id", { count: "exact", head: true });
 
@@ -75,44 +93,146 @@ export function SupabaseDiagnosticsPanel() {
       setItems([...nextItems]);
     }
 
-    const probeId =
-      typeof crypto !== "undefined" && "randomUUID" in crypto
-        ? `diagnostic-${crypto.randomUUID()}`
-        : `diagnostic-${Date.now()}`;
+    const probeId = createProbeId();
+    const actionProbeId = createProbeId();
+    const weekProbeId = createProbeId();
+    const writingProbeId = createProbeId();
+    const templateProbeId = `diagnostic-${probeId}`;
+    const probeDate = createProbeDate();
+    const probeWeek = `2099-W${String((Date.now() % 52) + 1).padStart(2, "0")}`;
+    const insertedLabels: string[] = [];
 
-    const { error: insertError } = await supabase.from("action_templates").insert({
-      id: probeId,
-      category: "diet_fitness",
-      title: "diagnostic probe",
-      description: "temporary write test",
-    });
+    try {
+      const { error: logError } = await client.from("daily_logs").insert({
+        id: probeId,
+        date: probeDate,
+        daily_mood: "steady",
+        daily_reflection: "diagnostic probe",
+      });
 
-    if (insertError) {
+      if (logError) {
+        throw new Error(`daily_logs insert failed: ${logError.message}`);
+      }
+
+      insertedLabels.push("daily_logs");
+
+      const { error: actionError } = await client.from("daily_actions").insert({
+        id: actionProbeId,
+        daily_log_id: probeId,
+        slot: "diet",
+        category: "diet_fitness",
+        title: "diagnostic probe",
+        description: "temporary write test",
+        status: "done",
+        satisfaction: 3,
+        reflection: "",
+      });
+
+      if (actionError) {
+        throw new Error(`daily_actions insert failed: ${actionError.message}`);
+      }
+
+      insertedLabels.push("daily_actions");
+
+      const { error: weekError } = await client.from("weekly_reflections").insert({
+        id: weekProbeId,
+        week_key: probeWeek,
+        wins: "diagnostic probe",
+        blockers: "",
+        next_focus: "",
+      });
+
+      if (weekError) {
+        throw new Error(`weekly_reflections insert failed: ${weekError.message}`);
+      }
+
+      insertedLabels.push("weekly_reflections");
+
+      const { error: writingError } = await client.from("daily_writings").insert({
+        id: writingProbeId,
+        date: probeDate,
+        content: "diagnostic probe",
+        content_markdown: "diagnostic probe",
+        content_json: {
+          type: "doc",
+          content: [
+            {
+              type: "paragraph",
+              content: [{ type: "text", text: "diagnostic probe" }],
+            },
+          ],
+        },
+      });
+
+      if (writingError) {
+        throw new Error(`daily_writings insert failed: ${writingError.message}`);
+      }
+
+      insertedLabels.push("daily_writings");
+
+      const { error: templateError } = await client.from("action_templates").insert({
+        id: templateProbeId,
+        category: "diet_fitness",
+        title: "diagnostic probe",
+        description: "temporary write test",
+      });
+
+      if (templateError) {
+        throw new Error(`action_templates insert failed: ${templateError.message}`);
+      }
+
+      insertedLabels.push("action_templates");
+
       nextItems.push({
         label: "WRITE",
-        message: insertError.message,
+        message: `${insertedLabels.length} tables writable`,
+        status: "ok",
+      });
+    } catch (error) {
+      nextItems.push({
+        label: "WRITE",
+        message: error instanceof Error ? error.message : "Write probe failed",
         status: "error",
       });
-      setItems([...nextItems]);
-      setIsRunning(false);
-      return;
+    } finally {
+      const cleanupErrors: string[] = [];
+
+      const cleanupSteps = [
+        () => client.from("action_templates").delete().eq("id", templateProbeId),
+        () => client.from("weekly_reflections").delete().eq("id", weekProbeId),
+        () => client.from("daily_writings").delete().eq("id", writingProbeId),
+        () => client.from("daily_actions").delete().eq("id", actionProbeId),
+        () => client.from("daily_logs").delete().eq("id", probeId),
+      ] as const;
+
+      for (const cleanupStep of cleanupSteps) {
+        const { error } = await cleanupStep();
+
+        if (error) {
+          cleanupErrors.push(error.message);
+        }
+      }
+
+      nextItems.push({
+        label: "CLEANUP",
+        message:
+          cleanupErrors.length > 0
+            ? `Cleanup needs review: ${cleanupErrors[0]}`
+            : "Temporary rows cleaned up",
+        status: cleanupErrors.length > 0 ? "error" : "ok",
+      });
     }
 
-    const { error: deleteError } = await supabase
-      .from("action_templates")
-      .delete()
-      .eq("id", probeId);
-
-    nextItems.push({
-      label: "WRITE",
-      message: deleteError ? `Write ok, cleanup failed: ${deleteError.message}` : "Write and cleanup ok",
-      status: deleteError ? "error" : "ok",
-    });
     setItems([...nextItems]);
     setIsRunning(false);
   }
 
-  const status = items.length === 0 ? "idle" : items.some((item) => item.status === "error") ? "error" : "ok";
+  const status =
+    items.length === 0
+      ? "idle"
+      : items.some((item) => item.status === "error")
+        ? "error"
+        : "ok";
 
   return (
     <section className="survey-card rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
@@ -174,7 +294,10 @@ export function SupabaseDiagnosticsPanel() {
                 <p className="text-sm font-semibold uppercase tracking-[0.08em] text-zinc-600">
                   {item.label}
                 </p>
-                <p className="mt-1 truncate text-base font-semibold text-zinc-950" title={item.message}>
+                <p
+                  className="mt-1 truncate text-base font-semibold text-zinc-950"
+                  title={item.message}
+                >
                   {item.message}
                 </p>
               </div>

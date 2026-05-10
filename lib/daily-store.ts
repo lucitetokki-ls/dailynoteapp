@@ -2,7 +2,12 @@
 
 import { useEffect, useSyncExternalStore } from "react";
 
-import { isSupabaseConfigured, supabase } from "@/lib/supabase";
+import {
+  isSupabaseConfigured,
+  retrySupabaseMutation,
+  supabase,
+  type SupabaseMutationResult,
+} from "@/lib/supabase";
 import { createEmptyDailyLog, getRecentDateKeys, getTodayDateKey } from "@/lib/utils";
 import type {
   ActionCategory,
@@ -63,6 +68,11 @@ type DailyActionRow = {
   created_at: string;
   updated_at: string;
 };
+
+type SupabaseStoreError = {
+  code?: string;
+  message?: string;
+} | null;
 
 function getStorageKey(date: string) {
   return `${storagePrefix}${date}`;
@@ -168,6 +178,16 @@ function mapDailyActionToRow(action: DailyAction): DailyActionRow {
   };
 }
 
+function isUniqueConstraintConflict(error: SupabaseStoreError, constraintNames: string[]) {
+  const message = error?.message ?? "";
+
+  return Boolean(
+    error &&
+      (error.code === "23505" || /duplicate key/i.test(message)) &&
+      constraintNames.some((constraintName) => message.includes(constraintName)),
+  );
+}
+
 function subscribeToStoredDays(onStoreChange: () => void) {
   window.addEventListener(storeEventName, onStoreChange);
   window.addEventListener("storage", onStoreChange);
@@ -211,6 +231,13 @@ function hasUserContent(day: StoredDay) {
   );
 }
 
+function shouldKeepLocalDay(localDay: StoredDay, remoteDay: StoredDay) {
+  return Boolean(
+    hasUserContent(localDay) &&
+      (!hasUserContent(remoteDay) || localDay.dailyLog.updatedAt > remoteDay.dailyLog.updatedAt),
+  );
+}
+
 export function writeStoredDay(date: string, nextDay: StoredDay) {
   writeStoredDayLocally(date, nextDay);
 
@@ -222,7 +249,7 @@ export function writeStoredDay(date: string, nextDay: StoredDay) {
       updatedAt: now,
     });
 
-    void persistStoredDayToSupabase(nextDay).then((result) => {
+    void retrySupabaseMutation(() => persistStoredDayToSupabase(nextDay)).then((result) => {
       setSyncStatus(date, {
         status: result.ok ? "saved" : "error",
         message: result.ok
@@ -323,7 +350,7 @@ async function fetchStoredDayFromSupabase(date: string) {
 
   if (logError) {
     console.warn("Failed to fetch daily log from Supabase", logError.message);
-    return null;
+    return undefined;
   }
 
   if (!logRow) {
@@ -339,7 +366,7 @@ async function fetchStoredDayFromSupabase(date: string) {
 
   if (actionError) {
     console.warn("Failed to fetch daily actions from Supabase", actionError.message);
-    return null;
+    return undefined;
   }
 
   return {
@@ -357,10 +384,15 @@ async function syncStoredDayFromSupabase(date: string) {
 
   const remoteDay = await fetchStoredDayFromSupabase(date);
 
+  if (remoteDay === undefined) {
+    loadedDates.delete(date);
+    return;
+  }
+
   if (remoteDay) {
     const localDay = readStoredDayFromLocalStorage(date);
 
-    if (!hasUserContent(remoteDay) && hasUserContent(localDay)) {
+    if (shouldKeepLocalDay(localDay, remoteDay)) {
       return;
     }
 
@@ -383,6 +415,7 @@ async function syncAllStoredDaysFromSupabase() {
 
   if (logError) {
     console.warn("Failed to fetch daily logs from Supabase", logError.message);
+    loadedAllDays = false;
     return;
   }
 
@@ -394,6 +427,7 @@ async function syncAllStoredDaysFromSupabase() {
 
   if (actionError) {
     console.warn("Failed to fetch daily actions from Supabase", actionError.message);
+    loadedAllDays = false;
     return;
   }
 
@@ -407,46 +441,110 @@ async function syncAllStoredDaysFromSupabase() {
   });
 
   (logRows ?? []).forEach((row) => {
-    loadedDates.add(row.date);
-    writeStoredDayLocally(row.date, {
+    const remoteDay = {
       dailyLog: mapDailyLogRow(row),
       actions: actionsByLogId.get(row.id) ?? [],
-    });
+    };
+    const localDay = readStoredDayFromLocalStorage(row.date);
+
+    loadedDates.add(row.date);
+
+    if (shouldKeepLocalDay(localDay, remoteDay)) {
+      return;
+    }
+
+    writeStoredDayLocally(row.date, remoteDay);
   });
 }
 
-async function persistStoredDayToSupabase(day: StoredDay): Promise<{
-  ok: boolean;
-  message?: string;
-}> {
+async function persistStoredDayToSupabase(day: StoredDay): Promise<SupabaseMutationResult> {
   if (!supabase) {
     return { ok: true };
   }
 
-  const { error: logError } = await supabase
+  const client = supabase;
+  const dailyLogRow = mapDailyLogToRow(day.dailyLog);
+  let persistedDailyLogId = dailyLogRow.id;
+
+  const { error: logError } = await client
     .from("daily_logs")
-    .upsert(mapDailyLogToRow(day.dailyLog), { onConflict: "id" });
+    .upsert(dailyLogRow, { onConflict: "id" });
 
   if (logError) {
-    console.warn("Failed to save daily log to Supabase", logError.message);
-    return { ok: false, message: logError.message };
+    if (!isUniqueConstraintConflict(logError, ["daily_logs_date_key"])) {
+      console.warn("Failed to save daily log to Supabase", logError.message);
+      return { ok: false, message: logError.message };
+    }
+
+    const { data: existingLog, error: updateLogError } = await client
+      .from("daily_logs")
+      .update({
+        daily_mood: dailyLogRow.daily_mood,
+        daily_reflection: dailyLogRow.daily_reflection,
+        created_at: dailyLogRow.created_at,
+        updated_at: dailyLogRow.updated_at,
+      })
+      .eq("date", dailyLogRow.date)
+      .select("id")
+      .maybeSingle<Pick<DailyLogRow, "id">>();
+
+    if (updateLogError) {
+      console.warn("Failed to update daily log by date in Supabase", updateLogError.message);
+      return { ok: false, message: updateLogError.message };
+    }
+
+    if (!existingLog) {
+      return { ok: false, message: "Daily log date conflict could not be resolved." };
+    }
+
+    persistedDailyLogId = existingLog.id;
   }
 
   if (day.actions.length > 0) {
-    const { error: actionsError } = await supabase
-      .from("daily_actions")
-      .upsert(day.actions.map(mapDailyActionToRow), { onConflict: "id" });
+    const actionRows = day.actions.map((action) => ({
+      ...mapDailyActionToRow(action),
+      daily_log_id: persistedDailyLogId,
+    }));
 
-    if (actionsError) {
-      console.warn("Failed to save daily actions to Supabase", actionsError.message);
-      return { ok: false, message: actionsError.message };
+    for (const actionRow of actionRows) {
+      const { error: actionError } = await client
+        .from("daily_actions")
+        .upsert(actionRow, { onConflict: "id" });
+
+      if (!actionError) {
+        continue;
+      }
+
+      if (
+        actionRow.slot &&
+        isUniqueConstraintConflict(actionError, [
+          "daily_actions_daily_log_id_slot_idx",
+          "daily_actions_daily_log_id_slot_key",
+        ])
+      ) {
+        const { error: updateActionError } = await client
+          .from("daily_actions")
+          .update(actionRow)
+          .eq("daily_log_id", actionRow.daily_log_id)
+          .eq("slot", actionRow.slot);
+
+        if (!updateActionError) {
+          continue;
+        }
+
+        console.warn("Failed to update daily action by slot in Supabase", updateActionError.message);
+        return { ok: false, message: updateActionError.message };
+      }
+
+      console.warn("Failed to save daily action to Supabase", actionError.message);
+      return { ok: false, message: actionError.message };
     }
   }
 
-  const { data: remoteActions, error: remoteActionsError } = await supabase
+  const { data: remoteActions, error: remoteActionsError } = await client
     .from("daily_actions")
     .select("id")
-    .eq("daily_log_id", day.dailyLog.id)
+    .eq("daily_log_id", persistedDailyLogId)
     .returns<Array<{ id: string }>>();
 
   if (remoteActionsError) {
@@ -460,7 +558,7 @@ async function persistStoredDayToSupabase(day: StoredDay): Promise<{
     .filter((id) => !localActionIds.has(id));
 
   if (idsToDelete.length > 0) {
-    const { error: deleteError } = await supabase
+    const { error: deleteError } = await client
       .from("daily_actions")
       .delete()
       .in("id", idsToDelete);
@@ -544,7 +642,18 @@ export function clearStoredDay(date: string) {
   emitStoreChange();
 
   if (supabase) {
-    void supabase.from("daily_logs").delete().eq("date", date);
+    const client = supabase;
+
+    void retrySupabaseMutation(async () => {
+      const { error } = await client.from("daily_logs").delete().eq("date", date);
+
+      if (error) {
+        console.warn("Failed to delete daily log from Supabase", error.message);
+        return { ok: false, message: error.message };
+      }
+
+      return { ok: true };
+    });
   }
 }
 
@@ -565,6 +674,20 @@ export function clearAllStoredDays() {
   emitStoreChange();
 
   if (supabase) {
-    void supabase.from("daily_logs").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+    const client = supabase;
+
+    void retrySupabaseMutation(async () => {
+      const { error } = await client
+        .from("daily_logs")
+        .delete()
+        .neq("id", "00000000-0000-0000-0000-000000000000");
+
+      if (error) {
+        console.warn("Failed to delete all daily logs from Supabase", error.message);
+        return { ok: false, message: error.message };
+      }
+
+      return { ok: true };
+    });
   }
 }
