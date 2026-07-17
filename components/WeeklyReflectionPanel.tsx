@@ -69,6 +69,7 @@ function ReflectionField({ label, value, placeholder, onChange }: ReflectionFiel
       {label}
       <textarea
         className="survey-control min-h-36 resize-none rounded-md border border-zinc-200 bg-zinc-50 px-4 py-3 text-base leading-7 text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white"
+        maxLength={20000}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         value={value}

@@ -6,7 +6,7 @@ import type { ActionCategory } from "@/types/daily-action";
 
 const templateStorageKey = "daily-note:action-templates";
 
-export const defaultActionTemplates: ActionTemplate[] = [
+const defaultActionTemplates: ActionTemplate[] = [
   {
     id: "template-walk",
     category: "diet_fitness",
@@ -24,6 +24,18 @@ export const defaultActionTemplates: ActionTemplate[] = [
     category: "writing",
     title: "문장 5개 쓰기",
     description: "초안 품질은 신경 쓰지 않기",
+  },
+  {
+    id: "template-organize",
+    category: "organization",
+    title: "열린 루프 하나 닫기",
+    description: "미뤄둔 일, 공간, 파일 중 하나 정리하기",
+  },
+  {
+    id: "template-relationship",
+    category: "relationships",
+    title: "먼저 안부 건네기",
+    description: "짧더라도 마음을 표현하고 대화하기",
   },
 ];
 

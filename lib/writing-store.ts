@@ -138,7 +138,7 @@ function mapWritingEntryToRow(entry: WritingEntry) {
   };
 }
 
-export function createDefaultWritingEntry(date: string): WritingEntry {
+function createDefaultWritingEntry(date: string): WritingEntry {
   const fallbackTimestamp = `${date}T00:00:00.000Z`;
 
   return {
@@ -290,7 +290,7 @@ export function readWritingEntry(date: string): WritingEntry {
   return readWritingEntryFromLocalStorage(date);
 }
 
-export function readAllWritingEntries() {
+function readAllWritingEntries() {
   if (typeof window === "undefined") {
     return [];
   }
@@ -442,7 +442,7 @@ function getServerSnapshot() {
   return "server";
 }
 
-export function readWritingSyncStatus(date: string) {
+function readWritingSyncStatus(date: string) {
   return writingSyncStatuses.get(date) ?? defaultWritingSyncStatus;
 }
 

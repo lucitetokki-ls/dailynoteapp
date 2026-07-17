@@ -68,8 +68,10 @@ Fixed slots:
 
 - Diet
 - Fitness
-- Vibe Coding
+- 코딩
 - Writing summary
+- Organization
+- Relationships
 
 Important distinction:
 

@@ -15,8 +15,8 @@ create table if not exists daily_logs (
 create table if not exists daily_actions (
   id uuid primary key default gen_random_uuid(),
   daily_log_id uuid not null references daily_logs(id) on delete cascade,
-  slot text check (slot in ('diet', 'fitness', 'vibe_coding', 'writing')),
-  category text not null check (category in ('diet_fitness', 'vibe_coding', 'writing')),
+  slot text check (slot in ('diet', 'fitness', 'vibe_coding', 'writing', 'organization', 'relationships')),
+  category text not null check (category in ('diet_fitness', 'vibe_coding', 'writing', 'organization', 'relationships')),
   title text not null,
   description text not null default '',
   status text not null check (status in ('done', 'partial', 'skipped')),
@@ -48,11 +48,63 @@ create table if not exists daily_writings (
 
 create table if not exists action_templates (
   id text primary key,
-  category text not null check (category in ('diet_fitness', 'vibe_coding', 'writing')),
+  category text not null check (category in ('diet_fitness', 'vibe_coding', 'writing', 'organization', 'relationships')),
   title text not null,
   description text not null default '',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
+);
+
+alter table daily_actions drop constraint if exists daily_actions_slot_check;
+alter table daily_actions add constraint daily_actions_slot_check
+check (slot in ('diet', 'fitness', 'vibe_coding', 'writing', 'organization', 'relationships'));
+
+alter table daily_actions drop constraint if exists daily_actions_category_check;
+alter table daily_actions add constraint daily_actions_category_check
+check (category in ('diet_fitness', 'vibe_coding', 'writing', 'organization', 'relationships'));
+
+alter table action_templates drop constraint if exists action_templates_category_check;
+alter table action_templates add constraint action_templates_category_check
+check (category in ('diet_fitness', 'vibe_coding', 'writing', 'organization', 'relationships'));
+
+alter table daily_logs drop constraint if exists daily_logs_content_length_check;
+alter table daily_logs add constraint daily_logs_content_length_check
+check (
+  char_length(daily_mood) <= 32
+  and char_length(daily_reflection) <= 20000
+);
+
+alter table daily_actions drop constraint if exists daily_actions_content_length_check;
+alter table daily_actions add constraint daily_actions_content_length_check
+check (
+  char_length(title) between 1 and 120
+  and char_length(description) <= 10000
+  and char_length(reflection) <= 10000
+);
+
+alter table weekly_reflections drop constraint if exists weekly_reflections_content_check;
+alter table weekly_reflections add constraint weekly_reflections_content_check
+check (
+  week_key ~ '^[0-9]{4}-W(0[1-9]|[1-4][0-9]|5[0-3])$'
+  and char_length(wins) <= 20000
+  and char_length(blockers) <= 20000
+  and char_length(next_focus) <= 20000
+);
+
+alter table daily_writings drop constraint if exists daily_writings_content_length_check;
+alter table daily_writings add constraint daily_writings_content_length_check
+check (
+  char_length(content) <= 1000000
+  and char_length(content_markdown) <= 1000000
+  and (content_json is null or pg_column_size(content_json) <= 2000000)
+);
+
+alter table action_templates drop constraint if exists action_templates_content_length_check;
+alter table action_templates add constraint action_templates_content_length_check
+check (
+  char_length(id) between 1 and 128
+  and char_length(title) between 1 and 120
+  and char_length(description) <= 2000
 );
 
 create index if not exists daily_actions_daily_log_id_idx on daily_actions(daily_log_id);

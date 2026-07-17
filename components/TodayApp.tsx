@@ -115,17 +115,17 @@ export function TodayApp() {
         <div className="max-w-5xl pt-1 text-left">
           <p className="survey-kicker">Lucitetokki Daily Action Log</p>
           <h1 className="survey-title mt-2.5 text-4xl font-semibold leading-tight text-zinc-950 sm:mt-3 sm:text-6xl lg:text-7xl">
-            苟日新, 日日新, 又日新
+            Write with the door closed
           </h1>
           <p className="mt-2.5 max-w-4xl text-[0.95rem] leading-7 text-zinc-600 sm:mt-4 sm:text-xl sm:leading-8">
-            진실로 날로 새로워지려면, 날마다 새로워지고 또 새로워져야 한다
+            많이 읽고, 많이 쓰는 것. 이 두 가지를 피해 갈 방법도, 지름길도 없다
           </p>
         </div>
 
         <div className="today-stat-grid grid min-w-0 grid-cols-[repeat(3,minmax(0,1fr))] gap-2 sm:gap-3">
-          <StatCard icon={Target} label="Slots" value={dailyActionSlots.length.toString()} />
-          <StatCard icon={CheckCircle2} label="Filled" value={recordedSlotCount.toString()} />
-          <StatCard icon={CircleDashed} label="Rate" value={`${completionRate}%`} accent />
+          <StatCard icon={Target} label="영역" value={dailyActionSlots.length.toString()} />
+          <StatCard icon={CheckCircle2} label="기록" value={recordedSlotCount.toString()} />
+          <StatCard icon={CircleDashed} label="비율" value={`${completionRate}%`} />
         </div>
       </header>
 
@@ -166,6 +166,7 @@ export function TodayApp() {
         </div>
         <div className="mobile-sync-row sync-status-cluster flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto">
           <span
+            data-status={syncStatus.status}
             className={cn(
               "sync-status-pill rounded-md border px-3 py-1.5 text-sm font-semibold",
               syncStatus.status === "saved" &&
@@ -185,6 +186,12 @@ export function TodayApp() {
       </div>
 
       <div className="mobile-today-grid grid gap-5 sm:gap-8">
+        <FixedDailyActions
+          actions={actions}
+          dateKey={selectedDate}
+          key={selectedDate}
+          onUpdateSlot={updateSlot}
+        />
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_460px] xl:items-stretch">
           <DailyReflection
             dailyLog={dailyLog}
@@ -193,11 +200,6 @@ export function TodayApp() {
           />
           <DailyImagePanel />
         </div>
-        <FixedDailyActions
-          actions={actions}
-          dateKey={selectedDate}
-          onUpdateSlot={updateSlot}
-        />
       </div>
     </div>
   );
@@ -207,19 +209,16 @@ type StatCardProps = {
   icon: React.ComponentType<{ "aria-hidden": true; size: number }>;
   label: string;
   value: string;
-  accent?: boolean;
 };
 
-function StatCard({ icon: Icon, label, value, accent = false }: StatCardProps) {
+function StatCard({ icon: Icon, label, value }: StatCardProps) {
   return (
     <div className="today-stat-card survey-card survey-stat min-w-0 rounded-lg border border-zinc-200 bg-white p-2 shadow-sm sm:p-3">
       <div className="flex items-center gap-1 text-[0.7rem] font-semibold text-zinc-500 sm:gap-2 sm:text-base">
         <Icon aria-hidden={true} size={16} />
         {label}
       </div>
-      <p className={cn("mt-1.5 text-2xl font-semibold sm:text-4xl", accent ? "text-sky-700" : "text-zinc-950")}>
-        {value}
-      </p>
+      <p className="mt-1.5 text-2xl font-semibold text-zinc-950 sm:text-4xl">{value}</p>
     </div>
   );
 }

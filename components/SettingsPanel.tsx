@@ -6,13 +6,17 @@ import { Database, Download, RotateCcw, ShieldAlert, Trash2, Upload } from "luci
 import { SupabaseDiagnosticsPanel } from "@/components/SupabaseDiagnosticsPanel";
 import { SupabaseStatusCard } from "@/components/SupabaseStatusCard";
 import {
+  maxBackupFileBytes,
+  parseDailyNoteBackup,
+  type DailyNoteBackup,
+} from "@/lib/backup";
+import {
   clearAllStoredDays,
   clearStoredDay,
   readStoredDay,
   updateStoredDay,
   useStoredDays,
   writeStoredDay,
-  type StoredDay,
 } from "@/lib/daily-store";
 import { readActionTemplates, writeActionTemplates } from "@/lib/template-store";
 import { createId, getDateKeyFromOffset, getTodayDateKey } from "@/lib/utils";
@@ -26,26 +30,16 @@ import {
   useWritingEntries,
   writeWritingEntries,
 } from "@/lib/writing-store";
-import type { ActionTemplate } from "@/types/action-template";
 import { dailyActionSlots, slotMeta, type DailyAction } from "@/types/daily-action";
-import type { WritingEntry } from "@/types/writing-entry";
 
 const sampleDescriptions = {
   diet: "단백질 중심으로 식사 구성",
   fitness: "퇴근 후 30분 걷기",
   vibe_coding: "작게 고치고 바로 확인",
   writing: "생각 정리용 초안 작성",
+  organization: "미뤄둔 파일과 메일 한 묶음 정리",
+  relationships: "먼저 안부를 묻고 대화 나누기",
 } as const;
-
-type DailyNoteBackup = {
-  app: "daily-note-app";
-  version: 1 | 2;
-  exportedAt: string;
-  days: StoredDay[];
-  writingEntries?: WritingEntry[];
-  templates: ActionTemplate[];
-  weeklyReflections: ReturnType<typeof useWeeklyReflections>;
-};
 
 type DeleteScope = "today" | "all";
 
@@ -80,7 +74,9 @@ export function SettingsPanel() {
           category: slotMeta[slot].category,
           title: slotMeta[slot].label,
           description:
-            actionIndex <= 3 - (dayIndex % 3) ? sampleDescriptions[slot] : "",
+            actionIndex < dailyActionSlots.length - (dayIndex % 3)
+              ? sampleDescriptions[slot]
+              : "",
           status: "done",
           satisfaction: Math.max(3, 5 - ((dayIndex + actionIndex) % 3)),
           reflection: actionIndex === 0 ? "작게라도 실행했다." : "",
@@ -94,7 +90,7 @@ export function SettingsPanel() {
             dailyMood: "steady",
             dailyReflection:
               dayIndex % 2 === 0
-                ? "완벽하지 않아도 네 슬롯 중 일부를 유지했다."
+                ? "완벽하지 않아도 고정 슬롯 중 일부를 유지했다."
                 : "오늘 채운 슬롯과 비운 슬롯을 분명히 확인했다.",
             updatedAt: now,
           },
@@ -168,33 +164,34 @@ export function SettingsPanel() {
     }
 
     try {
-      const parsed = JSON.parse(await file.text()) as Partial<DailyNoteBackup>;
-
-      if (parsed.app !== "daily-note-app" || !Array.isArray(parsed.days)) {
-        throw new Error("Invalid backup file.");
+      if (file.size > maxBackupFileBytes) {
+        throw new Error("Backup file is too large.");
       }
 
+      const parsed = parseDailyNoteBackup(JSON.parse(await file.text()));
+
       parsed.days.forEach((day) => {
-        if (day?.dailyLog?.date) {
-          writeStoredDay(day.dailyLog.date, day);
-        }
+        writeStoredDay(day.dailyLog.date, day);
       });
 
-      if (Array.isArray(parsed.templates)) {
+      if (parsed.templates.length > 0) {
         writeActionTemplates(parsed.templates);
       }
 
-      if (Array.isArray(parsed.writingEntries)) {
+      if (parsed.writingEntries.length > 0) {
         writeWritingEntries(parsed.writingEntries);
       }
 
-      if (Array.isArray(parsed.weeklyReflections)) {
+      if (parsed.weeklyReflections.length > 0) {
         writeWeeklyReflections(parsed.weeklyReflections);
       }
 
       setFeedback({ tone: "success", message: "백업을 가져왔습니다." });
     } catch {
-      setFeedback({ tone: "error", message: "백업 파일을 읽지 못했습니다." });
+      setFeedback({
+        tone: "error",
+        message: "백업 파일의 형식이 올바르지 않거나 허용 크기를 초과했습니다.",
+      });
     } finally {
       event.target.value = "";
     }
@@ -208,7 +205,7 @@ export function SettingsPanel() {
           저장과 데이터 관리
         </h1>
         <p className="mt-4 max-w-4xl text-lg leading-8 text-zinc-600">
-          네 개의 고정 기록 슬롯, Supabase 동기화, 백업과 삭제 작업을 관리합니다.
+          여섯 개의 고정 기록 슬롯, Supabase 동기화, 백업과 삭제 작업을 관리합니다.
         </p>
       </header>
 
@@ -217,7 +214,7 @@ export function SettingsPanel() {
 
       <section className="grid gap-4 lg:grid-cols-3">
         <ActionPanel
-          description="최근 7일에 4슬롯 구조 예시 데이터를 채웁니다."
+          description="최근 7일에 6슬롯 구조 예시 데이터를 채웁니다."
           icon={Database}
           onClick={handleSeedSampleData}
           title="샘플 7일 추가"

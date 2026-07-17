@@ -38,6 +38,7 @@ import { Markdown } from "@tiptap/markdown";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
+import { getSafeLinkHref } from "@/lib/safe-url";
 import { cn } from "@/lib/utils";
 
 export type RichWritingChange = {
@@ -151,11 +152,18 @@ function toggleLink(editor: Editor) {
     return;
   }
 
+  const safeHref = getSafeLinkHref(nextHref);
+
+  if (!safeHref) {
+    window.alert("http, https, mailto, tel 링크만 사용할 수 있습니다.");
+    return;
+  }
+
   editor
     .chain()
     .focus()
     .extendMarkRange("link")
-    .setLink({ href: nextHref.trim() })
+    .setLink({ href: safeHref })
     .run();
 }
 
@@ -465,20 +473,6 @@ function getNodeText(node: JSONContent): string {
   return node.content?.map(getNodeText).join("") ?? "";
 }
 
-function getSafeHref(href: unknown) {
-  if (typeof href !== "string") {
-    return null;
-  }
-
-  const trimmed = href.trim();
-
-  if (!trimmed || /^javascript:/i.test(trimmed)) {
-    return null;
-  }
-
-  return trimmed;
-}
-
 function applyMarks(text: string, marks: JSONContent["marks"], key: string): ReactNode {
   return (marks ?? []).reduce<ReactNode>((children, mark, index) => {
     const markKey = `${key}-mark-${index}`;
@@ -495,10 +489,10 @@ function applyMarks(text: string, marks: JSONContent["marks"], key: string): Rea
       case "code":
         return <code key={markKey}>{children}</code>;
       case "link": {
-        const href = getSafeHref(mark.attrs?.href);
+        const href = getSafeLinkHref(mark.attrs?.href);
 
         return href ? (
-          <a href={href} key={markKey} rel="noreferrer" target="_blank">
+          <a href={href} key={markKey} rel="noopener noreferrer" target="_blank">
             {children}
           </a>
         ) : (

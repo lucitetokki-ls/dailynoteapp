@@ -9,6 +9,7 @@ import {
   type SupabaseMutationResult,
 } from "@/lib/supabase";
 import { createEmptyDailyLog, getRecentDateKeys, getTodayDateKey } from "@/lib/utils";
+import { normalizeActionTitle } from "@/types/daily-action";
 import type {
   ActionCategory,
   ActionStatus,
@@ -78,7 +79,7 @@ function getStorageKey(date: string) {
   return `${storagePrefix}${date}`;
 }
 
-export function createDefaultStoredDay(date: string): StoredDay {
+function createDefaultStoredDay(date: string): StoredDay {
   return {
     dailyLog: createEmptyDailyLog(date),
     actions: [],
@@ -152,7 +153,7 @@ function mapDailyActionRow(row: DailyActionRow): DailyAction {
     dailyLogId: row.daily_log_id,
     slot: row.slot ?? undefined,
     category: row.category,
-    title: row.title,
+    title: normalizeActionTitle(row.title, row.category, row.slot),
     description: row.description,
     status: row.status,
     satisfaction: row.satisfaction,
@@ -218,7 +219,17 @@ function readStoredDayFromLocalStorage(date: string): StoredDay {
   }
 
   try {
-    return JSON.parse(raw) as StoredDay;
+    const storedDay = JSON.parse(raw) as StoredDay;
+
+    return {
+      ...storedDay,
+      actions: Array.isArray(storedDay.actions)
+        ? storedDay.actions.map((action) => ({
+            ...action,
+            title: normalizeActionTitle(action.title, action.category, action.slot),
+          }))
+        : [],
+    };
   } catch {
     return createDefaultStoredDay(date);
   }
@@ -311,7 +322,7 @@ export function deleteStoredAction(date: string, actionId: string) {
   }));
 }
 
-export function readAllStoredDays() {
+function readAllStoredDays() {
   if (!canReadBrowserStore()) {
     return [];
   }
@@ -572,7 +583,7 @@ async function persistStoredDayToSupabase(day: StoredDay): Promise<SupabaseMutat
   return { ok: true };
 }
 
-export function readRecentStoredDays(count: number) {
+function readRecentStoredDays(count: number) {
   return getRecentDateKeys(count).map((date) => readStoredDay(date));
 }
 
@@ -598,7 +609,7 @@ function getSyncSnapshot() {
   return `${syncVersion}:${syncStatuses.size}`;
 }
 
-export function readSupabaseSyncStatus(date: string) {
+function readSupabaseSyncStatus(date: string) {
   return syncStatuses.get(date) ?? defaultSyncStatus;
 }
 
