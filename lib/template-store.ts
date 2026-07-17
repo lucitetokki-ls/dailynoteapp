@@ -22,8 +22,8 @@ const defaultActionTemplates: ActionTemplate[] = [
   {
     id: "template-write",
     category: "writing",
-    title: "문장 5개 쓰기",
-    description: "초안 품질은 신경 쓰지 않기",
+    title: "공부한 내용 복습하기",
+    description: "핵심 개념과 막힌 점을 짧게 정리하기",
   },
   {
     id: "template-organize",
