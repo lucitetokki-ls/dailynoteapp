@@ -6,7 +6,7 @@ import type { ActionCategory } from "@/types/daily-action";
 
 const templateStorageKey = "daily-note:action-templates";
 
-export const defaultActionTemplates: ActionTemplate[] = [
+const defaultActionTemplates: ActionTemplate[] = [
   {
     id: "template-walk",
     category: "diet_fitness",

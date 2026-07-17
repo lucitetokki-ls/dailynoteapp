@@ -78,7 +78,7 @@ function getStorageKey(date: string) {
   return `${storagePrefix}${date}`;
 }
 
-export function createDefaultStoredDay(date: string): StoredDay {
+function createDefaultStoredDay(date: string): StoredDay {
   return {
     dailyLog: createEmptyDailyLog(date),
     actions: [],
@@ -311,7 +311,7 @@ export function deleteStoredAction(date: string, actionId: string) {
   }));
 }
 
-export function readAllStoredDays() {
+function readAllStoredDays() {
   if (!canReadBrowserStore()) {
     return [];
   }
@@ -572,7 +572,7 @@ async function persistStoredDayToSupabase(day: StoredDay): Promise<SupabaseMutat
   return { ok: true };
 }
 
-export function readRecentStoredDays(count: number) {
+function readRecentStoredDays(count: number) {
   return getRecentDateKeys(count).map((date) => readStoredDay(date));
 }
 
@@ -598,7 +598,7 @@ function getSyncSnapshot() {
   return `${syncVersion}:${syncStatuses.size}`;
 }
 
-export function readSupabaseSyncStatus(date: string) {
+function readSupabaseSyncStatus(date: string) {
   return syncStatuses.get(date) ?? defaultSyncStatus;
 }
 

@@ -118,7 +118,7 @@ function getServerSnapshot() {
   return "server";
 }
 
-export function createDefaultWeeklyReflection(weekKey: string): WeeklyReflection {
+function createDefaultWeeklyReflection(weekKey: string): WeeklyReflection {
   const fallbackTimestamp = "1970-01-01T00:00:00.000Z";
 
   return {
@@ -132,7 +132,7 @@ export function createDefaultWeeklyReflection(weekKey: string): WeeklyReflection
   };
 }
 
-export function readWeeklyReflection(weekKey: string) {
+function readWeeklyReflection(weekKey: string) {
   if (!canReadBrowserWeeklyStore()) {
     return createDefaultWeeklyReflection(weekKey);
   }
@@ -150,7 +150,7 @@ export function readWeeklyReflection(weekKey: string) {
   }
 }
 
-export function writeWeeklyReflection(reflection: WeeklyReflection) {
+function writeWeeklyReflection(reflection: WeeklyReflection) {
   writeWeeklyReflectionLocally(reflection);
 
   if (supabase) {
@@ -184,7 +184,7 @@ export function updateWeeklyReflection(
   });
 }
 
-export function readAllWeeklyReflections() {
+function readAllWeeklyReflections() {
   if (!canReadBrowserWeeklyStore()) {
     return [];
   }

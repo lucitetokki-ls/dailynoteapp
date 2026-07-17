@@ -56,7 +56,7 @@ function wait(ms: number) {
   });
 }
 
-export function formatSupabaseError(error: unknown) {
+function formatSupabaseError(error: unknown) {
   if (!error) {
     return "Unknown Supabase error";
   }

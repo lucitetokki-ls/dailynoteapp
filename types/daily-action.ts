@@ -4,11 +4,10 @@ export const actionCategories = [
   "writing",
 ] as const;
 
-export const actionStatuses = ["done", "partial", "skipped"] as const;
 export const dailyActionSlots = ["diet", "fitness", "vibe_coding", "writing"] as const;
 
 export type ActionCategory = (typeof actionCategories)[number];
-export type ActionStatus = (typeof actionStatuses)[number];
+export type ActionStatus = "done" | "partial" | "skipped";
 export type DailyActionSlot = (typeof dailyActionSlots)[number];
 
 export type DailyAction = {

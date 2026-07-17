@@ -25,7 +25,7 @@ export function getActionForSlot(actions: DailyAction[], slot: DailyActionSlot) 
   });
 }
 
-export function isSlotFilled(actions: DailyAction[], slot: DailyActionSlot) {
+function isSlotFilled(actions: DailyAction[], slot: DailyActionSlot) {
   const action = getActionForSlot(actions, slot);
 
   return Boolean(action?.description.trim() || action?.reflection.trim());

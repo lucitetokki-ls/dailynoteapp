@@ -43,7 +43,7 @@ export function getTodayDateKey() {
   return getDateKey(now);
 }
 
-export function getDateKey(date: Date) {
+function getDateKey(date: Date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
@@ -109,10 +109,6 @@ export function getWeekKey(date = new Date()) {
   const week = Math.ceil(((target.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
 
   return `${target.getUTCFullYear()}-W${String(week).padStart(2, "0")}`;
-}
-
-export function getWeekKeyFromDateKey(dateKey: string) {
-  return getWeekKey(new Date(`${dateKey}T00:00:00`));
 }
 
 export function formatDisplayWeek(weekKey: string) {
