@@ -47,9 +47,9 @@ export function FixedDailyActions({ actions, dateKey, onUpdateSlot }: FixedDaily
   return (
     <section aria-labelledby="daily-slots-heading" className="daily-slots-section grid gap-3">
       <div className="daily-slots-heading flex items-end justify-between gap-3">
-        <div>
+        <div className="daily-slots-title-row flex min-w-0 items-baseline gap-3">
           <p className="survey-kicker">오늘의 여섯 영역</p>
-          <h2 className="mt-1 text-2xl font-semibold text-zinc-950" id="daily-slots-heading">
+          <h2 className="text-2xl font-semibold text-zinc-950" id="daily-slots-heading">
             행동 기록
           </h2>
         </div>

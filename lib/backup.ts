@@ -19,7 +19,7 @@ export const maxBackupFileBytes = 5 * 1024 * 1024;
 
 export type DailyNoteBackup = {
   app: "daily-note-app";
-  version: 1 | 2;
+  version: 1 | 2 | 3;
   exportedAt: string;
   days: StoredDay[];
   writingEntries: WritingEntry[];
@@ -46,6 +46,7 @@ const maxTextLength = {
   templateTitle: 120,
   weeklyField: 20_000,
   writing: 1_000_000,
+  writingTitle: 120,
 } as const;
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -327,6 +328,10 @@ function parseWritingEntry(value: unknown, index: number): WritingEntry {
   return {
     id: asUuid(entry.id, `${path}.id`),
     date: asDate(entry.date, `${path}.date`),
+    title:
+      entry.title === undefined
+        ? ""
+        : asString(entry.title, `${path}.title`, maxTextLength.writingTitle),
     content,
     contentJson,
     contentMarkdown,
@@ -373,7 +378,10 @@ function parseWeeklyReflection(value: unknown, index: number): WeeklyReflection 
 export function parseDailyNoteBackup(value: unknown): DailyNoteBackup {
   const backup = asRecord(value, "backup");
 
-  if (backup.app !== "daily-note-app" || (backup.version !== 1 && backup.version !== 2)) {
+  if (
+    backup.app !== "daily-note-app" ||
+    (backup.version !== 1 && backup.version !== 2 && backup.version !== 3)
+  ) {
     fail("backup.header");
   }
 

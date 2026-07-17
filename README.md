@@ -6,7 +6,7 @@
 
 - **Today**: 식단, 운동, 코딩, 공부, 정리, 관계 여섯 개 고정 슬롯 기록
 - **Review**: 최근 7일 슬롯 밀도, 일별 흐름, 주간 회고
-- **Writing**: 날짜별 1일 1작문 WYSIWYG 리치 에디터, Markdown 호환 저장
+- **Writing**: 날짜별 제목과 본문을 저장하는 1일 1작문 리치 에디터, 제목형 최근 목록과 전체 글 팝업
 - **Category**: 카테고리별 기록 히스토리
 - **Calendar**: 월간 날짜 기반 기록 탐색
 - **Search**: 행동 내용, 짧은 회고, 오늘 회고 검색
@@ -63,7 +63,7 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...
 - `daily_writings`
 - `action_templates`
 
-`daily_writings`는 기존 `content` 호환 필드와 함께 `content_markdown`, `content_json`을 저장합니다. 리치 에디터 화면은 JSON을 우선 사용하고, Markdown은 백업/이전 데이터 호환용으로 유지합니다.
+`daily_writings`는 `title`과 기존 `content` 호환 필드, `content_markdown`, `content_json`을 저장합니다. 리치 에디터 화면은 JSON을 우선 사용하고, Markdown은 백업/이전 데이터 호환용으로 유지합니다.
 
 `schema.sql`은 필수 테이블, 인덱스, updated_at 트리거, RLS, anon/authenticated 접근 정책을 함께 설정합니다. 현재 앱은 별도 사용자 인증 없이 브라우저에서 직접 저장하므로 정책이 개인용 공개 쓰기 구조입니다. 실제 계정별 보안을 붙일 때는 사용자 소유 컬럼과 인증 기반 RLS 정책으로 교체해야 합니다. Settings의 Supabase 진단에서 읽기와 임시 쓰기/삭제를 확인할 수 있습니다.
 

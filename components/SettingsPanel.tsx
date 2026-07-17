@@ -136,7 +136,7 @@ export function SettingsPanel() {
   function handleExportBackup() {
     const backup: DailyNoteBackup = {
       app: "daily-note-app",
-      version: 2,
+      version: 3,
       exportedAt: new Date().toISOString(),
       days: storedDays,
       writingEntries,
