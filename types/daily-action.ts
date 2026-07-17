@@ -109,8 +109,8 @@ export const categoryMeta: Record<
   }
 > = {
   diet_fitness: {
-    label: "Diet / Fitness",
-    shortLabel: "Fitness",
+    label: "식단·운동",
+    shortLabel: "건강",
     description: "식단, 운동, 컨디션 관리",
     tone: "emerald",
   },
@@ -121,19 +121,19 @@ export const categoryMeta: Record<
     tone: "sky",
   },
   writing: {
-    label: "Writing",
-    shortLabel: "Writing",
+    label: "작문",
+    shortLabel: "작문",
     description: "작문, 메모, 글쓰기 루틴",
     tone: "rose",
   },
   organization: {
-    label: "Organization",
+    label: "정리",
     shortLabel: "정리",
     description: "공간, 파일, 미뤄둔 일 정리",
     tone: "amber",
   },
   relationships: {
-    label: "Relationships",
+    label: "관계",
     shortLabel: "관계",
     description: "연락, 대화, 감사와 관계 행동",
     tone: "violet",
@@ -148,15 +148,15 @@ export const statusMeta: Record<
   }
 > = {
   done: {
-    label: "Done",
+    label: "완료",
     description: "완료",
   },
   partial: {
-    label: "Partial",
+    label: "일부",
     description: "일부 진행",
   },
   skipped: {
-    label: "Skipped",
+    label: "건너뜀",
     description: "건너뜀",
   },
 };

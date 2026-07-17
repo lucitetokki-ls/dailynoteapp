@@ -44,7 +44,7 @@ export function ReviewDashboard() {
     <div className="grid gap-8 pb-12">
       <header className="survey-hero grid gap-5">
         <div className="max-w-5xl text-left">
-          <p className="survey-kicker">Weekly Review</p>
+          <p className="survey-kicker">7일 리뷰</p>
           <h1 className="survey-title mt-3 text-5xl font-semibold leading-tight text-zinc-950 sm:text-6xl">
             최근 7일 로그 흐름
           </h1>
@@ -54,10 +54,10 @@ export function ReviewDashboard() {
         </div>
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <StatCard icon={BarChart3} label="Log Marks" value={`${filledSlots}/${totalSlots}`} />
-          <StatCard icon={CheckCircle2} label="Complete" value={`${fullDays}/7`} tone="emerald" />
-          <StatCard icon={CircleDashed} label="Daily Avg" value={averageDailySlots.toString()} tone="sky" />
-          <StatCard icon={Star} label="Avg Score" value={averageSatisfaction.toString()} tone="amber" />
+          <StatCard icon={BarChart3} label="기록" value={`${filledSlots}/${totalSlots}`} />
+          <StatCard icon={CheckCircle2} label="전부 기록" value={`${fullDays}/7`} tone="emerald" />
+          <StatCard icon={CircleDashed} label="일평균" value={averageDailySlots.toString()} tone="sky" />
+          <StatCard icon={Star} label="만족도" value={averageSatisfaction.toString()} tone="amber" />
         </div>
       </header>
 
@@ -145,33 +145,36 @@ export function ReviewDashboard() {
           </span>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <div className="review-density-list survey-card border border-zinc-200 bg-white">
           {dailyActionSlots.map((slot) => {
             const filledCount = days.filter((day) => getSlotFillMap(day.actions)[slot]).length;
             const rate = Math.round((filledCount / totalWindowDays) * 100);
 
             return (
               <article
-                className="survey-card rounded-lg border border-zinc-200 bg-white p-5 shadow-sm"
+                className="review-density-row grid items-center gap-3 px-4 py-3 sm:grid-cols-[minmax(8rem,1fr)_minmax(10rem,2fr)_4rem] sm:px-5"
                 key={slot}
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <h3 className="text-xl font-semibold text-zinc-950">
-                      {slotMeta[slot].label}
-                    </h3>
-                    <p className="mt-1.5 text-base text-zinc-500">
-                      {filledCount}일 로그 · {totalWindowDays - filledCount}일 공백
-                    </p>
-                  </div>
-                  <span className="text-3xl font-semibold text-zinc-950">{rate}%</span>
+                <div>
+                  <h3 className="text-lg font-semibold text-zinc-950">{slotMeta[slot].label}</h3>
+                  <p className="mt-0.5 text-sm text-zinc-500">
+                    {filledCount}일 기록 · {totalWindowDays - filledCount}일 공백
+                  </p>
                 </div>
-                <div className="mt-5 h-3 overflow-hidden rounded-full bg-zinc-100">
+                <div
+                  aria-label={`${slotMeta[slot].label} 기록 밀도 ${rate}%`}
+                  aria-valuemax={100}
+                  aria-valuemin={0}
+                  aria-valuenow={rate}
+                  className="review-density-track h-2 bg-zinc-100"
+                  role="progressbar"
+                >
                   <div
-                    className="h-full rounded-full bg-emerald-400"
+                    className="review-density-fill h-full bg-emerald-400"
                     style={{ width: `${rate}%` }}
                   />
                 </div>
+                <span className="text-right text-xl font-semibold text-zinc-950">{rate}%</span>
               </article>
             );
           })}
@@ -182,14 +185,14 @@ export function ReviewDashboard() {
 
       <section className="grid gap-4">
         <h2 className="text-2xl font-semibold text-zinc-950">최근 7일</h2>
-        <div className="grid gap-3">
+        <div className="history-list grid">
           {days.map((day) => {
             const filledCount = getFilledSlotCount(day.actions);
             const fillMap = getSlotFillMap(day.actions);
 
             return (
               <article
-                className="survey-card survey-list-row grid gap-4 rounded-lg border border-zinc-200 bg-white p-4 shadow-sm sm:p-5 lg:grid-cols-[220px_minmax(0,1fr)_120px]"
+                className="survey-card survey-list-row history-row grid gap-4 border border-zinc-200 bg-white p-4 sm:p-5 lg:grid-cols-[220px_minmax(0,1fr)_120px]"
                 key={day.dailyLog.date}
               >
                 <div>

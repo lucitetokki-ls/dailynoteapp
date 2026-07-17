@@ -44,7 +44,7 @@ export function CategoryHistory() {
     <div className="grid gap-8 pb-12">
       <header className="survey-hero grid gap-5">
         <div className="max-w-5xl text-left">
-          <p className="survey-kicker">Category History</p>
+          <p className="survey-kicker">카테고리 기록</p>
           <h1 className="survey-title mt-3 text-5xl font-semibold leading-tight text-zinc-950 sm:text-6xl">
             카테고리별 행동 히스토리
           </h1>
@@ -84,25 +84,25 @@ export function CategoryHistory() {
         ))}
       </div>
 
-      <section className="grid gap-3">
+      <section className="history-list grid">
         {categoryActions.length > 0 ? (
           categoryActions.map((action) => {
             const StatusIcon = statusIcons[action.status as ActionStatus];
 
             return (
               <article
-                className="survey-card survey-list-row grid gap-4 rounded-lg border border-zinc-200 bg-white p-5 shadow-sm lg:grid-cols-[220px_minmax(0,1fr)_140px]"
+                className="survey-card survey-list-row history-row grid gap-4 border border-zinc-200 bg-white p-4 lg:grid-cols-[180px_minmax(0,1fr)_130px]"
                 key={action.id}
               >
                 <div>
-                  <p className="text-lg font-semibold text-zinc-950">
+                  <p className="text-base font-semibold text-zinc-950">
                     {formatDisplayDate(action.date)}
                   </p>
-                  <p className="mt-1 text-base text-zinc-500">만족도 {action.satisfaction}/5</p>
+                  <p className="mt-1 text-sm text-zinc-500">만족도 {action.satisfaction}/5</p>
                 </div>
 
                 <div className="min-w-0">
-                  <h2 className="truncate text-xl font-semibold text-zinc-950">
+                  <h2 className="truncate text-lg font-semibold text-zinc-950">
                     {action.title}
                   </h2>
                   <ExpandableText

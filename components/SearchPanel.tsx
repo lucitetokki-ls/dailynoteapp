@@ -53,7 +53,7 @@ export function SearchPanel() {
   return (
     <div className="search-panel grid gap-8 pb-12">
       <header className="survey-hero">
-        <p className="survey-kicker">Search</p>
+        <p className="survey-kicker">기록 검색</p>
         <h1 className="survey-title mt-3 max-w-5xl text-5xl font-semibold leading-tight text-zinc-950 sm:text-6xl">
           행동 기록 검색
         </h1>
@@ -80,7 +80,7 @@ export function SearchPanel() {
           <FilterGroup
             activeValue={category}
             items={[
-              { label: "All", value: "all" },
+              { label: "전체", value: "all" },
               ...actionCategories.map((item) => ({
                 label: categoryMeta[item].shortLabel,
                 value: item,
@@ -91,7 +91,7 @@ export function SearchPanel() {
         </div>
       </section>
 
-      <section className="grid gap-3">
+      <section className="search-results-section grid gap-3">
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-2xl font-semibold text-zinc-950">검색 결과</h2>
           <span className="survey-chip rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-base font-semibold text-zinc-600">
@@ -100,44 +100,46 @@ export function SearchPanel() {
         </div>
 
         {results.length > 0 ? (
-          results.map((action) => (
-            <article
-              className="survey-card survey-list-row grid gap-4 rounded-lg border border-zinc-200 bg-white p-5 shadow-sm lg:grid-cols-[220px_minmax(0,1fr)_170px]"
-              key={action.id}
-            >
-              <div>
-                <p className="text-lg font-semibold text-zinc-950">
-                  {formatDisplayDate(action.date)}
-                </p>
-                <p className="mt-1 text-base text-zinc-500">
-                  {categoryMeta[action.category].label}
-                </p>
-              </div>
-              <div className="min-w-0">
-                <h3 className="truncate text-xl font-semibold text-zinc-950">{action.title}</h3>
-                <ActionDialogTrigger
-                  action={action}
-                  className="mt-1.5 block text-left"
-                  date={action.date}
-                  fallback="메모가 비어 있습니다."
-                  title={`${formatDisplayDate(action.date)} · ${action.title}`}
-                >
-                  <p
-                    className="line-clamp-2 whitespace-pre-line text-base leading-7 text-zinc-500"
-                    title={[action.description, action.reflection].filter(Boolean).join("\n\n")}
-                  >
-                    {[action.description, action.reflection].filter(Boolean).join("\n\n") ||
-                      "메모가 비어 있습니다."}
+          <div className="history-list grid">
+            {results.map((action) => (
+              <article
+                className="survey-card survey-list-row history-row grid gap-4 border border-zinc-200 bg-white p-4 lg:grid-cols-[180px_minmax(0,1fr)_150px]"
+                key={action.id}
+              >
+                <div>
+                  <p className="text-base font-semibold text-zinc-950">
+                    {formatDisplayDate(action.date)}
                   </p>
-                </ActionDialogTrigger>
-              </div>
-              <div className="flex items-center justify-start lg:justify-end">
-                <span className="survey-chip rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-base font-semibold text-zinc-700">
-                  {statusMeta[action.status].label} · {action.satisfaction}/5
-                </span>
-              </div>
-            </article>
-          ))
+                  <p className="mt-1 text-sm text-zinc-500">
+                    {categoryMeta[action.category].label}
+                  </p>
+                </div>
+                <div className="min-w-0">
+                  <h3 className="truncate text-lg font-semibold text-zinc-950">{action.title}</h3>
+                  <ActionDialogTrigger
+                    action={action}
+                    className="mt-1 block text-left"
+                    date={action.date}
+                    fallback="메모가 비어 있습니다."
+                    title={`${formatDisplayDate(action.date)} · ${action.title}`}
+                  >
+                    <p
+                      className="line-clamp-2 whitespace-pre-line text-sm leading-6 text-zinc-500"
+                      title={[action.description, action.reflection].filter(Boolean).join("\n\n")}
+                    >
+                      {[action.description, action.reflection].filter(Boolean).join("\n\n") ||
+                        "메모가 비어 있습니다."}
+                    </p>
+                  </ActionDialogTrigger>
+                </div>
+                <div className="flex items-center justify-start lg:justify-end">
+                  <span className="survey-chip rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm font-semibold text-zinc-700">
+                    {statusMeta[action.status].label} · {action.satisfaction}/5
+                  </span>
+                </div>
+              </article>
+            ))}
+          </div>
         ) : (
           <EmptyState
             title="검색 결과 없음"
