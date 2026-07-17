@@ -461,24 +461,37 @@ function readWritingSyncStatus(date: string) {
 }
 
 export function useWritingEntry(date = getTodayDateKey()) {
-  useSyncExternalStore(subscribeToWritingEntry, getWritingSnapshot, getServerSnapshot);
+  const snapshot = useSyncExternalStore(
+    subscribeToWritingEntry,
+    getWritingSnapshot,
+    getServerSnapshot,
+  );
   useEffect(() => {
     void syncWritingEntryFromSupabase(date);
   }, [date]);
-  return readWritingEntry(date);
+
+  return snapshot === "server" ? createDefaultWritingEntry(date) : readWritingEntry(date);
 }
 
 export function useWritingEntries() {
-  useSyncExternalStore(subscribeToWritingEntry, getWritingSnapshot, getServerSnapshot);
+  const snapshot = useSyncExternalStore(
+    subscribeToWritingEntry,
+    getWritingSnapshot,
+    getServerSnapshot,
+  );
   useEffect(() => {
     void syncAllWritingEntriesFromSupabase();
   }, []);
 
-  return readAllWritingEntries();
+  return snapshot === "server" ? [] : readAllWritingEntries();
 }
 
 export function useWritingSyncStatus(date: string) {
-  useSyncExternalStore(subscribeToWritingSyncStatus, getWritingSyncSnapshot, getServerSnapshot);
+  const snapshot = useSyncExternalStore(
+    subscribeToWritingSyncStatus,
+    getWritingSyncSnapshot,
+    getServerSnapshot,
+  );
 
-  return readWritingSyncStatus(date);
+  return snapshot === "server" ? defaultWritingSyncStatus : readWritingSyncStatus(date);
 }
