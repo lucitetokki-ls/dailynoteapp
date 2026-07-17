@@ -6,7 +6,7 @@ export const metadata: Metadata = {
     default: "Lucitetokki Daily Action Log",
     template: "%s | Lucitetokki Daily Action Log",
   },
-  description: "A personal daily action log for diet, fitness, vibe coding, writing, and reflection.",
+  description: "식단, 운동, 코딩, 작문, 정리, 관계를 기록하는 개인용 데일리 로그.",
   applicationName: "Lucitetokki Daily Action Log",
   appleWebApp: {
     capable: true,

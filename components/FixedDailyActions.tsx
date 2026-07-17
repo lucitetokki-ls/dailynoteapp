@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Dumbbell, PenLine, Salad, Sparkles, Star } from "lucide-react";
+import { Dumbbell, Handshake, ListChecks, PenLine, Salad, Sparkles, Star } from "lucide-react";
 
 import { getActionForSlot } from "@/lib/slot-metrics";
 import { cn } from "@/lib/utils";
@@ -17,6 +17,8 @@ const slotIcons = {
   fitness: Dumbbell,
   vibe_coding: Sparkles,
   writing: PenLine,
+  organization: ListChecks,
+  relationships: Handshake,
 };
 
 type FixedDailyActionsProps = {
@@ -153,9 +155,10 @@ function FixedDailyActionCard({ action, slot, onUpdateSlot }: FixedDailyActionCa
           <textarea
             className="survey-control daily-slot-input min-h-32 resize-y rounded-md border border-zinc-200 bg-zinc-50 px-3.5 py-3 text-base leading-7 text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white sm:px-4 sm:text-lg sm:leading-8"
             data-field="description"
+            maxLength={10000}
             onBlur={(event) => saveDraft(event.currentTarget.value)}
             onInput={(event) => handleDescriptionInput(event.currentTarget.value)}
-            placeholder={`${slotMeta[slot].label}에서 오늘 실행한 한 가지`}
+            placeholder={slotMeta[slot].actionPlaceholder}
             value={description}
           />
         </label>
@@ -165,9 +168,10 @@ function FixedDailyActionCard({ action, slot, onUpdateSlot }: FixedDailyActionCa
           <textarea
             className="survey-control daily-slot-input min-h-24 resize-y rounded-md border border-zinc-200 bg-zinc-50 px-3.5 py-3 text-base leading-7 text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white sm:px-4"
             data-field="reflection"
+            maxLength={10000}
             onBlur={(event) => saveDraft(description, event.currentTarget.value)}
             onInput={(event) => handleReflectionInput(event.currentTarget.value)}
-            placeholder="이어갈 점, 고칠 점, 배운 점"
+            placeholder={slotMeta[slot].reflectionPlaceholder}
             value={reflection}
           />
         </label>

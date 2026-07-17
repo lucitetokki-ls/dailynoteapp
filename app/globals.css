@@ -2077,7 +2077,7 @@ input:focus {
 
   .review-mobile-slot-grid {
     gap: 1px !important;
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   }
 
   .review-mobile-slot-grid > button {
@@ -2462,7 +2462,7 @@ input:focus {
 }
 
 .search-filter-grid > div {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 
 .settings-gate {

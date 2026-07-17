@@ -23,6 +23,7 @@ import {
 import { dailyActionSlots, slotMeta } from "@/types/daily-action";
 
 const weekdays = ["월", "화", "수", "목", "금", "토", "일"];
+const slotCount = dailyActionSlots.length;
 
 export function MonthlyCalendar() {
   useStoredDays();
@@ -125,11 +126,11 @@ export function MonthlyCalendar() {
                               : "bg-emerald-50 text-emerald-700",
                           )}
                         >
-                          {filledCount}/4
+                          {filledCount}/{slotCount}
                         </span>
                       ) : null}
                     </div>
-                    <div className="mt-4 grid grid-cols-4 gap-1">
+                    <div className="mt-4 grid grid-cols-6 gap-1">
                       {dailyActionSlots.map((slot) => (
                         <span
                           className={cn(
@@ -188,10 +189,10 @@ export function MonthlyCalendar() {
                     </p>
                   </div>
                   <span className="rounded-md border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-sm font-semibold text-zinc-600">
-                    {filledCount}/4
+                    {filledCount}/{slotCount}
                   </span>
                 </div>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-3 gap-2">
                   {dailyActionSlots.map((slot) => (
                     <span
                       className={cn(
@@ -217,7 +218,7 @@ export function MonthlyCalendar() {
             <div className="survey-chip rounded-md border border-zinc-200 bg-zinc-50 p-3">
               <p className="text-sm font-semibold text-zinc-500">Filled</p>
               <p className="mt-2 text-3xl font-semibold text-zinc-950">
-                {selectedFilledCount}/4
+                {selectedFilledCount}/{slotCount}
               </p>
             </div>
             <div className="survey-chip rounded-md border border-zinc-200 bg-zinc-50 p-3">

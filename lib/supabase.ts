@@ -5,6 +5,28 @@ const supabasePublishableKey =
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
+function getLegacyJwtRole(key: string) {
+  const payload = key.split(".")[1];
+
+  if (!payload) {
+    return null;
+  }
+
+  try {
+    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
+    const decoded = JSON.parse(atob(padded)) as { role?: unknown };
+
+    return typeof decoded.role === "string" ? decoded.role : null;
+  } catch {
+    return null;
+  }
+}
+
+function isUnsafeBrowserKey(key: string) {
+  return key.startsWith("sb_secret_") || getLegacyJwtRole(key) === "service_role";
+}
+
 export const requiredSupabaseTables = [
   "daily_logs",
   "daily_actions",
@@ -28,10 +50,7 @@ function getSupabaseConfigIssue() {
     return "Supabase URL 형식이 올바르지 않습니다.";
   }
 
-  if (
-    supabasePublishableKey.startsWith("sb_secret_") ||
-    supabasePublishableKey.includes("service_role")
-  ) {
+  if (isUnsafeBrowserKey(supabasePublishableKey)) {
     return "브라우저에 노출되는 NEXT_PUBLIC 값에는 secret/service_role key를 넣으면 안 됩니다.";
   }
 

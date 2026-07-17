@@ -9,6 +9,7 @@ import {
   type SupabaseMutationResult,
 } from "@/lib/supabase";
 import { createEmptyDailyLog, getRecentDateKeys, getTodayDateKey } from "@/lib/utils";
+import { normalizeActionTitle } from "@/types/daily-action";
 import type {
   ActionCategory,
   ActionStatus,
@@ -152,7 +153,7 @@ function mapDailyActionRow(row: DailyActionRow): DailyAction {
     dailyLogId: row.daily_log_id,
     slot: row.slot ?? undefined,
     category: row.category,
-    title: row.title,
+    title: normalizeActionTitle(row.title, row.category, row.slot),
     description: row.description,
     status: row.status,
     satisfaction: row.satisfaction,
@@ -218,7 +219,17 @@ function readStoredDayFromLocalStorage(date: string): StoredDay {
   }
 
   try {
-    return JSON.parse(raw) as StoredDay;
+    const storedDay = JSON.parse(raw) as StoredDay;
+
+    return {
+      ...storedDay,
+      actions: Array.isArray(storedDay.actions)
+        ? storedDay.actions.map((action) => ({
+            ...action,
+            title: normalizeActionTitle(action.title, action.category, action.slot),
+          }))
+        : [],
+    };
   } catch {
     return createDefaultStoredDay(date);
   }

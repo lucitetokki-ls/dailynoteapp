@@ -70,7 +70,7 @@ export function SearchPanel() {
             <input
               className="h-full min-w-0 flex-1 bg-transparent text-lg text-zinc-950 outline-none placeholder:text-zinc-400"
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="식단, 운동, 작문, 회고"
+              placeholder="식단, 운동, 작문, 정리, 관계, 회고"
               value={query}
             />
           </div>
@@ -157,7 +157,7 @@ type FilterGroupProps = {
 
 function FilterGroup({ activeValue, items, onChange }: FilterGroupProps) {
   return (
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
       {items.map((item) => (
         <button
           className={cn(

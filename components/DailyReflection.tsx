@@ -156,6 +156,7 @@ export function DailyReflection({ dailyLog, onUpdateLog }: DailyReflectionProps)
         <textarea
           aria-label="오늘 회고 입력"
           className="survey-control min-h-48 flex-1 w-full resize-y rounded-md border border-zinc-200 bg-zinc-50 px-3.5 py-3 text-base leading-7 text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white sm:min-h-72 sm:px-4 sm:text-lg sm:leading-8"
+          maxLength={20000}
           onBlur={handleReflectionBlur}
           onChange={(event) => handleReflectionChange(event.target.value)}
           placeholder="오늘의 행동에서 배운 점, 이어갈 점, 고칠 점"

@@ -16,12 +16,15 @@ import { cn, formatDisplayDate } from "@/lib/utils";
 import { dailyActionSlots, slotMeta, type DailyActionSlot } from "@/types/daily-action";
 
 const totalWindowDays = 7;
+const slotCount = dailyActionSlots.length;
 const totalSlots = totalWindowDays * dailyActionSlots.length;
 const slotShortLabels: Record<DailyActionSlot, string> = {
   diet: "식단",
   fitness: "운동",
-  vibe_coding: "Coding",
+  vibe_coding: "코딩",
   writing: "작문",
+  organization: "정리",
+  relationships: "관계",
 };
 
 function getActionTitle(day: ReturnType<typeof useRecentStoredDays>[number], slot: DailyActionSlot) {
@@ -105,10 +108,10 @@ export function ReviewDashboard() {
                     {formatDisplayDate(day.dailyLog.date)}
                   </p>
                   <span className="survey-chip rounded-md border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-sm font-semibold text-zinc-700">
-                    {filledCount}/4
+                    {filledCount}/{slotCount}
                   </span>
                 </div>
-                <div className="review-mobile-slot-grid grid grid-cols-4 gap-2">
+                <div className="review-mobile-slot-grid grid grid-cols-3 gap-2">
                   {dailyActionSlots.map((slot) => (
                     <ActionDialogTrigger
                       action={getActionForSlot(day.actions, slot)}
@@ -142,7 +145,7 @@ export function ReviewDashboard() {
           </span>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {dailyActionSlots.map((slot) => {
             const filledCount = days.filter((day) => getSlotFillMap(day.actions)[slot]).length;
             const rate = Math.round((filledCount / totalWindowDays) * 100);
@@ -194,7 +197,9 @@ export function ReviewDashboard() {
                     {formatDisplayDate(day.dailyLog.date)}
                   </p>
                   <p className="mt-1 text-base text-zinc-500">
-                    {filledCount === 4 ? "모든 슬롯 기록" : `${filledCount}/4 슬롯 기록`}
+                    {filledCount === slotCount
+                      ? "모든 슬롯 기록"
+                      : `${filledCount}/${slotCount} 슬롯 기록`}
                   </p>
                 </div>
 
@@ -220,7 +225,7 @@ export function ReviewDashboard() {
 
                 <div className="flex items-center justify-start lg:justify-end">
                   <span className="survey-chip rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-lg font-semibold text-zinc-700">
-                    {filledCount}/4
+                    {filledCount}/{slotCount}
                   </span>
                 </div>
               </article>

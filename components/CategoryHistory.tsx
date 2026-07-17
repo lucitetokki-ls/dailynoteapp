@@ -66,7 +66,7 @@ export function CategoryHistory() {
         </div>
       </header>
 
-      <div className="category-tabs grid grid-cols-3 gap-2.5">
+      <div className="category-tabs grid grid-cols-2 gap-2.5 sm:grid-cols-5">
         {actionCategories.map((category) => (
           <button
             className={cn(
