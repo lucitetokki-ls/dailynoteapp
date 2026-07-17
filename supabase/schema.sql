@@ -39,6 +39,7 @@ create table if not exists weekly_reflections (
 create table if not exists daily_writings (
   id uuid primary key default gen_random_uuid(),
   date date not null unique,
+  title text not null default '',
   content text not null default '',
   content_markdown text not null default '',
   content_json jsonb,
@@ -91,10 +92,12 @@ check (
   and char_length(next_focus) <= 20000
 );
 
+alter table daily_writings add column if not exists title text not null default '';
 alter table daily_writings drop constraint if exists daily_writings_content_length_check;
 alter table daily_writings add constraint daily_writings_content_length_check
 check (
-  char_length(content) <= 1000000
+  char_length(title) <= 120
+  and char_length(content) <= 1000000
   and char_length(content_markdown) <= 1000000
   and (content_json is null or pg_column_size(content_json) <= 2000000)
 );

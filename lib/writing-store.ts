@@ -38,6 +38,7 @@ const defaultWritingSyncStatus: WritingSyncStatus = {
 type WritingEntryRow = {
   id: string;
   date: string;
+  title?: string | null;
   content: string;
   content_json?: JSONContent | null;
   content_markdown?: string | null;
@@ -46,6 +47,7 @@ type WritingEntryRow = {
 };
 
 export type WritingEntryDraft = {
+  title?: string;
   content: string;
   contentJson?: JSONContent | null;
   contentMarkdown?: string;
@@ -63,8 +65,14 @@ function selectWritingContent(preferred: string | null | undefined, fallback: st
   return preferred?.trim() ? preferred : fallback ?? preferred ?? "";
 }
 
-function hasWritingContent(entry: Pick<WritingEntry, "content" | "contentMarkdown" | "contentJson">) {
-  return Boolean(entry.contentJson) || getWritingContent(entry).trim().length > 0;
+function hasWritingContent(
+  entry: Pick<WritingEntry, "title" | "content" | "contentMarkdown" | "contentJson">,
+) {
+  return (
+    entry.title.trim().length > 0 ||
+    Boolean(entry.contentJson) ||
+    getWritingContent(entry).trim().length > 0
+  );
 }
 
 function normalizeWritingEntry(
@@ -77,6 +85,7 @@ function normalizeWritingEntry(
   return {
     id: entry?.id ?? fallback.id,
     date: entry?.date ?? fallback.date,
+    title: typeof entry?.title === "string" ? entry.title.slice(0, 120) : fallback.title,
     content: contentMarkdown,
     contentJson: isJsonContent(entry?.contentJson) ? entry.contentJson : null,
     contentMarkdown,
@@ -116,6 +125,7 @@ function mapWritingEntryRow(row: WritingEntryRow): WritingEntry {
   return {
     id: row.id,
     date: row.date,
+    title: row.title?.slice(0, 120) ?? "",
     content: contentMarkdown,
     contentJson: isJsonContent(row.content_json) ? row.content_json : null,
     contentMarkdown,
@@ -130,6 +140,7 @@ function mapWritingEntryToRow(entry: WritingEntry) {
   return {
     id: entry.id,
     date: entry.date,
+    title: entry.title,
     content: contentMarkdown,
     content_json: entry.contentJson ?? null,
     content_markdown: contentMarkdown,
@@ -144,6 +155,7 @@ function createDefaultWritingEntry(date: string): WritingEntry {
   return {
     id: createStableUuid(`daily-writing:${date}`),
     date,
+    title: "",
     content: "",
     contentJson: null,
     contentMarkdown: "",
@@ -322,6 +334,7 @@ export function writeWritingEntry(date: string, nextContent: string | WritingEnt
   const draft =
     typeof nextContent === "string"
       ? {
+          title: currentEntry.title,
           content: nextContent,
           contentJson: null,
           contentMarkdown: nextContent,
@@ -330,6 +343,7 @@ export function writeWritingEntry(date: string, nextContent: string | WritingEnt
   const contentMarkdown = draft.contentMarkdown ?? draft.content;
   const nextEntry: WritingEntry = {
     ...currentEntry,
+    title: (draft.title ?? currentEntry.title).slice(0, 120),
     content: contentMarkdown,
     contentJson: draft.contentJson ?? null,
     contentMarkdown,

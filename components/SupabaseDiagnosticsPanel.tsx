@@ -151,6 +151,7 @@ export function SupabaseDiagnosticsPanel() {
       const { error: writingError } = await client.from("daily_writings").insert({
         id: writingProbeId,
         date: probeDate,
+        title: "diagnostic probe",
         content: "diagnostic probe",
         content_markdown: "diagnostic probe",
         content_json: {

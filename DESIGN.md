@@ -147,6 +147,8 @@ Mobile:
 - A dedicated long-form writing area.
 - It is intentionally separate from Today's study action slot.
 - The editor should feel spacious and quiet compared with the dashboard.
+- Titles are first-class writing metadata and should sit directly above the editor.
+- Recent writing stays compact: show title rows, then reveal full rich text in a focused dialog.
 
 ### Review And Calendar
 

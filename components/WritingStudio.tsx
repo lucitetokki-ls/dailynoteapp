@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight, Save } from "lucide-react";
 
 import {
@@ -12,22 +12,26 @@ import {
 import { EmptyState } from "@/components/EmptyState";
 import {
   RichWritingEditor,
-  RichWritingPreview,
   type RichWritingChange,
 } from "@/components/RichWritingEditor";
+import { WritingEntryDialog } from "@/components/WritingEntryDialog";
 import {
   readWritingEntry,
   useWritingEntries,
   useWritingEntry,
   useWritingSyncStatus,
   writeWritingEntry,
+  type WritingEntryDraft,
 } from "@/lib/writing-store";
 import type { WritingEntry } from "@/types/writing-entry";
 
-function createDraftFromEntry(entry: WritingEntry): RichWritingChange {
+type WritingStudioDraft = RichWritingChange & Required<Pick<WritingEntryDraft, "title">>;
+
+function createDraftFromEntry(entry: WritingEntry): WritingStudioDraft {
   const contentMarkdown = getEntryContent(entry);
 
   return {
+    title: entry.title,
     content: contentMarkdown,
     contentJson: entry.contentJson ?? null,
     contentMarkdown,
@@ -39,7 +43,11 @@ function getEntryContent(entry: WritingEntry) {
 }
 
 function hasEntryContent(entry: WritingEntry) {
-  return Boolean(entry.contentJson) || getEntryContent(entry).trim().length > 0;
+  return (
+    entry.title.trim().length > 0 ||
+    Boolean(entry.contentJson) ||
+    getEntryContent(entry).trim().length > 0
+  );
 }
 
 export function WritingStudio() {
@@ -49,9 +57,10 @@ export function WritingStudio() {
   const writingEntries = useWritingEntries();
   const syncStatus = useWritingSyncStatus(selectedDate);
   const saveTimerRef = useRef<number | null>(null);
-  const pendingSaveRef = useRef<{ date: string; draft: RichWritingChange } | null>(null);
+  const pendingSaveRef = useRef<{ date: string; draft: WritingStudioDraft } | null>(null);
   const writingEntryRef = useRef(writingEntry);
   const [draft, setDraft] = useState(() => createDraftFromEntry(writingEntry));
+  const [previewEntry, setPreviewEntry] = useState<WritingEntry | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const isToday = selectedDate === todayDate;
   const writingSourceKey = `${selectedDate}:${writingEntry.updatedAt}`;
@@ -126,7 +135,7 @@ export function WritingStudio() {
     setHasUnsavedChanges(false);
   }
 
-  function scheduleWritingSave(nextDraft: RichWritingChange) {
+  function scheduleWritingSave(nextDraft: WritingStudioDraft) {
     setDraft(nextDraft);
     setHasUnsavedChanges(true);
     pendingSaveRef.current = {
@@ -151,6 +160,20 @@ export function WritingStudio() {
     }, 1100);
   }
 
+  function scheduleTitleSave(title: string) {
+    scheduleWritingSave({
+      ...draft,
+      title,
+    });
+  }
+
+  function scheduleContentSave(nextContent: RichWritingChange) {
+    scheduleWritingSave({
+      ...nextContent,
+      title: draft.title,
+    });
+  }
+
   function selectDate(nextDate: string) {
     flushPendingWriting();
     setDraft(createDraftFromEntry(readWritingEntry(nextDate)));
@@ -161,6 +184,8 @@ export function WritingStudio() {
   function shiftSelectedDate(amount: number) {
     selectDate(addDaysToDateKey(selectedDate, amount));
   }
+
+  const closePreview = useCallback(() => setPreviewEntry(null), []);
 
   return (
     <div className="writing-studio grid gap-5 pb-9 sm:gap-6 sm:pb-12">
@@ -250,13 +275,27 @@ export function WritingStudio() {
           <span>Rich</span>
         </div>
 
+        <label className="writing-title-field grid gap-2" htmlFor="writing-title">
+          <span className="survey-kicker">제목</span>
+          <input
+            className="survey-control writing-title-input min-h-12 w-full border border-zinc-200 bg-white px-3.5 text-xl font-semibold text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-zinc-500 sm:min-h-14 sm:px-4 sm:text-2xl"
+            id="writing-title"
+            maxLength={120}
+            onBlur={flushPendingWriting}
+            onChange={(event) => scheduleTitleSave(event.currentTarget.value)}
+            placeholder="작문 제목을 입력하세요"
+            type="text"
+            value={draft.title}
+          />
+        </label>
+
         <RichWritingEditor
           ariaLabel={`${formatDisplayDate(selectedDate)} 리치 작문 입력`}
           contentJson={draft.contentJson}
           fallbackMarkdown={draft.contentMarkdown || draft.content}
           key={selectedDate}
-          onBlur={() => saveWriting()}
-          onChange={scheduleWritingSave}
+          onBlur={flushPendingWriting}
+          onChange={scheduleContentSave}
           sourceKey={writingSourceKey}
         />
       </section>
@@ -270,25 +309,17 @@ export function WritingStudio() {
         </div>
 
         {recentEntries.length > 0 ? (
-          <div className="grid gap-3">
+          <div className="writing-recent-list divide-y divide-zinc-200 border border-zinc-200 bg-white">
             {recentEntries.map((entry) => (
-              <article
-                className="survey-card survey-list-row grid gap-3 rounded-lg border border-zinc-200 bg-white p-4 shadow-sm sm:grid-cols-[180px_minmax(0,1fr)] sm:p-5"
+              <button
+                aria-label={`${entry.title.trim() || "제목 없는 작문"} 전체 글 보기`}
+                className="writing-recent-title survey-control flex min-h-14 w-full items-center px-4 py-3 text-left text-base font-semibold text-zinc-900 transition hover:bg-zinc-50 focus-visible:bg-zinc-50 sm:min-h-16 sm:px-5 sm:text-lg"
                 key={entry.id}
+                onClick={() => setPreviewEntry(entry)}
+                type="button"
               >
-                <button
-                  className="survey-chip w-fit rounded-md border border-zinc-200 bg-white px-3 py-2 text-left text-base font-semibold text-zinc-700 transition hover:bg-zinc-50"
-                  onClick={() => selectDate(entry.date)}
-                  type="button"
-                >
-                  {formatDisplayDate(entry.date)}
-                </button>
-                <RichWritingPreview
-                  compact
-                  contentJson={entry.contentJson}
-                  fallbackMarkdown={getEntryContent(entry)}
-                />
-              </article>
+                {entry.title.trim() || "제목 없는 작문"}
+              </button>
             ))}
           </div>
         ) : (
@@ -298,6 +329,8 @@ export function WritingStudio() {
           />
         )}
       </section>
+
+      <WritingEntryDialog entry={previewEntry} onClose={closePreview} />
     </div>
   );
 }

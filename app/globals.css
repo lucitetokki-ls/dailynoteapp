@@ -752,6 +752,33 @@ body::before {
   line-height: 1 !important;
 }
 
+.today-stat-card {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  min-height: 4.75rem;
+  padding: 0.75rem 1rem !important;
+}
+
+.today-stat-card p {
+  flex: 0 0 auto;
+  inline-size: auto !important;
+  margin-top: 0 !important;
+  width: auto !important;
+}
+
+.today-stat-card > div {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.today-hero .today-stat-card.survey-stat > p:not(.survey-kicker) {
+  flex: 0 0 auto !important;
+  font-size: 2rem !important;
+  inline-size: auto !important;
+  width: auto !important;
+}
+
 .survey-control {
   background: transparent !important;
   border: 1px solid var(--line-soft) !important;
@@ -959,6 +986,32 @@ input:focus {
 .writing-stat-strip span:last-child {
   background: var(--acid);
   color: var(--line);
+}
+
+.writing-title-field .survey-kicker {
+  justify-self: start;
+}
+
+.writing-title-input {
+  border-color: var(--line) !important;
+  font-family: var(--display-font);
+}
+
+.writing-recent-list {
+  border-color: var(--line) !important;
+}
+
+.writing-recent-title {
+  border: 0 !important;
+  border-radius: 0 !important;
+  color: var(--line) !important;
+  font-family: var(--display-font);
+}
+
+.writing-entry-dialog .rich-preview,
+.writing-entry-dialog .rich-preview-empty {
+  margin-inline: auto;
+  max-width: 70ch;
 }
 
 .rich-editor-panel {
@@ -2599,14 +2652,15 @@ input:focus {
 
   .today-stat-card,
   .today-stat-card:nth-child(3) {
+    aspect-ratio: auto !important;
     grid-column: auto !important;
-    min-height: 4.4rem !important;
-    padding: 0.65rem 0.7rem !important;
+    min-height: 3.65rem !important;
+    padding: 0.45rem 0.6rem !important;
   }
 
-  .today-stat-card p {
-    font-size: 1.45rem !important;
-    margin-top: 0.25rem !important;
+  .today-hero .today-stat-card.survey-stat > p:not(.survey-kicker) {
+    font-size: 1.3rem !important;
+    margin-top: 0.15rem !important;
   }
 
   .mobile-sync-row > p {
@@ -2623,12 +2677,17 @@ input:focus {
   }
 
   .daily-slots-heading {
-    align-items: end;
+    align-items: center;
     padding-top: 0.25rem;
   }
 
+  .daily-slots-title-row {
+    gap: 0.55rem;
+    white-space: nowrap;
+  }
+
   .daily-slots-heading h2 {
-    font-size: 1.5rem !important;
+    font-size: 1.2rem !important;
   }
 
   .daily-slots-hint {

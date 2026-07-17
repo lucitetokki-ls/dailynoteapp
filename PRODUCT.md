@@ -98,8 +98,10 @@ The long-form writing workspace.
 Purpose:
 
 - Save one long-form writing entry per day.
+- Give each writing entry a short title.
 - Keep the writing area clean and spacious.
 - Avoid unnecessary tools or distractions.
+- Show recent entries as titles first and reveal the full text on demand.
 
 Writing entries are intentionally separate from Today's study action slot.
 
