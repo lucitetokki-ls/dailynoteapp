@@ -34,15 +34,26 @@ export type DailyAction = {
 };
 
 const legacyCodingLabels = new Set(["coding", "vibe coding"]);
+const legacyStudyLabels = new Set(["writing", "작문"]);
 
 export function normalizeActionTitle(
   title: string,
   category: ActionCategory,
   slot?: DailyActionSlot | null,
 ) {
+  const normalizedTitle = title.trim().toLowerCase();
   const isCodingAction = slot === "vibe_coding" || category === "vibe_coding";
+  const isStudyAction = slot === "writing" || category === "writing";
 
-  return isCodingAction && legacyCodingLabels.has(title.trim().toLowerCase()) ? "코딩" : title;
+  if (isCodingAction && legacyCodingLabels.has(normalizedTitle)) {
+    return "코딩";
+  }
+
+  if (isStudyAction && legacyStudyLabels.has(normalizedTitle)) {
+    return "공부";
+  }
+
+  return title;
 }
 
 export const slotMeta: Record<
@@ -77,11 +88,11 @@ export const slotMeta: Record<
     reflectionPlaceholder: "막힌 점, 해결한 점, 다음 시도",
   },
   writing: {
-    label: "작문",
+    label: "공부",
     category: "writing",
-    description: "오늘 쓴 글 또는 문장 한 가지",
-    actionPlaceholder: "오늘 쓴 글이나 문장 한 가지",
-    reflectionPlaceholder: "잘 풀린 점과 다음에 이어 쓸 점",
+    description: "오늘 배운 내용 한 가지",
+    actionPlaceholder: "오늘 공부하거나 배운 한 가지",
+    reflectionPlaceholder: "이해한 점, 막힌 점, 다음에 복습할 점",
   },
   organization: {
     label: "정리",
@@ -121,9 +132,9 @@ export const categoryMeta: Record<
     tone: "sky",
   },
   writing: {
-    label: "작문",
-    shortLabel: "작문",
-    description: "작문, 메모, 글쓰기 루틴",
+    label: "공부",
+    shortLabel: "공부",
+    description: "독서, 강의, 복습과 학습 기록",
     tone: "rose",
   },
   organization: {

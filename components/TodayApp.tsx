@@ -117,9 +117,6 @@ export function TodayApp() {
           <h1 className="survey-title mt-2.5 text-4xl font-semibold leading-tight text-zinc-950 sm:mt-3 sm:text-6xl lg:text-7xl">
             With the door closed
           </h1>
-          <p className="mt-2.5 max-w-4xl text-[0.95rem] leading-7 text-zinc-600 sm:mt-4 sm:text-xl sm:leading-8">
-            어휘를 치장하려 하지 마라. 기억해라, 어휘의 제1법칙은 적절하고 생생하다면 네 마음에 가장 먼저 떠오른 그 단어를 쓰는 것이다
-          </p>
         </div>
 
         <div className="today-stat-grid grid min-w-0 grid-cols-[repeat(3,minmax(0,1fr))] gap-2 sm:gap-3">

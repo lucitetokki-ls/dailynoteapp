@@ -137,7 +137,7 @@ Mobile:
 
 ### Daily Slot Cards
 
-- Six fixed daily slots: 식단, 운동, 코딩, 작문, 정리, 관계.
+- Six fixed daily slots: 식단, 운동, 코딩, 공부, 정리, 관계.
 - The user records only completed actions.
 - No Done / Partial / Skipped controls in Today.
 - Each slot should feel like a designated input field, not an open-ended task list.
@@ -145,7 +145,7 @@ Mobile:
 ### Writing Studio
 
 - A dedicated long-form writing area.
-- It is intentionally separate from Today's short writing summary.
+- It is intentionally separate from Today's study action slot.
 - The editor should feel spacious and quiet compared with the dashboard.
 
 ### Review And Calendar

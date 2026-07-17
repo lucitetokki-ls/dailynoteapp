@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import {
+  BookOpen,
   ChevronDown,
   Dumbbell,
   Handshake,
   ListChecks,
-  PenLine,
   Salad,
   Sparkles,
   Star,
@@ -25,7 +25,7 @@ const slotIcons = {
   diet: Salad,
   fitness: Dumbbell,
   vibe_coding: Sparkles,
-  writing: PenLine,
+  writing: BookOpen,
   organization: ListChecks,
   relationships: Handshake,
 };

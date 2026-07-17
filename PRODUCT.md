@@ -66,18 +66,18 @@ Purpose:
 
 Fixed slots:
 
-- Diet
-- Fitness
+- 식단
+- 운동
 - 코딩
-- Writing summary
-- Organization
-- Relationships
+- 공부
+- 정리
+- 관계
 
 Important distinction:
 
-- Today Writing is a short summary/reflection.
+- Today Study is a short record of learning completed that day.
 - Writing page is long-form composition.
-- These should not be automatically merged.
+- These are separate workflows and should not be automatically merged.
 
 ### Review
 
@@ -101,7 +101,7 @@ Purpose:
 - Keep the writing area clean and spacious.
 - Avoid unnecessary tools or distractions.
 
-Writing entries are intentionally separate from the short Today writing slot.
+Writing entries are intentionally separate from Today's study action slot.
 
 ### Category
 
@@ -170,7 +170,7 @@ Historical compatibility may keep status fields, but the product UI should assum
 
 1. Fast daily input.
 2. Reliable saving.
-3. Clear separation between short daily notes and long writing.
+3. Clear separation between daily action logs and long writing.
 4. Calendar and review surfaces that make history easy to inspect.
 5. Mobile readability and tap comfort.
 6. Search that helps retrieve memory without complex filters.

@@ -70,7 +70,7 @@ export function SearchPanel() {
             <input
               className="h-full min-w-0 flex-1 bg-transparent text-lg text-zinc-950 outline-none placeholder:text-zinc-400"
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="식단, 운동, 작문, 정리, 관계, 회고"
+              placeholder="식단, 운동, 코딩, 공부, 정리, 관계, 회고"
               value={query}
             />
           </div>

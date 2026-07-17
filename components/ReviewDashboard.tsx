@@ -22,7 +22,7 @@ const slotShortLabels: Record<DailyActionSlot, string> = {
   diet: "식단",
   fitness: "운동",
   vibe_coding: "코딩",
-  writing: "작문",
+  writing: "공부",
   organization: "정리",
   relationships: "관계",
 };
