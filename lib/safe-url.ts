@@ -12,10 +12,23 @@ export function getSafeLinkHref(value: unknown) {
     return null;
   }
 
+  if (href.startsWith("//")) {
+    return null;
+  }
+
   try {
     const url = new URL(href, linkBaseUrl);
 
-    return allowedLinkProtocols.has(url.protocol) ? href : null;
+    if (
+      !allowedLinkProtocols.has(url.protocol) ||
+      url.username ||
+      url.password ||
+      ((url.protocol === "http:" || url.protocol === "https:") && !url.hostname)
+    ) {
+      return null;
+    }
+
+    return href;
   } catch {
     return null;
   }

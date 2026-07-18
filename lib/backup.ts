@@ -7,6 +7,7 @@ import {
   actionCategories,
   dailyActionSlots,
   normalizeActionTitle,
+  slotMeta,
   type ActionCategory,
   type ActionStatus,
   type DailyAction,
@@ -184,6 +185,11 @@ function parseAction(value: unknown, path: string, dailyLogId: string): DailyAct
 
   const slot = asSlot(action.slot, `${path}.slot`);
   const category = asCategory(action.category, `${path}.category`);
+
+  if (slot && slotMeta[slot].category !== category) {
+    fail(`${path}.category`);
+  }
+
   const title = asString(action.title, `${path}.title`, maxTextLength.actionTitle, false);
 
   return {

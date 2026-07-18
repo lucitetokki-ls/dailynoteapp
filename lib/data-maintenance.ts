@@ -28,6 +28,7 @@ export function clearAllRemoteData() {
       "daily-upsert",
       "daily-delete-one",
       "daily-delete-all",
+      "templates-sync",
       "writing-upsert",
       "writing-delete-all",
       "weekly-upsert",

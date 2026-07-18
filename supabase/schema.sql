@@ -196,6 +196,7 @@ begin
   delete from public.daily_logs;
   delete from public.weekly_reflections;
   delete from public.daily_writings;
+  delete from public.action_templates;
 end;
 $$;
 
@@ -235,11 +236,8 @@ alter table daily_writings enable row level security;
 alter table action_templates enable row level security;
 
 grant usage on schema public to anon, authenticated;
-revoke all on daily_logs from anon;
-revoke all on daily_actions from anon;
-revoke all on weekly_reflections from anon;
-revoke all on daily_writings from anon;
-revoke all on action_templates from anon;
+revoke all on daily_logs, daily_actions, weekly_reflections, daily_writings, action_templates
+from public, anon;
 grant select, insert, update, delete on daily_logs to authenticated;
 grant select, insert, update, delete on daily_actions to authenticated;
 grant select, insert, update, delete on weekly_reflections to authenticated;

@@ -3,9 +3,10 @@
 import { retrySupabaseMutation, supabase, type SupabaseMutationResult } from "@/lib/supabase";
 import { enqueueSyncOperation, registerSyncHandler } from "@/lib/sync-engine";
 import type { ActionTemplate } from "@/types/action-template";
-import type { ActionCategory } from "@/types/daily-action";
+import { actionCategories, type ActionCategory } from "@/types/daily-action";
 
 const templateStorageKey = "daily-note:action-templates";
+const categorySet = new Set<string>(actionCategories);
 
 const defaultActionTemplates: ActionTemplate[] = [
   {
@@ -58,21 +59,66 @@ function mapTemplateToRow(template: ActionTemplate): ActionTemplateRow {
   };
 }
 
+function getDefaultActionTemplates() {
+  return defaultActionTemplates.map((template) => ({ ...template }));
+}
+
+function isActionTemplate(value: unknown): value is ActionTemplate {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return false;
+  }
+
+  const template = value as Partial<ActionTemplate>;
+  return (
+    typeof template.id === "string" &&
+    template.id.length >= 1 &&
+    template.id.length <= 128 &&
+    typeof template.category === "string" &&
+    categorySet.has(template.category) &&
+    typeof template.title === "string" &&
+    template.title.trim().length > 0 &&
+    template.title.length <= 120 &&
+    typeof template.description === "string" &&
+    template.description.length <= 2000
+  );
+}
+
+function parseActionTemplates(value: unknown) {
+  if (!Array.isArray(value)) {
+    return getDefaultActionTemplates();
+  }
+
+  const templates = value.filter(isActionTemplate);
+  const uniqueTemplates = templates.filter(
+    (template, index) => templates.findIndex((candidate) => candidate.id === template.id) === index,
+  );
+
+  return uniqueTemplates.length > 0 || value.length === 0
+    ? uniqueTemplates
+    : getDefaultActionTemplates();
+}
+
 export function readActionTemplates() {
   if (!canReadBrowserTemplateStore()) {
-    return defaultActionTemplates;
+    return getDefaultActionTemplates();
   }
 
   const raw = window.localStorage.getItem(templateStorageKey);
 
   if (!raw) {
-    return defaultActionTemplates;
+    return getDefaultActionTemplates();
   }
 
   try {
-    return JSON.parse(raw) as ActionTemplate[];
+    return parseActionTemplates(JSON.parse(raw) as unknown);
   } catch {
-    return defaultActionTemplates;
+    return getDefaultActionTemplates();
+  }
+}
+
+export function clearLocalActionTemplates() {
+  if (typeof window !== "undefined") {
+    window.localStorage.removeItem(templateStorageKey);
   }
 }
 

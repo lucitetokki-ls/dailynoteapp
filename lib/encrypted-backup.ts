@@ -1,6 +1,13 @@
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 const iterations = 310_000;
+const minimumIterations = 100_000;
+const maximumIterations = 1_000_000;
+const saltBytes = 16;
+const ivBytes = 12;
+const authenticationTagBytes = 16;
+const maximumCiphertextBytes = 5 * 1024 * 1024;
+const base64Pattern = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
 
 export type EncryptedDailyNoteBackup = {
   app: "daily-note-app-encrypted";
@@ -26,6 +33,34 @@ function bytesToBase64(bytes: Uint8Array) {
 function base64ToBytes(value: string) {
   const binary = atob(value);
   return Uint8Array.from(binary, (character) => character.charCodeAt(0));
+}
+
+function isSupportedIterationCount(value: unknown): value is number {
+  return (
+    typeof value === "number" &&
+    Number.isInteger(value) &&
+    value >= minimumIterations &&
+    value <= maximumIterations
+  );
+}
+
+function getBase64ByteLength(value: string) {
+  const padding = value.endsWith("==") ? 2 : value.endsWith("=") ? 1 : 0;
+  return (value.length * 3) / 4 - padding;
+}
+
+function isBase64WithByteLength(value: unknown, minimum: number, maximum: number) {
+  if (
+    typeof value !== "string" ||
+    value.length === 0 ||
+    value.length % 4 !== 0 ||
+    !base64Pattern.test(value)
+  ) {
+    return false;
+  }
+
+  const byteLength = getBase64ByteLength(value);
+  return byteLength >= minimum && byteLength <= maximum;
 }
 
 async function deriveKey(passphrase: string, salt: Uint8Array, rounds: number) {
@@ -56,10 +91,14 @@ export function isEncryptedDailyNoteBackup(value: unknown): value is EncryptedDa
     candidate.app === "daily-note-app-encrypted" &&
     candidate.version === 1 &&
     candidate.algorithm === "AES-GCM" &&
-    Number.isInteger(candidate.iterations) &&
-    typeof candidate.salt === "string" &&
-    typeof candidate.iv === "string" &&
-    typeof candidate.ciphertext === "string"
+    isSupportedIterationCount(candidate.iterations) &&
+    isBase64WithByteLength(candidate.salt, saltBytes, saltBytes) &&
+    isBase64WithByteLength(candidate.iv, ivBytes, ivBytes) &&
+    isBase64WithByteLength(
+      candidate.ciphertext,
+      authenticationTagBytes,
+      maximumCiphertextBytes,
+    )
   );
 }
 
@@ -92,6 +131,10 @@ export async function decryptDailyNoteBackup(
   value: EncryptedDailyNoteBackup,
   passphrase: string,
 ) {
+  if (!isEncryptedDailyNoteBackup(value)) {
+    throw new Error("Invalid encrypted backup format.");
+  }
+
   if (!passphrase) {
     throw new Error("A passphrase is required for this backup.");
   }

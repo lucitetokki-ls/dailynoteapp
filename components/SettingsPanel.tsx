@@ -24,7 +24,11 @@ import {
   isEncryptedDailyNoteBackup,
 } from "@/lib/encrypted-backup";
 import { supabase } from "@/lib/supabase";
-import { readActionTemplates, writeActionTemplates } from "@/lib/template-store";
+import {
+  clearLocalActionTemplates,
+  readActionTemplates,
+  writeActionTemplates,
+} from "@/lib/template-store";
 import { getTodayDateKey } from "@/lib/utils";
 import {
   clearAllWeeklyReflections,
@@ -123,6 +127,7 @@ export function SettingsPanel() {
           clearAllStoredDays({ syncRemote: false }),
           clearAllWritingEntries({ syncRemote: false }),
           clearAllWeeklyReflections({ syncRemote: false }),
+          clearLocalActionTemplates(),
         ]);
         setFeedback({
           tone: "success",
@@ -241,16 +246,18 @@ export function SettingsPanel() {
   }
 
   return (
-    <div className="grid gap-8 pb-12">
-      <header className="survey-hero">
-        <p className="survey-kicker">설정</p>
-        <h1 className="survey-title mt-3 max-w-5xl text-5xl font-semibold leading-tight text-zinc-950 sm:text-6xl">
-          저장과 데이터 관리
-        </h1>
-        <p className="mt-4 max-w-4xl text-lg leading-8 text-zinc-600">
-          여섯 개의 고정 기록 슬롯, Supabase 동기화, 백업과 삭제 작업을 관리합니다.
-        </p>
-      </header>
+      <div className="grid gap-8 pb-12">
+        <header className="survey-hero">
+          <div className="max-w-5xl text-left">
+            <p className="survey-kicker">설정</p>
+            <h1 className="survey-title mt-3 text-5xl font-semibold leading-tight text-zinc-950 sm:text-6xl">
+              저장과 데이터 관리
+            </h1>
+            <p className="mt-4 max-w-4xl text-lg leading-8 text-zinc-600">
+              여섯 개의 고정 기록 슬롯, Supabase 동기화, 백업과 삭제 작업을 관리합니다.
+            </p>
+          </div>
+        </header>
 
       <SupabaseStatusCard />
       <SupabaseDiagnosticsPanel />

@@ -51,16 +51,18 @@ export function SearchPanel() {
   }, [category, days, query]);
 
   return (
-    <div className="search-panel grid gap-8 pb-12">
-      <header className="survey-hero">
-        <p className="survey-kicker">기록 검색</p>
-        <h1 className="survey-title mt-3 max-w-5xl text-5xl font-semibold leading-tight text-zinc-950 sm:text-6xl">
-          행동 기록 검색
-        </h1>
-        <p className="mt-4 max-w-4xl text-lg leading-8 text-zinc-600">
-          행동 내용, 짧은 회고, 오늘 회고를 한 번에 찾아봅니다.
-        </p>
-      </header>
+      <div className="search-panel grid gap-8 pb-12">
+        <header className="survey-hero">
+          <div className="max-w-5xl text-left">
+            <p className="survey-kicker">기록 검색</p>
+            <h1 className="survey-title mt-3 text-5xl font-semibold leading-tight text-zinc-950 sm:text-6xl">
+              행동 기록 검색
+            </h1>
+            <p className="mt-4 max-w-4xl text-lg leading-8 text-zinc-600">
+              행동 내용, 짧은 회고, 오늘 회고를 한 번에 찾아봅니다.
+            </p>
+          </div>
+        </header>
 
       <section className="survey-card rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
         <label className="grid gap-2 text-base font-semibold text-zinc-700">

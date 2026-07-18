@@ -41,4 +41,37 @@ describe("backup parser", () => {
 
     expect(() => parseDailyNoteBackup(backup)).toThrow("writingEntries.date");
   });
+
+  it("rejects an action whose slot and category do not match", () => {
+    const backup = createBackup();
+    backup.days = [
+      {
+        dailyLog: {
+          id: "01800000-0000-7000-8000-000000000010",
+          date: "2026-07-18",
+          dailyMood: "steady",
+          dailyReflection: "",
+          createdAt: timestamp,
+          updatedAt: timestamp,
+        },
+        actions: [
+          {
+            id: "01800000-0000-7000-8000-000000000011",
+            dailyLogId: "01800000-0000-7000-8000-000000000010",
+            slot: "diet",
+            category: "writing",
+            title: "잘못된 카테고리",
+            description: "",
+            status: "done",
+            satisfaction: 3,
+            reflection: "",
+            createdAt: timestamp,
+            updatedAt: timestamp,
+          },
+        ],
+      },
+    ];
+
+    expect(() => parseDailyNoteBackup(backup)).toThrow("days[0].actions[0].category");
+  });
 });
