@@ -191,7 +191,7 @@ export function WritingStudio() {
     <div className="writing-studio grid gap-5 pb-9 sm:gap-6 sm:pb-12">
       <section className="survey-hero grid gap-4">
         <div className="text-left">
-          <p className="survey-kicker">Writing</p>
+          <p className="survey-kicker">작문</p>
           <h1 className="survey-title mt-2.5 text-4xl font-semibold leading-tight text-zinc-950 sm:mt-3 sm:text-6xl">
             1일 1작문
           </h1>
@@ -205,6 +205,7 @@ export function WritingStudio() {
         <div className="writing-toolbar flex min-w-0 flex-wrap items-center justify-between gap-3">
           <div className="flex min-w-0 flex-wrap items-center gap-2">
             <button
+              aria-label="이전 날짜"
               className="survey-control flex h-10 w-10 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950 sm:h-11 sm:w-11"
               onClick={() => shiftSelectedDate(-1)}
               title="이전 날짜"
@@ -217,6 +218,7 @@ export function WritingStudio() {
               {formatDisplayDate(selectedDate)}
             </div>
             <button
+              aria-label="다음 날짜"
               className="survey-control flex h-10 w-10 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950 disabled:cursor-not-allowed disabled:opacity-40 sm:h-11 sm:w-11"
               disabled={isToday}
               onClick={() => shiftSelectedDate(1)}
@@ -238,6 +240,7 @@ export function WritingStudio() {
 
           <div className="writing-save-cluster flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto">
             <span
+              aria-live="polite"
               className={cn(
                 "sync-status-pill rounded-md border px-2.5 py-1.5 text-xs font-semibold sm:px-3 sm:text-sm",
                 hasUnsavedChanges && "border-amber-200 bg-amber-50 text-amber-700",
@@ -268,11 +271,11 @@ export function WritingStudio() {
           </div>
         </div>
 
-        <div className="writing-stat-strip" aria-label="Writing statistics">
-          <span>{writingStats.characters} chars</span>
-          <span>{writingStats.words} words</span>
-          <span>{writingStats.lines} lines</span>
-          <span>Rich</span>
+        <div className="writing-stat-strip" aria-label="작문 통계">
+          <span className="tabular-nums">{writingStats.characters}자</span>
+          <span className="tabular-nums">{writingStats.words}단어</span>
+          <span className="tabular-nums">{writingStats.lines}줄</span>
+          <span>서식 편집</span>
         </div>
 
         <label className="writing-title-field grid gap-2" htmlFor="writing-title">

@@ -141,7 +141,7 @@ export function ActionDialogTrigger({
           >
             <div className="dialog-header flex items-start justify-between gap-4 border-b-2 border-zinc-900/80 bg-white px-4 py-3 sm:px-5">
               <div className="min-w-0">
-                <p className="survey-kicker">{isEditing ? "Edit Log" : "Full Text"}</p>
+                <p className="survey-kicker">{isEditing ? "기록 수정" : "전체 글"}</p>
                 <h2
                   className="mt-1 truncate text-xl font-semibold text-zinc-950 sm:text-2xl"
                   id={titleId}
@@ -263,7 +263,7 @@ export function ActionDialogTrigger({
                     {[1, 2, 3, 4, 5].map((score) => (
                       <button
                         aria-label={`만족도 ${score}`}
-                        aria-pressed={score <= draftSatisfaction}
+                        aria-pressed={score === draftSatisfaction}
                         className={cn(
                           "flex h-9 w-9 items-center justify-center rounded-md border transition",
                           score <= draftSatisfaction

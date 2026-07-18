@@ -46,7 +46,7 @@ export function SettingsGate({ children }: SettingsGateProps) {
   return (
     <div className="settings-gate">
       <header className="settings-gate-hero survey-hero">
-        <p className="survey-kicker">Settings</p>
+        <p className="survey-kicker">설정</p>
         <h1 className="survey-title mt-3">Access Control</h1>
         <p className="mt-4">설정 페이지는 암호 확인 후 진입합니다.</p>
       </header>
@@ -55,7 +55,7 @@ export function SettingsGate({ children }: SettingsGateProps) {
         <div className="settings-gate-icon">
           <LockKeyhole aria-hidden="true" size={24} />
         </div>
-        <p className="survey-kicker mt-5">Settings Locked</p>
+        <p className="survey-kicker mt-5">설정 잠김</p>
         <h1 className="mt-3 text-3xl font-semibold text-zinc-950 sm:text-4xl">
           설정 접근 제한
         </h1>

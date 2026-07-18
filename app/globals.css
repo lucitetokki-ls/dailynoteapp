@@ -548,16 +548,6 @@ body::before {
   stroke-width: 2.25;
 }
 
-.route-status {
-  background: var(--line);
-  color: var(--panel);
-  display: none;
-  font-size: 0.52rem;
-  grid-column: 1 / -1;
-  line-height: 1;
-  padding: 0.35rem 0.55rem;
-}
-
 .mobile-nav-link::before {
   display: none;
 }
@@ -575,10 +565,6 @@ body::before {
 
 .mobile-nav-link[data-active="true"] .route-code {
   color: var(--line);
-}
-
-.mobile-nav-link[data-active="true"] .route-status {
-  display: block;
 }
 
 .mobile-nav-link svg {
@@ -654,7 +640,7 @@ body::before {
   gap: 1rem;
   margin: 0;
   min-width: 0;
-  padding: 0 0 1.35rem !important;
+  padding: 0 0 1.05rem !important;
 }
 
 .survey-hero::before {
@@ -670,12 +656,17 @@ body::before {
 .survey-hero:not(.today-hero) .survey-title {
   color: var(--line) !important;
   font-family: var(--display-font);
-  font-size: clamp(2.5rem, 5vw, 4.5rem) !important;
+  font-size: 3rem !important;
   font-weight: 900 !important;
-  letter-spacing: -0.06em !important;
-  line-height: 0.95 !important;
+  letter-spacing: -0.045em !important;
+  line-height: 1.02 !important;
   overflow-wrap: anywhere;
-  text-transform: uppercase;
+  text-transform: none;
+  text-wrap: balance;
+}
+
+.today-hero .survey-title {
+  font-size: 3.5rem !important;
 }
 
 .survey-hero:not(.today-hero) p:not(.survey-kicker),
@@ -690,7 +681,8 @@ body::before {
   max-width: min(64rem, 100%);
   min-width: 0;
   overflow-wrap: anywhere;
-  text-transform: uppercase;
+  text-transform: none;
+  text-wrap: pretty;
   word-break: normal;
 }
 
@@ -698,10 +690,11 @@ body::before {
   background: var(--line);
   color: #f1f1ed !important;
   display: inline-flex;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 600;
   line-height: 1;
-  padding: 0.5rem 0.65rem;
+  padding: 0.42rem 0.58rem;
+  text-transform: none;
   width: fit-content;
 }
 
@@ -779,10 +772,25 @@ body::before {
   width: auto !important;
 }
 
+.survey-control,
+.mobile-nav-link,
+.satisfaction-button {
+  transition-duration: var(--motion-ui, 180ms) !important;
+  transition-property: background-color, border-color, color, opacity, transform !important;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+
 .survey-control {
   background: transparent !important;
   border: 1px solid var(--line-soft) !important;
   box-shadow: none !important;
+}
+
+.survey-stat p,
+.writing-stat-strip,
+.review-density-badge,
+.calendar-detail-stats {
+  font-variant-numeric: tabular-nums;
 }
 
 textarea.survey-control,

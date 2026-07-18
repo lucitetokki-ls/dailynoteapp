@@ -44,7 +44,7 @@ export function MonthlyCalendar() {
     <div className="grid gap-8 pb-12">
       <header className="survey-hero grid gap-5">
         <div className="max-w-5xl text-left">
-          <p className="survey-kicker">Calendar</p>
+          <p className="survey-kicker">월간 기록</p>
           <h1 className="survey-title mt-3 text-5xl font-semibold leading-tight text-zinc-950 sm:text-6xl">
             월간 로그 캘린더
           </h1>
@@ -216,13 +216,13 @@ export function MonthlyCalendar() {
           </h2>
           <div className="calendar-detail-stats mt-5 grid grid-cols-2 gap-2">
             <div className="survey-chip rounded-md border border-zinc-200 bg-zinc-50 p-3">
-              <p className="text-sm font-semibold text-zinc-500">Filled</p>
+              <p className="text-sm font-semibold text-zinc-500">기록</p>
               <p className="mt-2 text-3xl font-semibold text-zinc-950">
                 {selectedFilledCount}/{slotCount}
               </p>
             </div>
             <div className="survey-chip rounded-md border border-zinc-200 bg-zinc-50 p-3">
-              <p className="text-sm font-semibold text-zinc-500">Rate</p>
+              <p className="text-sm font-semibold text-zinc-500">비율</p>
               <p className="mt-2 text-3xl font-semibold text-zinc-950">
                 {selectedRate}%
               </p>
@@ -254,7 +254,7 @@ export function MonthlyCalendar() {
                         filled ? "text-emerald-700" : "text-zinc-400",
                       )}
                     >
-                      {filled ? "Filled" : "Empty"}
+                      {filled ? "기록 있음" : "비어 있음"}
                     </span>
                   </div>
                   <ActionDialogTrigger
