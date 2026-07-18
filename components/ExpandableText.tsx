@@ -103,7 +103,7 @@ export function ExpandableText({
           >
             <div className="dialog-header flex items-start justify-between gap-4 border-b-2 border-zinc-900/80 bg-white px-4 py-3 sm:px-5">
               <div className="min-w-0">
-                <p className="survey-kicker">Full Text</p>
+                <p className="survey-kicker">전체 글</p>
                 <h2
                   className="mt-1 truncate text-xl font-semibold text-zinc-950 sm:text-2xl"
                   id={titleId}

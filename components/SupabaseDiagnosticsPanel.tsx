@@ -243,7 +243,7 @@ export function SupabaseDiagnosticsPanel() {
             <Activity aria-hidden="true" size={21} />
           </div>
           <div className="min-w-0">
-            <p className="survey-kicker">Diagnostics</p>
+            <p className="survey-kicker">연결 진단</p>
             <h2 className="mt-1 text-2xl font-semibold text-zinc-950">Supabase 상태 진단</h2>
             <p className="mt-1.5 text-base leading-7 text-zinc-500">
               환경변수, 테이블 읽기, 임시 쓰기와 삭제를 한 번에 확인합니다.

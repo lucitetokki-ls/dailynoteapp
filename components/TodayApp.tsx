@@ -163,6 +163,7 @@ export function TodayApp() {
         </div>
         <div className="mobile-sync-row sync-status-cluster flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto">
           <span
+            aria-live="polite"
             data-status={syncStatus.status}
             className={cn(
               "sync-status-pill rounded-md border px-3 py-1.5 text-sm font-semibold",

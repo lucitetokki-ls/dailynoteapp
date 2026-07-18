@@ -70,7 +70,7 @@ export function ReviewDashboard() {
             </p>
           </div>
           <span className="review-density-badge rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-base font-semibold text-zinc-600">
-            {weeklyRate}% density
+            기록 밀도 {weeklyRate}%
           </span>
         </div>
 

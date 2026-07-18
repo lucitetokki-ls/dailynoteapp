@@ -19,7 +19,7 @@ export function AppShell({ children }: AppShellProps) {
         <aside className="app-sidebar">
           <div className="app-brand">
             <p className="app-brand-title">ROUTINE</p>
-            <p className="app-brand-subtitle">DAILY_LOG_V1.0</p>
+            <p className="app-brand-subtitle">DAILY ACTION LOG</p>
             <div className="app-mobile-brand-logo" aria-hidden="true">
               <Image
                 alt=""
@@ -56,11 +56,11 @@ export function AppShell({ children }: AppShellProps) {
                 />
               </div>
               <div>
-                <p className="app-user-label">GRINDING</p>
+                <p className="app-user-label">오늘의 기록</p>
                 <p className="app-user-name">LUCITE TOKKI</p>
               </div>
             </div>
-            <div className="app-command">ACTION_LOOP_ACTIVE</div>
+            <div className="app-command">기록 준비됨</div>
           </div>
         </aside>
 

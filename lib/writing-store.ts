@@ -31,7 +31,7 @@ export type WritingSyncStatus = {
 
 const defaultWritingSyncStatus: WritingSyncStatus = {
   status: isSupabaseConfigured ? "saved" : "local-only",
-  message: isSupabaseConfigured ? "Supabase 대기 중" : "로컬 저장만 사용 중",
+  message: isSupabaseConfigured ? "동기화 준비됨" : "로컬 저장만 사용 중",
   updatedAt: null,
 };
 
@@ -202,7 +202,7 @@ async function fetchWritingEntryFromSupabase(date: string) {
     console.warn("Failed to fetch daily writing from Supabase", error.message);
     setWritingSyncStatus(date, {
       status: "error",
-      message: "Writing 테이블 확인 필요",
+      message: "동기화에 실패했습니다",
       updatedAt: new Date().toISOString(),
     });
     return null;
@@ -363,14 +363,14 @@ export function writeWritingEntry(date: string, nextContent: string | WritingEnt
 
   setWritingSyncStatus(date, {
     status: "saving",
-    message: "Supabase 저장 중",
+    message: "저장 중",
     updatedAt: now,
   });
 
   void retrySupabaseMutation(() => persistWritingEntryToSupabase(nextEntry)).then((result) => {
     setWritingSyncStatus(date, {
       status: result.ok ? "saved" : "error",
-      message: result.ok ? "Supabase 저장됨" : result.message || "Supabase 저장 실패",
+      message: result.ok ? "저장됨" : "저장 실패 · 잠시 후 다시 시도하세요",
       updatedAt: new Date().toISOString(),
     });
   });

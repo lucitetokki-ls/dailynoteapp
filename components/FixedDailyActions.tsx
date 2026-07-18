@@ -238,7 +238,7 @@ function FixedDailyActionCard({
           {[1, 2, 3, 4, 5].map((score) => (
             <button
               aria-label={`만족도 ${score}`}
-              aria-pressed={score <= satisfaction}
+              aria-pressed={score === satisfaction}
               className={cn(
                 "satisfaction-button flex h-8 w-8 items-center justify-center rounded-md border transition sm:h-9 sm:w-9",
                 score <= satisfaction

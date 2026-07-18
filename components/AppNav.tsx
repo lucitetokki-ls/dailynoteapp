@@ -93,12 +93,12 @@ export function AppNav() {
 
   return (
     <nav
-      aria-label="Main navigation"
+      aria-label="주요 메뉴"
       className="mobile-nav mobile-terminal-nav app-nav mb-5 grid grid-cols-4 gap-1.5 rounded-lg border-2 border-zinc-200 bg-white p-1.5 shadow-sm sm:mb-8 sm:flex sm:items-center sm:gap-2 sm:overflow-x-auto"
     >
       <div className="route-index-caption" aria-hidden="true">
-        <span>ROUTE INDEX</span>
-        <span>NODE:07</span>
+        <span>메뉴</span>
+        <span>7개 영역</span>
       </div>
 
       {navItems.map((item, index) => {
@@ -129,9 +129,6 @@ export function AppNav() {
               <span className="route-code">{item.code}</span>
             </span>
             <Icon aria-hidden="true" className="route-icon" size={16} />
-            <span className="route-status" aria-hidden="true">
-              {isActive ? "ACTIVE" : "READY"}
-            </span>
           </Link>
         );
       })}
@@ -166,7 +163,7 @@ export function AppNav() {
       >
         <div className="mobile-more-panel-heading">
           <span>추가 메뉴</span>
-          <span>ROUTE 05-07</span>
+          <span>카테고리 · 캘린더 · 설정</span>
         </div>
         {mobileOverflowItems.map((item) => {
           const Icon = item.icon;
