@@ -21,6 +21,7 @@ import {
   createId,
   formatDisplayDate,
   getTodayDateKey,
+  getWeekKey,
 } from "@/lib/utils";
 import {
   dailyActionSlots,
@@ -39,6 +40,7 @@ export function TodayApp() {
 
   const recordedSlotCount = useMemo(() => getFilledSlotCount(actions), [actions]);
   const completionRate = Math.round((recordedSlotCount / dailyActionSlots.length) * 100);
+  const dateIndex = useMemo(() => getDateIndex(selectedDate), [selectedDate]);
 
   function updateSlot(slot: DailyActionSlot, updates: Partial<DailyAction>) {
     const now = new Date().toISOString();
@@ -110,12 +112,31 @@ export function TodayApp() {
   return (
     <div className="today-page grid gap-5 pb-9 sm:gap-8 sm:pb-12">
       <header className="survey-hero today-hero grid gap-4 sm:gap-5">
-        <div className="max-w-5xl pt-1 text-left">
+        <div className="today-hero-copy max-w-5xl pt-1 text-left">
           <p className="survey-kicker">Lucitetokki Daily Action Log</p>
           <h1 className="survey-title mt-2.5 text-4xl font-semibold leading-tight text-zinc-950 sm:mt-3 sm:text-6xl lg:text-7xl">
             With the door closed
           </h1>
         </div>
+
+        <aside
+          aria-label={`${dateIndex.year}년 ${dateIndex.month}월 ${dateIndex.day}일, 연중 ${dateIndex.ordinal}일, ${dateIndex.week}주차`}
+          className="desktop-date-index"
+        >
+          <div aria-hidden="true" className="desktop-date-index-year">
+            <span>DATE INDEX</span>
+            <strong>{dateIndex.year}</strong>
+          </div>
+          <div aria-hidden="true" className="desktop-date-index-date">
+            <span>{dateIndex.month}</span>
+            <i>/</i>
+            <span>{dateIndex.day}</span>
+          </div>
+          <div aria-hidden="true" className="desktop-date-index-meta">
+            <span>DAY {dateIndex.ordinal}</span>
+            <span>WEEK {dateIndex.week}</span>
+          </div>
+        </aside>
 
         <div className="today-stat-grid grid min-w-0 grid-cols-[repeat(3,minmax(0,1fr))] gap-2 sm:gap-3">
           <StatCard icon={Target} label="영역" value={dailyActionSlots.length.toString()} />
@@ -182,6 +203,22 @@ export function TodayApp() {
       </div>
     </div>
   );
+}
+
+function getDateIndex(dateKey: string) {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+  const ordinal = Math.floor(
+    (Date.UTC(year, month - 1, day) - Date.UTC(year, 0, 0)) / 86_400_000,
+  );
+
+  return {
+    year: String(year),
+    month: String(month).padStart(2, "0"),
+    day: String(day).padStart(2, "0"),
+    ordinal: String(ordinal).padStart(3, "0"),
+    week: getWeekKey(date).slice(-2),
+  };
 }
 
 type StatCardProps = {

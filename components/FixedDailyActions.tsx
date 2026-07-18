@@ -69,7 +69,7 @@ export function FixedDailyActions({ actions, dateKey, onUpdateSlot }: FixedDaily
         <span className="daily-slots-hint text-sm text-zinc-500">하나씩 열어 빠르게 기록하세요.</span>
       </div>
       <div aria-label="행동 영역 바로가기" className="daily-slot-jumpbar" role="navigation">
-        {dailyActionSlots.map((slot) => {
+        {dailyActionSlots.map((slot, index) => {
           const action = getActionForSlot(actions, slot);
           const isFilled = Boolean(action?.description.trim() || action?.reflection.trim());
 
@@ -83,7 +83,13 @@ export function FixedDailyActions({ actions, dateKey, onUpdateSlot }: FixedDaily
               onClick={() => focusSlot(slot)}
               type="button"
             >
-              <span>{slotMeta[slot].label}</span>
+              <span aria-hidden="true" className="daily-slot-jump-index">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <span className="daily-slot-jump-label">{slotMeta[slot].label}</span>
+              <span aria-hidden="true" className="daily-slot-jump-state">
+                {isFilled ? "REC" : "OPEN"}
+              </span>
               <span aria-hidden="true" className="daily-slot-jump-dot" />
             </button>
           );
@@ -194,7 +200,7 @@ function FixedDailyActionCard({
 
   return (
     <article
-      className="daily-slot-card survey-card rounded-lg border border-zinc-200 bg-white shadow-sm transition"
+      className="daily-slot-card survey-card rounded-lg border border-zinc-200 bg-white shadow-sm"
       data-active={active}
       data-dirty={isDirty}
       data-expanded={expanded}
