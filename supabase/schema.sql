@@ -1,7 +1,39 @@
--- Daily Note App Supabase schema draft
--- Run after creating a Supabase project. Auth/user ownership can be added later.
+-- Daily Note App Supabase schema
+-- Run after creating a Supabase project and a single Supabase Auth user.
 
 create extension if not exists pgcrypto;
+
+create schema if not exists app_private;
+revoke all on schema app_private from public, anon, authenticated;
+
+create table if not exists app_private.owner (
+  singleton boolean primary key default true check (singleton),
+  user_id uuid not null unique references auth.users(id) on delete restrict,
+  created_at timestamptz not null default now()
+);
+
+alter table app_private.owner enable row level security;
+revoke all on table app_private.owner from public, anon, authenticated;
+
+create or replace function app_private.is_daily_note_owner()
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select (select auth.uid()) is not null
+    and exists (
+      select 1
+      from app_private.owner
+      where singleton = true
+        and user_id = (select auth.uid())
+    );
+$$;
+
+revoke all on function app_private.is_daily_note_owner() from public, anon, authenticated;
+grant usage on schema app_private to authenticated;
+grant execute on function app_private.is_daily_note_owner() to authenticated;
 
 create table if not exists daily_logs (
   id uuid primary key default gen_random_uuid(),
@@ -157,6 +189,10 @@ security invoker
 set search_path = ''
 as $$
 begin
+  if not (select app_private.is_daily_note_owner()) then
+    raise exception 'not authorized';
+  end if;
+
   delete from public.daily_logs;
   delete from public.weekly_reflections;
   delete from public.daily_writings;
@@ -164,7 +200,8 @@ end;
 $$;
 
 revoke all on function clear_daily_note_data() from public;
-grant execute on function clear_daily_note_data() to anon, authenticated;
+revoke all on function clear_daily_note_data() from anon;
+grant execute on function clear_daily_note_data() to authenticated;
 
 drop trigger if exists daily_logs_set_updated_at on daily_logs;
 create trigger daily_logs_set_updated_at
@@ -198,11 +235,16 @@ alter table daily_writings enable row level security;
 alter table action_templates enable row level security;
 
 grant usage on schema public to anon, authenticated;
-grant select, insert, update, delete on daily_logs to anon, authenticated;
-grant select, insert, update, delete on daily_actions to anon, authenticated;
-grant select, insert, update, delete on weekly_reflections to anon, authenticated;
-grant select, insert, update, delete on daily_writings to anon, authenticated;
-grant select, insert, update, delete on action_templates to anon, authenticated;
+revoke all on daily_logs from anon;
+revoke all on daily_actions from anon;
+revoke all on weekly_reflections from anon;
+revoke all on daily_writings from anon;
+revoke all on action_templates from anon;
+grant select, insert, update, delete on daily_logs to authenticated;
+grant select, insert, update, delete on daily_actions to authenticated;
+grant select, insert, update, delete on weekly_reflections to authenticated;
+grant select, insert, update, delete on daily_writings to authenticated;
+grant select, insert, update, delete on action_templates to authenticated;
 
 revoke truncate, references, trigger on daily_logs from anon, authenticated;
 revoke truncate, references, trigger on daily_actions from anon, authenticated;
@@ -210,47 +252,51 @@ revoke truncate, references, trigger on weekly_reflections from anon, authentica
 revoke truncate, references, trigger on daily_writings from anon, authenticated;
 revoke truncate, references, trigger on action_templates from anon, authenticated;
 
--- The app currently writes directly from the browser with the publishable/anon key.
--- Replace these public policies with user-scoped policies after adding real auth.
 drop policy if exists "anon full access daily_logs" on daily_logs;
 drop policy if exists "Allow public access daily_logs" on daily_logs;
-create policy "Allow public access daily_logs"
+drop policy if exists "Owner access daily_logs" on daily_logs;
+create policy "Owner access daily_logs"
 on daily_logs for all
-to anon, authenticated
-using (true)
-with check (true);
+to authenticated
+using ((select app_private.is_daily_note_owner()))
+with check ((select app_private.is_daily_note_owner()));
 
 drop policy if exists "anon full access daily_actions" on daily_actions;
 drop policy if exists "Allow public access daily_actions" on daily_actions;
-create policy "Allow public access daily_actions"
+drop policy if exists "Owner access daily_actions" on daily_actions;
+create policy "Owner access daily_actions"
 on daily_actions for all
-to anon, authenticated
-using (true)
-with check (true);
+to authenticated
+using ((select app_private.is_daily_note_owner()))
+with check ((select app_private.is_daily_note_owner()));
 
 drop policy if exists "anon full access weekly_reflections" on weekly_reflections;
 drop policy if exists "Allow public access weekly_reflections" on weekly_reflections;
-create policy "Allow public access weekly_reflections"
+drop policy if exists "Owner access weekly_reflections" on weekly_reflections;
+create policy "Owner access weekly_reflections"
 on weekly_reflections for all
-to anon, authenticated
-using (true)
-with check (true);
+to authenticated
+using ((select app_private.is_daily_note_owner()))
+with check ((select app_private.is_daily_note_owner()));
 
 drop policy if exists "Allow public read daily_writings" on daily_writings;
 drop policy if exists "Allow public insert daily_writings" on daily_writings;
 drop policy if exists "Allow public update daily_writings" on daily_writings;
 drop policy if exists "Allow public delete daily_writings" on daily_writings;
+drop policy if exists "anon full access daily_writings" on daily_writings;
 drop policy if exists "Allow public access daily_writings" on daily_writings;
-create policy "Allow public access daily_writings"
+drop policy if exists "Owner access daily_writings" on daily_writings;
+create policy "Owner access daily_writings"
 on daily_writings for all
-to anon, authenticated
-using (true)
-with check (true);
+to authenticated
+using ((select app_private.is_daily_note_owner()))
+with check ((select app_private.is_daily_note_owner()));
 
 drop policy if exists "anon full access action_templates" on action_templates;
 drop policy if exists "Allow public access action_templates" on action_templates;
-create policy "Allow public access action_templates"
+drop policy if exists "Owner access action_templates" on action_templates;
+create policy "Owner access action_templates"
 on action_templates for all
-to anon, authenticated
-using (true)
-with check (true);
+to authenticated
+using ((select app_private.is_daily_note_owner()))
+with check ((select app_private.is_daily_note_owner()));

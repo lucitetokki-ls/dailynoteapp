@@ -1,8 +1,9 @@
 "use client";
 
 import { ChangeEvent, useRef, useState } from "react";
-import { Database, Download, RotateCcw, ShieldAlert, Trash2, Upload } from "lucide-react";
+import { Database, Download, LogOut, RotateCcw, ShieldAlert, Trash2, Upload } from "lucide-react";
 
+import { useAppAuth } from "@/components/AuthGate";
 import { SupabaseDiagnosticsPanel } from "@/components/SupabaseDiagnosticsPanel";
 import { SupabaseStatusCard } from "@/components/SupabaseStatusCard";
 import {
@@ -55,6 +56,7 @@ type SettingsFeedback = {
 };
 
 export function SettingsPanel() {
+  const { session, signOut } = useAppAuth();
   const importInputRef = useRef<HTMLInputElement>(null);
   const storedDays = useStoredDays();
   const weeklyReflections = useWeeklyReflections();
@@ -285,6 +287,24 @@ export function SettingsPanel() {
 
       <SupabaseStatusCard />
       <SupabaseDiagnosticsPanel />
+
+      {session ? (
+        <section className="survey-card flex flex-wrap items-center justify-between gap-4 rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+          <div>
+            <p className="survey-kicker">계정</p>
+            <p className="mt-1 text-base font-semibold text-zinc-950">{session.user.email}</p>
+            <p className="mt-1 text-sm text-zinc-500">이 브라우저에 로그인 세션이 유지됩니다.</p>
+          </div>
+          <button
+            className="survey-control flex min-h-11 items-center gap-2 rounded-md border border-zinc-200 bg-white px-4 text-base font-semibold text-zinc-700 transition hover:bg-zinc-50"
+            onClick={() => void signOut()}
+            type="button"
+          >
+            <LogOut aria-hidden="true" size={17} />
+            로그아웃
+          </button>
+        </section>
+      ) : null}
 
       <section className="survey-card rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
         <label className="grid max-w-xl gap-2 text-sm font-semibold text-zinc-800">

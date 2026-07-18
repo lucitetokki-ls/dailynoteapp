@@ -45,7 +45,7 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...
 
 기존 anon key를 쓰는 프로젝트라면 `NEXT_PUBLIC_SUPABASE_ANON_KEY`도 호환됩니다. `NEXT_PUBLIC_` 값은 브라우저에 노출되므로 `service_role` 또는 secret key는 넣지 않습니다.
 
-값이 없으면 앱은 브라우저 `localStorage`만 사용합니다. 값이 있으면 로컬 저장 후 Supabase로 동기화합니다.
+값이 없으면 앱은 브라우저 저장소만 사용합니다. 값이 있으면 Supabase Auth 로그인을 요구하고, 로그인 세션을 브라우저에 유지한 뒤 로컬 저장과 원격 동기화를 함께 사용합니다.
 
 ## 데이터 저장
 
@@ -65,7 +65,7 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...
 
 `daily_writings`는 `title`과 기존 `content` 호환 필드, `content_markdown`, `content_json`을 저장합니다. 리치 에디터 화면은 JSON을 우선 사용하고, Markdown은 백업/이전 데이터 호환용으로 유지합니다.
 
-`schema.sql`은 필수 테이블, 인덱스, updated_at 트리거, RLS, anon/authenticated 접근 정책을 함께 설정합니다. 현재 앱은 별도 사용자 인증 없이 브라우저에서 직접 저장하므로 정책이 개인용 공개 쓰기 구조입니다. 실제 계정별 보안을 붙일 때는 사용자 소유 컬럼과 인증 기반 RLS 정책으로 교체해야 합니다. Settings의 Supabase 진단에서 읽기와 임시 쓰기/삭제를 확인할 수 있습니다.
+`schema.sql`은 필수 테이블, 인덱스, updated_at 트리거와 단일 소유자 전용 RLS 정책을 함께 설정합니다. `app_private.owner`에 등록된 Supabase Auth 사용자만 기록을 읽거나 변경할 수 있고, publishable key만 가진 비로그인 사용자는 모든 테이블에서 차단됩니다. Settings의 Supabase 진단에서 읽기와 임시 쓰기/삭제를 확인할 수 있습니다.
 
 ## 제품 원칙
 
@@ -73,7 +73,7 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...
 - 기록은 압박보다 회고용입니다.
 - Today는 공부 행동을 짧게 기록하고, Writing 페이지는 긴 글쓰기에 집중합니다.
 - 모바일은 빠른 입력, 데스크톱은 리뷰와 작성에 맞춥니다.
-- Settings의 암호 게이트는 개인용 편의 장치이며 실제 인증이 아닙니다.
+- Supabase Auth 세션은 브라우저에 유지되며, 로그아웃하거나 세션이 만료될 때만 다시 로그인합니다.
 
 ## 문서
 
