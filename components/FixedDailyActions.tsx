@@ -37,12 +37,25 @@ type FixedDailyActionsProps = {
 };
 
 export function FixedDailyActions({ actions, dateKey, onUpdateSlot }: FixedDailyActionsProps) {
-  const [expandedSlot, setExpandedSlot] = useState<DailyActionSlot | null>(() => {
+  const [activeSlot, setActiveSlot] = useState<DailyActionSlot>(() => {
     return (
       dailyActionSlots.find((slot) => !getActionForSlot(actions, slot)?.description?.trim()) ??
       dailyActionSlots[0]
     );
   });
+  const [expandedSlot, setExpandedSlot] = useState<DailyActionSlot | null>(null);
+
+  function focusSlot(slot: DailyActionSlot) {
+    setActiveSlot(slot);
+
+    window.requestAnimationFrame(() => {
+      const card = document.getElementById(`daily-slot-${slot}`);
+      const input = card?.querySelector<HTMLTextAreaElement>('[data-field="description"]');
+
+      card?.scrollIntoView({ block: "start" });
+      input?.focus({ preventScroll: true });
+    });
+  }
 
   return (
     <section aria-labelledby="daily-slots-heading" className="daily-slots-section grid gap-3">
@@ -55,6 +68,27 @@ export function FixedDailyActions({ actions, dateKey, onUpdateSlot }: FixedDaily
         </div>
         <span className="daily-slots-hint text-sm text-zinc-500">하나씩 열어 빠르게 기록하세요.</span>
       </div>
+      <div aria-label="행동 영역 바로가기" className="daily-slot-jumpbar" role="navigation">
+        {dailyActionSlots.map((slot) => {
+          const action = getActionForSlot(actions, slot);
+          const isFilled = Boolean(action?.description.trim() || action?.reflection.trim());
+
+          return (
+            <button
+              aria-label={`${slotMeta[slot].label} 입력으로 이동${isFilled ? ", 기록됨" : ""}`}
+              aria-pressed={activeSlot === slot}
+              className="daily-slot-jump"
+              data-filled={isFilled}
+              key={`jump-${slot}`}
+              onClick={() => focusSlot(slot)}
+              type="button"
+            >
+              <span>{slotMeta[slot].label}</span>
+              <span aria-hidden="true" className="daily-slot-jump-dot" />
+            </button>
+          );
+        })}
+      </div>
       <div className="grid gap-4 lg:grid-cols-2">
         {dailyActionSlots.map((slot) => {
           const action = getActionForSlot(actions, slot);
@@ -62,8 +96,10 @@ export function FixedDailyActions({ actions, dateKey, onUpdateSlot }: FixedDaily
           return (
             <FixedDailyActionCard
               action={action}
+              active={activeSlot === slot}
               expanded={expandedSlot === slot}
               key={`${dateKey}-${slot}`}
+              onActivate={() => setActiveSlot(slot)}
               onUpdateSlot={onUpdateSlot}
               onToggle={() => setExpandedSlot((current) => (current === slot ? null : slot))}
               slot={slot}
@@ -77,16 +113,20 @@ export function FixedDailyActions({ actions, dateKey, onUpdateSlot }: FixedDaily
 
 type FixedDailyActionCardProps = {
   action?: DailyAction;
+  active: boolean;
   expanded: boolean;
   slot: DailyActionSlot;
+  onActivate: () => void;
   onUpdateSlot: (slot: DailyActionSlot, updates: Partial<DailyAction>) => void;
   onToggle: () => void;
 };
 
 function FixedDailyActionCard({
   action,
+  active,
   expanded,
   slot,
+  onActivate,
   onUpdateSlot,
   onToggle,
 }: FixedDailyActionCardProps) {
@@ -96,8 +136,7 @@ function FixedDailyActionCard({
   const [satisfaction, setSatisfaction] = useState(action?.satisfaction ?? 3);
   const [isDirty, setIsDirty] = useState(false);
   const isFilled = Boolean(description.trim() || reflection.trim());
-  const panelId = `daily-slot-panel-${slot}`;
-  const summary = description.trim() || reflection.trim() || "기록할 내용을 입력하세요.";
+  const detailsId = `daily-slot-details-${slot}`;
 
   useEffect(() => {
     if (isDirty) {
@@ -156,10 +195,13 @@ function FixedDailyActionCard({
   return (
     <article
       className="daily-slot-card survey-card rounded-lg border border-zinc-200 bg-white shadow-sm transition"
+      data-active={active}
       data-dirty={isDirty}
       data-expanded={expanded}
       data-filled={isFilled}
       data-slot={slot}
+      id={`daily-slot-${slot}`}
+      onFocusCapture={onActivate}
     >
       <div className="daily-slot-card-header flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2 sm:gap-2.5">
@@ -185,12 +227,12 @@ function FixedDailyActionCard({
               !isDirty && !isFilled && "border-zinc-200 bg-zinc-50 text-zinc-500",
             )}
           >
-            {isDirty ? "입력 중" : isFilled ? "저장됨" : "대기"}
+            {isDirty ? "작성 중" : isFilled ? "기록됨" : "미기록"}
           </span>
           <button
-            aria-controls={panelId}
+            aria-controls={detailsId}
             aria-expanded={expanded}
-            aria-label={`${slotMeta[slot].label} 입력 ${expanded ? "접기" : "펼치기"}`}
+            aria-label={`${slotMeta[slot].label} 회고와 만족도 ${expanded ? "접기" : "펼치기"}`}
             className="daily-slot-toggle survey-control flex h-11 w-11 items-center justify-center border border-zinc-200 bg-white text-zinc-700"
             onClick={onToggle}
             type="button"
@@ -200,23 +242,23 @@ function FixedDailyActionCard({
         </div>
       </div>
 
-      <p className="daily-slot-summary line-clamp-1">{summary}</p>
+      <div className="daily-slot-primary">
+        <label className="grid gap-2 text-sm font-semibold text-zinc-700 sm:text-base">
+          행동 내용
+          <textarea
+            className="survey-control daily-slot-input min-h-20 resize-y rounded-md border border-zinc-200 bg-zinc-50 px-3.5 py-3 text-base leading-7 text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white sm:px-4 sm:text-lg sm:leading-8"
+            data-field="description"
+            maxLength={10000}
+            onBlur={(event) => saveDraft(event.currentTarget.value)}
+            onInput={(event) => handleDescriptionInput(event.currentTarget.value)}
+            placeholder={slotMeta[slot].actionPlaceholder}
+            value={description}
+          />
+        </label>
+      </div>
 
-      <div className="daily-slot-card-body grid gap-4" id={panelId}>
+      <div className="daily-slot-card-body daily-slot-details grid gap-4" id={detailsId}>
         <div className="grid gap-3 sm:gap-4">
-          <label className="grid gap-2 text-sm font-semibold text-zinc-700 sm:text-base">
-            행동 내용
-            <textarea
-              className="survey-control daily-slot-input min-h-32 resize-y rounded-md border border-zinc-200 bg-zinc-50 px-3.5 py-3 text-base leading-7 text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white sm:px-4 sm:text-lg sm:leading-8"
-              data-field="description"
-              maxLength={10000}
-              onBlur={(event) => saveDraft(event.currentTarget.value)}
-              onInput={(event) => handleDescriptionInput(event.currentTarget.value)}
-              placeholder={slotMeta[slot].actionPlaceholder}
-              value={description}
-            />
-          </label>
-
           <label className="grid gap-2 text-sm font-semibold text-zinc-700 sm:text-base">
             짧은 회고
             <textarea

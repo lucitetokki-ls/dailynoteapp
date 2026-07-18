@@ -5,11 +5,11 @@ import { CalendarDays, ChevronLeft, ChevronRight, Save } from "lucide-react";
 
 import {
   addDaysToDateKey,
-  cn,
   formatDisplayDate,
   getTodayDateKey,
 } from "@/lib/utils";
 import { EmptyState } from "@/components/EmptyState";
+import { SaveStatusIndicator } from "@/components/SaveStatusIndicator";
 import {
   RichWritingEditor,
   type RichWritingChange,
@@ -240,27 +240,10 @@ export function WritingStudio() {
           </div>
 
           <div className="writing-save-cluster flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto">
-            <span
-              aria-live="polite"
-              className={cn(
-                "sync-status-pill rounded-md border px-2.5 py-1.5 text-xs font-semibold sm:px-3 sm:text-sm",
-                hasUnsavedChanges && "border-amber-200 bg-amber-50 text-amber-700",
-                !hasUnsavedChanges &&
-                  syncStatus.status === "saved" &&
-                  "border-emerald-200 bg-emerald-50 text-emerald-700",
-                !hasUnsavedChanges &&
-                  syncStatus.status === "saving" &&
-                  "border-sky-200 bg-sky-50 text-sky-700",
-                !hasUnsavedChanges &&
-                  syncStatus.status === "error" &&
-                  "border-red-200 bg-red-50 text-red-700",
-                !hasUnsavedChanges &&
-                  syncStatus.status === "local-only" &&
-                  "border-zinc-200 bg-zinc-50 text-zinc-600",
-              )}
-            >
-              {hasUnsavedChanges ? "입력 중" : syncStatus.message}
-            </span>
+            <SaveStatusIndicator
+              status={hasUnsavedChanges ? "editing" : syncStatus.status}
+              updatedAt={syncStatus.updatedAt}
+            />
             <button
               className="survey-control flex min-h-10 items-center gap-2 rounded-md border border-zinc-200 bg-white px-3 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50 hover:text-zinc-950 sm:min-h-11 sm:px-4 sm:text-base"
               onClick={() => saveWriting()}

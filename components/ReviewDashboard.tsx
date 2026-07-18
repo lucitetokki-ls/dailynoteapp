@@ -1,9 +1,9 @@
 "use client";
 
-import { BarChart3, CheckCircle2, CircleDashed, Star } from "lucide-react";
+import { useState } from "react";
+import { BarChart3, CheckCircle2, ChevronDown, CircleDashed, Star } from "lucide-react";
 
 import { ActionDialogTrigger } from "@/components/ActionDialogTrigger";
-import { ExpandableText } from "@/components/ExpandableText";
 import { WeeklyReflectionPanel } from "@/components/WeeklyReflectionPanel";
 import { useRecentStoredDays } from "@/lib/daily-store";
 import {
@@ -33,12 +33,16 @@ function getActionTitle(day: ReturnType<typeof useRecentStoredDays>[number], slo
 
 export function ReviewDashboard() {
   const days = useRecentStoredDays(totalWindowDays);
+  const [selectedReviewDate, setSelectedReviewDate] = useState(() => days[0]?.dailyLog.date ?? "");
+  const [isDensityExpanded, setIsDensityExpanded] = useState(false);
   const filledSlots = days.reduce((total, day) => total + getFilledSlotCount(day.actions), 0);
   const fullDays = days.filter((day) => getFilledSlotCount(day.actions) === dailyActionSlots.length).length;
   const averageDailySlots = Number((filledSlots / totalWindowDays).toFixed(1));
   const averageSatisfaction = getAverageSlotSatisfaction(days.flatMap((day) => day.actions));
   const weeklyRate = Math.round((filledSlots / totalSlots) * 100);
   const dayLabels = days.map((day) => day.dailyLog.date.slice(5).replace("-", "/"));
+  const selectedReviewDay =
+    days.find((day) => day.dailyLog.date === selectedReviewDate) ?? days[0];
 
   return (
     <div className="grid gap-8 pb-12">
@@ -97,20 +101,30 @@ export function ReviewDashboard() {
           {days.map((day) => {
             const filledCount = getFilledSlotCount(day.actions);
             const fillMap = getSlotFillMap(day.actions);
+            const isSelected = selectedReviewDay?.dailyLog.date === day.dailyLog.date;
 
             return (
               <article
                 className="review-mobile-matrix-card survey-card grid gap-3 rounded-lg border border-zinc-200 bg-white p-3.5 shadow-sm"
+                data-selected={isSelected}
                 key={`mobile-matrix-${day.dailyLog.date}`}
               >
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-base font-semibold text-zinc-950">
+                <button
+                  aria-expanded={isSelected}
+                  className="review-mobile-day-trigger flex min-h-11 items-center justify-between gap-3 text-left"
+                  onClick={() => setSelectedReviewDate(day.dailyLog.date)}
+                  type="button"
+                >
+                  <span className="text-base font-semibold text-zinc-950">
                     {formatDisplayDate(day.dailyLog.date)}
-                  </p>
-                  <span className="survey-chip rounded-md border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-sm font-semibold text-zinc-700">
-                    {filledCount}/{slotCount}
                   </span>
-                </div>
+                  <span className="flex items-center gap-2">
+                    <span className="survey-chip border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-sm font-semibold text-zinc-700">
+                      {filledCount}/{slotCount}
+                    </span>
+                    <ChevronDown aria-hidden="true" className="review-mobile-day-chevron" size={17} />
+                  </span>
+                </button>
                 <div className="review-mobile-slot-grid grid grid-cols-3 gap-2">
                   {dailyActionSlots.map((slot) => (
                     <ActionDialogTrigger
@@ -134,18 +148,77 @@ export function ReviewDashboard() {
               </article>
             );
           })}
+
+          {selectedReviewDay ? (
+            <section
+              aria-label={`${formatDisplayDate(selectedReviewDay.dailyLog.date)} 상세`}
+              className="review-mobile-day-detail survey-card grid gap-3 border border-zinc-200 bg-white p-4"
+            >
+              <div>
+                <p className="survey-kicker">선택 날짜</p>
+                <h3 className="mt-2 text-xl font-semibold text-zinc-950">
+                  {formatDisplayDate(selectedReviewDay.dailyLog.date)}
+                </h3>
+              </div>
+              <div className="grid gap-1 border border-zinc-200">
+                {dailyActionSlots.map((slot) => {
+                  const action = getActionForSlot(selectedReviewDay.actions, slot);
+                  const content = [action?.description, action?.reflection]
+                    .filter(Boolean)
+                    .join(" · ");
+
+                  return (
+                    <ActionDialogTrigger
+                      action={action}
+                      ariaLabel={`${formatDisplayDate(selectedReviewDay.dailyLog.date)} ${slotMeta[slot].label} 전문 보기`}
+                      className="review-mobile-detail-row grid min-h-11 grid-cols-[3.5rem_minmax(0,1fr)] items-center gap-2 px-3 py-2 text-left"
+                      date={selectedReviewDay.dailyLog.date}
+                      key={`selected-${selectedReviewDay.dailyLog.date}-${slot}`}
+                      title={getActionTitle(selectedReviewDay, slot)}
+                    >
+                      <strong>{slotShortLabels[slot]}</strong>
+                      <span className="line-clamp-1 text-zinc-500">
+                        {content || "기록 없음"}
+                      </span>
+                    </ActionDialogTrigger>
+                  );
+                })}
+              </div>
+              <div className="border-t border-zinc-200 pt-3">
+                <p className="text-xs font-semibold text-zinc-500">하루 회고</p>
+                <p className="mt-1.5 whitespace-pre-line text-sm leading-6 text-zinc-700">
+                  {selectedReviewDay.dailyLog.dailyReflection || "회고가 비어 있습니다."}
+                </p>
+              </div>
+            </section>
+          ) : null}
         </div>
       </section>
+
+      <WeeklyReflectionPanel />
 
       <section className="grid gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-2xl font-semibold text-zinc-950">슬롯별 로그 밀도</h2>
-          <span className="rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-base font-semibold text-zinc-600">
-            전체 {weeklyRate}%
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-base font-semibold text-zinc-600">
+              전체 {weeklyRate}%
+            </span>
+            <button
+              aria-expanded={isDensityExpanded}
+              className="review-density-toggle survey-control min-h-10 border border-zinc-200 bg-white px-3 text-sm font-semibold md:hidden"
+              onClick={() => setIsDensityExpanded((current) => !current)}
+              type="button"
+            >
+              {isDensityExpanded ? "접기" : "펼치기"}
+            </button>
+          </div>
         </div>
 
-        <div className="review-density-list survey-card border border-zinc-200 bg-white">
+        <div
+          className="review-density-content review-density-list survey-card border border-zinc-200 bg-white"
+          data-expanded={isDensityExpanded}
+        >
           {dailyActionSlots.map((slot) => {
             const filledCount = days.filter((day) => getSlotFillMap(day.actions)[slot]).length;
             const rate = Math.round((filledCount / totalWindowDays) * 100);
@@ -175,62 +248,6 @@ export function ReviewDashboard() {
                   />
                 </div>
                 <span className="text-right text-xl font-semibold text-zinc-950">{rate}%</span>
-              </article>
-            );
-          })}
-        </div>
-      </section>
-
-      <WeeklyReflectionPanel />
-
-      <section className="grid gap-4">
-        <h2 className="text-2xl font-semibold text-zinc-950">최근 7일</h2>
-        <div className="history-list grid">
-          {days.map((day) => {
-            const filledCount = getFilledSlotCount(day.actions);
-            const fillMap = getSlotFillMap(day.actions);
-
-            return (
-              <article
-                className="survey-card survey-list-row history-row grid gap-4 border border-zinc-200 bg-white p-4 sm:p-5 lg:grid-cols-[220px_minmax(0,1fr)_120px]"
-                key={day.dailyLog.date}
-              >
-                <div>
-                  <p className="text-lg font-semibold text-zinc-950">
-                    {formatDisplayDate(day.dailyLog.date)}
-                  </p>
-                  <p className="mt-1 text-base text-zinc-500">
-                    {filledCount === slotCount
-                      ? "모든 슬롯 기록"
-                      : `${filledCount}/${slotCount} 슬롯 기록`}
-                  </p>
-                </div>
-
-                <div className="min-w-0">
-                  <div className="flex flex-wrap gap-2">
-                    {dailyActionSlots.map((slot) => (
-                      <SlotPill
-                        day={day}
-                        filled={fillMap[slot]}
-                        key={slot}
-                        slot={slot}
-                      />
-                    ))}
-                  </div>
-                  <ExpandableText
-                    className="mt-3"
-                    fallback="회고가 비어 있습니다."
-                    previewLines={2}
-                    text={day.dailyLog.dailyReflection}
-                    title={`${formatDisplayDate(day.dailyLog.date)} · Daily Reflection`}
-                  />
-                </div>
-
-                <div className="flex items-center justify-start lg:justify-end">
-                  <span className="survey-chip rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-lg font-semibold text-zinc-700">
-                    {filledCount}/{slotCount}
-                  </span>
-                </div>
               </article>
             );
           })}
@@ -271,31 +288,6 @@ function HeatmapRow({ slot, days }: HeatmapRowProps) {
         );
       })}
     </>
-  );
-}
-
-type SlotPillProps = {
-  slot: DailyActionSlot;
-  filled: boolean;
-  day: ReturnType<typeof useRecentStoredDays>[number];
-};
-
-function SlotPill({ slot, filled, day }: SlotPillProps) {
-  return (
-    <ActionDialogTrigger
-      action={getActionForSlot(day.actions, slot)}
-      ariaLabel={`${formatDisplayDate(day.dailyLog.date)} ${slotMeta[slot].label} 전문 보기`}
-      className={cn(
-        "rounded-md border px-2.5 py-1 text-sm font-semibold transition",
-        filled
-          ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-white"
-          : "border-zinc-200 bg-zinc-50 text-zinc-400",
-      )}
-      date={day.dailyLog.date}
-      title={getActionTitle(day, slot)}
-    >
-      {slotMeta[slot].label}
-    </ActionDialogTrigger>
   );
 }
 

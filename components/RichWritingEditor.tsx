@@ -6,6 +6,7 @@ import {
   useEffect,
   useMemo,
   useRef,
+  useState,
 } from "react";
 import {
   Bold,
@@ -22,6 +23,7 @@ import {
   Pilcrow,
   Quote,
   Redo2,
+  SlidersHorizontal,
   Strikethrough,
   Underline as UnderlineIcon,
   Undo2,
@@ -102,6 +104,8 @@ const emptyToolbarState: ToolbarState = {
   underline: false,
 };
 
+const primaryToolbarLabels = new Set(["굵게", "기울임", "목록", "인용"]);
+
 function setEditorContent(
   editor: Editor,
   contentJson: JSONContent | null | undefined,
@@ -168,6 +172,7 @@ function toggleLink(editor: Editor) {
 }
 
 function RichEditorToolbar({ editor }: { editor: Editor | null }) {
+  const [isFormatExpanded, setIsFormatExpanded] = useState(false);
   const state =
     useEditorState({
       editor,
@@ -309,11 +314,35 @@ function RichEditorToolbar({ editor }: { editor: Editor | null }) {
       onClick: () => editor?.chain().focus().setHorizontalRule().run(),
     },
   ];
+  const primaryButtons = buttons.filter((button) => primaryToolbarLabels.has(button.label));
+  const secondaryButtons = buttons.filter((button) => !primaryToolbarLabels.has(button.label));
 
   return (
-    <div className="rich-editor-topbar">
+    <div className="rich-editor-topbar" data-format-expanded={isFormatExpanded}>
       <div className="rich-format-toolbar" aria-label="Rich text formatting tools">
-        {buttons.map((button) => (
+        {primaryButtons.map((button) => (
+          <ToolbarButton key={button.label} {...button} />
+        ))}
+        <button
+          aria-controls="rich-secondary-formatting-tools"
+          aria-expanded={isFormatExpanded}
+          aria-label={isFormatExpanded ? "서식 도구 접기" : "서식 도구 더보기"}
+          className="survey-control rich-format-toggle"
+          data-tooltip={isFormatExpanded ? "서식 접기" : "서식 더보기"}
+          onClick={() => setIsFormatExpanded((current) => !current)}
+          title={isFormatExpanded ? "서식 접기" : "서식 더보기"}
+          type="button"
+        >
+          <SlidersHorizontal aria-hidden="true" size={16} />
+          <span>서식</span>
+        </button>
+      </div>
+      <div
+        aria-label="More rich text formatting tools"
+        className="rich-secondary-toolbar"
+        id="rich-secondary-formatting-tools"
+      >
+        {secondaryButtons.map((button) => (
           <ToolbarButton key={button.label} {...button} />
         ))}
       </div>

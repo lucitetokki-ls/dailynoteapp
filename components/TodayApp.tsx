@@ -13,12 +13,11 @@ import {
 import { DailyImagePanel } from "@/components/DailyImagePanel";
 import { DailyReflection } from "@/components/DailyReflection";
 import { FixedDailyActions } from "@/components/FixedDailyActions";
-import { SyncToast } from "@/components/SyncToast";
+import { SaveStatusIndicator } from "@/components/SaveStatusIndicator";
 import { updateStoredDay, useStoredDay, useSupabaseSyncStatus } from "@/lib/daily-store";
 import { getActionForSlot, getFilledSlotCount } from "@/lib/slot-metrics";
 import {
   addDaysToDateKey,
-  cn,
   createId,
   formatDisplayDate,
   getTodayDateKey,
@@ -110,7 +109,6 @@ export function TodayApp() {
 
   return (
     <div className="today-page grid gap-5 pb-9 sm:gap-8 sm:pb-12">
-      <SyncToast syncStatus={syncStatus} />
       <header className="survey-hero today-hero grid gap-4 sm:gap-5">
         <div className="max-w-5xl pt-1 text-left">
           <p className="survey-kicker">Lucitetokki Daily Action Log</p>
@@ -162,24 +160,7 @@ export function TodayApp() {
           ) : null}
         </div>
         <div className="mobile-sync-row sync-status-cluster flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto">
-          <span
-            aria-live="polite"
-            data-status={syncStatus.status}
-            className={cn(
-              "sync-status-pill rounded-md border px-3 py-1.5 text-sm font-semibold",
-              syncStatus.status === "saved" &&
-                "border-emerald-200 bg-emerald-50 text-emerald-700",
-              syncStatus.status === "saving" && "border-sky-200 bg-sky-50 text-sky-700",
-              syncStatus.status === "error" && "border-red-200 bg-red-50 text-red-700",
-              syncStatus.status === "local-only" &&
-                "border-zinc-200 bg-zinc-50 text-zinc-600",
-            )}
-          >
-            {syncStatus.message}
-          </span>
-          <p className="w-full min-w-0 flex-none text-sm leading-6 text-zinc-500 sm:w-auto sm:text-base">
-            입력은 자동 저장됩니다. 오류가 나면 로컬 기록은 유지됩니다.
-          </p>
+          <SaveStatusIndicator status={syncStatus.status} updatedAt={syncStatus.updatedAt} />
         </div>
       </div>
 

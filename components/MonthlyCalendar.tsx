@@ -40,6 +40,14 @@ export function MonthlyCalendar() {
   const selectedFilledCount = getFilledSlotCount(selectedDay.actions);
   const selectedRate = getSlotCompletionRate(selectedDay.actions);
 
+  function shiftMonth(amount: number) {
+    const nextMonth = addMonthsToMonthKey(monthKey, amount);
+    const today = getTodayDateKey();
+
+    setMonthKey(nextMonth);
+    setSelectedDate(today.startsWith(nextMonth) ? today : getMonthDateKeys(nextMonth)[0]);
+  }
+
   return (
     <div className="grid gap-8 pb-12">
       <header className="survey-hero grid gap-5">
@@ -56,7 +64,7 @@ export function MonthlyCalendar() {
         <div className="flex flex-wrap items-center justify-start gap-2">
           <button
             className="survey-control flex h-12 w-12 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950"
-            onClick={() => setMonthKey((current) => addMonthsToMonthKey(current, -1))}
+            onClick={() => shiftMonth(-1)}
             title="이전 달"
             type="button"
           >
@@ -67,7 +75,7 @@ export function MonthlyCalendar() {
           </div>
           <button
             className="survey-control flex h-12 w-12 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950"
-            onClick={() => setMonthKey((current) => addMonthsToMonthKey(current, 1))}
+            onClick={() => shiftMonth(1)}
             title="다음 달"
             type="button"
           >
@@ -162,54 +170,46 @@ export function MonthlyCalendar() {
           </div>
         </div>
 
-        <div className="grid gap-3 md:hidden">
-          {monthDates.map((dateKey) => {
-            const day = readStoredDay(dateKey);
-            const filledCount = getFilledSlotCount(day.actions);
-            const fillMap = getSlotFillMap(day.actions);
-            const isSelected = selectedDate === dateKey;
+        <div className="mobile-calendar-panel survey-card grid gap-2 border border-zinc-200 bg-white p-2 md:hidden">
+          <div className="mobile-calendar-weekdays grid grid-cols-7 gap-1" aria-hidden="true">
+            {weekdays.map((weekday) => (
+              <span className="py-1 text-center text-xs font-semibold text-zinc-500" key={weekday}>
+                {weekday}
+              </span>
+            ))}
+          </div>
+          <div className="mobile-calendar-grid grid grid-cols-7 gap-1">
+            {Array.from({ length: leadingBlankCount }).map((_, index) => (
+              <span aria-hidden="true" className="mobile-calendar-blank" key={`mobile-blank-${index}`} />
+            ))}
+            {monthDates.map((dateKey) => {
+              const day = readStoredDay(dateKey);
+              const filledCount = getFilledSlotCount(day.actions);
+              const rate = getSlotCompletionRate(day.actions);
+              const isSelected = selectedDate === dateKey;
 
-            return (
-              <button
-                className={cn(
-                  "calendar-mobile-day-card survey-card grid gap-3 rounded-lg border border-zinc-200 bg-white p-4 text-left shadow-sm",
-                  isSelected && "border-zinc-950",
-                )}
-                key={dateKey}
-                onClick={() => setSelectedDate(dateKey)}
-                type="button"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-lg font-semibold text-zinc-950">
-                      {formatDisplayDate(dateKey)}
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-zinc-500">
-                      {filledCount > 0 ? `${filledCount}개 로그` : "아직 로그 없음"}
-                    </p>
-                  </div>
-                  <span className="rounded-md border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-sm font-semibold text-zinc-600">
-                    {filledCount}/{slotCount}
+              return (
+                <button
+                  aria-label={`${formatDisplayDate(dateKey)} 기록 ${filledCount}/${slotCount}`}
+                  aria-pressed={isSelected}
+                  className="mobile-calendar-day"
+                  data-filled={filledCount > 0}
+                  data-selected={isSelected}
+                  key={dateKey}
+                  onClick={() => setSelectedDate(dateKey)}
+                  type="button"
+                >
+                  <span className="mobile-calendar-date-number">{Number(dateKey.slice(-2))}</span>
+                  <span aria-hidden="true" className="mobile-calendar-progress">
+                    <span style={{ width: `${rate}%` }} />
                   </span>
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  {dailyActionSlots.map((slot) => (
-                    <span
-                      className={cn(
-                        "h-2 border border-zinc-200",
-                        fillMap[slot] ? "bg-emerald-50" : "bg-zinc-50",
-                      )}
-                      key={slot}
-                      title={slotMeta[slot].label}
-                    />
-                  ))}
-                </div>
-              </button>
-            );
-          })}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        <aside className="calendar-detail-panel survey-card order-first rounded-lg border border-zinc-200 bg-white p-5 shadow-sm md:order-none">
+        <aside className="calendar-detail-panel survey-card rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
           <p className="text-base font-semibold text-zinc-500">선택 날짜</p>
           <h2 className="mt-2 text-2xl font-semibold text-zinc-950">
             {formatDisplayDate(selectedDate)}

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Check, Pencil, X } from "lucide-react";
 
+import { SaveStatusIndicator } from "@/components/SaveStatusIndicator";
 import type { DailyLog } from "@/types/daily-log";
 
 type DailyReflectionProps = {
@@ -15,10 +16,6 @@ export function DailyReflection({ dailyLog, onUpdateLog }: DailyReflectionProps)
   const [isEditing, setIsEditing] = useState(!hasReflection);
   const [draftReflection, setDraftReflection] = useState(dailyLog.dailyReflection);
   const [isDirty, setIsDirty] = useState(false);
-  const updatedAt = new Intl.DateTimeFormat("ko-KR", {
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(dailyLog.updatedAt));
 
   useEffect(() => {
     if (isDirty) {
@@ -88,20 +85,6 @@ export function DailyReflection({ dailyLog, onUpdateLog }: DailyReflectionProps)
     setIsEditing(true);
   }
 
-  function getSaveLabel() {
-    if (isDirty) {
-      return "입력 중";
-    }
-
-    if (hasReflection) {
-      return `저장 ${updatedAt}`;
-    }
-
-    return null;
-  }
-
-  const saveLabel = getSaveLabel();
-
   return (
     <section className="survey-card flex h-full flex-col rounded-lg border border-zinc-200 bg-white p-4 shadow-sm sm:p-5">
       <div className="mb-4 flex items-start justify-between gap-3 sm:mb-5 sm:gap-4">
@@ -110,10 +93,12 @@ export function DailyReflection({ dailyLog, onUpdateLog }: DailyReflectionProps)
           <p className="mt-1.5 text-sm leading-6 text-zinc-500 sm:text-base">작성 후 언제든 다시 수정할 수 있습니다.</p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          {saveLabel ? (
-            <span className="hidden rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-sm font-semibold text-emerald-700 sm:inline">
-              {saveLabel}
-            </span>
+          {isDirty || hasReflection ? (
+            <SaveStatusIndicator
+              className="hidden sm:inline-flex"
+              status={isDirty ? "editing" : "saved"}
+              updatedAt={dailyLog.updatedAt}
+            />
           ) : null}
           {isEditing ? (
             <>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { SaveStatusIndicator } from "@/components/SaveStatusIndicator";
 import { formatDisplayWeek, getWeekKey } from "@/lib/utils";
 import { updateWeeklyReflection, useWeeklyReflection } from "@/lib/weekly-store";
 
@@ -11,10 +12,6 @@ export function WeeklyReflectionPanel() {
   const hasReflection = Boolean(
     reflection.wins.trim() || reflection.blockers.trim() || reflection.nextFocus.trim(),
   );
-  const updatedAt = new Intl.DateTimeFormat("ko-KR", {
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(reflection.updatedAt));
 
   return (
     <section className="survey-card rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
@@ -26,9 +23,7 @@ export function WeeklyReflectionPanel() {
           </p>
         </div>
         {hasReflection ? (
-          <span className="rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-sm font-semibold text-emerald-700">
-            저장 {updatedAt}
-          </span>
+          <SaveStatusIndicator status="saved" updatedAt={reflection.updatedAt} />
         ) : null}
       </div>
 

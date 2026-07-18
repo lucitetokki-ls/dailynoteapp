@@ -68,7 +68,13 @@ const navItems = [
   },
 ];
 
-const mobilePrimaryHrefs = new Set(["/", "/review", "/writing", "/search"]);
+const mobilePrimaryHrefs = new Set(["/", "/writing", "/calendar", "/review"]);
+const mobileOrderByHref = new Map([
+  ["/", "1"],
+  ["/writing", "2"],
+  ["/calendar", "3"],
+  ["/review", "4"],
+]);
 const mobileOverflowItems = navItems.filter((item) => !mobilePrimaryHrefs.has(item.href));
 
 export function AppNav() {
@@ -110,6 +116,7 @@ export function AppNav() {
           <Link
             aria-current={isActive ? "page" : undefined}
             data-active={isActive}
+            data-mobile-order={mobileOrderByHref.get(item.href)}
             data-mobile-primary={mobilePrimaryHrefs.has(item.href)}
             data-tooltip={item.label}
             className={cn(
@@ -138,6 +145,7 @@ export function AppNav() {
         aria-expanded={isMoreOpen}
         className="mobile-nav-link mobile-more-trigger"
         data-active={isOverflowActive || isMoreOpen}
+        data-mobile-order="5"
         onClick={() => setIsMoreOpen((current) => !current)}
         type="button"
       >
@@ -163,7 +171,7 @@ export function AppNav() {
       >
         <div className="mobile-more-panel-heading">
           <span>추가 메뉴</span>
-          <span>카테고리 · 캘린더 · 설정</span>
+          <span>카테고리 · 검색 · 설정</span>
         </div>
         {mobileOverflowItems.map((item) => {
           const Icon = item.icon;
