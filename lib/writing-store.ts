@@ -4,6 +4,18 @@ import { useEffect, useSyncExternalStore } from "react";
 import type { JSONContent } from "@tiptap/core";
 
 import {
+  deleteAllWritingEntriesFromDatabase,
+  readAllWritingEntriesFromDatabase,
+  readWritingEntryFromDatabase,
+  writeWritingEntryToDatabase,
+} from "@/lib/client-db";
+import {
+  enqueueSyncOperation,
+  registerSyncHandler,
+  replaceDomainWithDeleteOperation,
+} from "@/lib/sync-engine";
+import { collectSupabasePages } from "@/lib/supabase-pagination";
+import {
   isSupabaseConfigured,
   retrySupabaseMutation,
   supabase,
@@ -21,6 +33,8 @@ let writingSnapshotVersion = 0;
 let writingSyncVersion = 0;
 const loadedWritingDates = new Set<string>();
 let loadedAllWritingEntries = false;
+let writingHydrationPromise: Promise<void> | null = null;
+const writingEntriesCache = new Map<string, WritingEntry>();
 const writingSyncStatuses = new Map<string, WritingSyncStatus>();
 
 export type WritingSyncStatus = {
@@ -45,6 +59,14 @@ type WritingEntryRow = {
   created_at: string;
   updated_at: string;
 };
+
+type WritingEntrySummaryRow = Pick<
+  WritingEntryRow,
+  "id" | "date" | "title" | "created_at" | "updated_at"
+>;
+
+const writingEntryColumns =
+  "id,date,title,content,content_json,content_markdown,created_at,updated_at";
 
 export type WritingEntryDraft = {
   title?: string;
@@ -104,6 +126,16 @@ function emitWritingStoreChange() {
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event(writingStoreEventName));
   }
+}
+
+function broadcastWritingStoreChange(date = "all") {
+  if (typeof BroadcastChannel === "undefined") {
+    return;
+  }
+
+  const channel = new BroadcastChannel(writingStoreEventName);
+  channel.postMessage({ date });
+  channel.close();
 }
 
 function emitWritingSyncChange() {
@@ -183,8 +215,71 @@ function readWritingEntryFromLocalStorage(date: string): WritingEntry {
 }
 
 function writeWritingEntryLocally(date: string, entry: WritingEntry) {
-  window.localStorage.setItem(getWritingStorageKey(date), JSON.stringify(normalizeWritingEntry(entry, date)));
+  const normalizedEntry = normalizeWritingEntry(entry, date);
+  writingEntriesCache.set(date, normalizedEntry);
   emitWritingStoreChange();
+  broadcastWritingStoreChange(date);
+
+  void writeWritingEntryToDatabase(normalizedEntry).catch((error) => {
+    console.warn("Failed to save daily writing to IndexedDB", error);
+    setWritingSyncStatus(date, {
+      status: "error",
+      message: "브라우저 저장 공간을 확인하세요",
+      updatedAt: new Date().toISOString(),
+    });
+  });
+}
+
+async function hydrateWritingEntries() {
+  writingHydrationPromise ??= (async () => {
+    const databaseEntries = await readAllWritingEntriesFromDatabase();
+    databaseEntries.forEach((entry) => {
+      const normalizedEntry = normalizeWritingEntry(entry, entry.date);
+      const cachedEntry = writingEntriesCache.get(entry.date);
+
+      if (!cachedEntry || normalizedEntry.updatedAt > cachedEntry.updatedAt) {
+        writingEntriesCache.set(entry.date, normalizedEntry);
+      }
+    });
+
+    if (typeof window !== "undefined") {
+      const legacyKeys: string[] = [];
+
+      for (let index = 0; index < window.localStorage.length; index += 1) {
+        const key = window.localStorage.key(index);
+
+        if (key?.startsWith(writingStoragePrefix)) {
+          legacyKeys.push(key);
+        }
+      }
+
+      for (const key of legacyKeys) {
+        const date = key.slice(writingStoragePrefix.length);
+
+        if (!writingDatePattern.test(date)) {
+          continue;
+        }
+
+        const legacyEntry = readWritingEntryFromLocalStorage(date);
+        const databaseEntry = writingEntriesCache.get(date);
+
+        if (!databaseEntry || legacyEntry.updatedAt > databaseEntry.updatedAt) {
+          writingEntriesCache.set(date, legacyEntry);
+          await writeWritingEntryToDatabase(legacyEntry);
+        }
+
+        window.localStorage.removeItem(key);
+      }
+    }
+
+    emitWritingStoreChange();
+  })().catch((error) => {
+    writingHydrationPromise = null;
+    console.warn("Failed to hydrate daily writings from IndexedDB", error);
+    throw error;
+  });
+
+  return writingHydrationPromise;
 }
 
 async function fetchWritingEntryFromSupabase(date: string) {
@@ -194,7 +289,7 @@ async function fetchWritingEntryFromSupabase(date: string) {
 
   const { data, error } = await supabase
     .from("daily_writings")
-    .select("*")
+    .select(writingEntryColumns)
     .eq("date", date)
     .maybeSingle<WritingEntryRow>();
 
@@ -205,7 +300,7 @@ async function fetchWritingEntryFromSupabase(date: string) {
       message: "동기화에 실패했습니다",
       updatedAt: new Date().toISOString(),
     });
-    return null;
+    return undefined;
   }
 
   return data ? mapWritingEntryRow(data) : null;
@@ -218,6 +313,8 @@ async function syncWritingEntryFromSupabase(date: string) {
 
   loadedWritingDates.add(date);
 
+  await hydrateWritingEntries();
+
   const remoteEntry = await fetchWritingEntryFromSupabase(date);
 
   if (remoteEntry === undefined) {
@@ -226,12 +323,13 @@ async function syncWritingEntryFromSupabase(date: string) {
   }
 
   if (remoteEntry) {
-    const localEntry = readWritingEntryFromLocalStorage(date);
+    const localEntry = readWritingEntry(date);
 
     if (
       hasWritingContent(localEntry) &&
       (!hasWritingContent(remoteEntry) || localEntry.updatedAt > remoteEntry.updatedAt)
     ) {
+      void enqueueSyncOperation("writing-upsert", date, localEntry);
       return;
     }
 
@@ -245,22 +343,30 @@ async function syncAllWritingEntriesFromSupabase() {
   }
 
   loadedAllWritingEntries = true;
+  const client = supabase;
 
-  const { data, error } = await supabase
-    .from("daily_writings")
-    .select("*")
-    .order("date", { ascending: false })
-    .returns<WritingEntryRow[]>();
+  await hydrateWritingEntries();
 
-  if (error) {
-    console.warn("Failed to fetch daily writings from Supabase", error.message);
+  let rows: WritingEntryRow[];
+
+  try {
+    rows = await collectSupabasePages<WritingEntryRow>((from, to) =>
+      client
+        .from("daily_writings")
+        .select(writingEntryColumns)
+        .order("date", { ascending: false })
+        .range(from, to)
+        .returns<WritingEntryRow[]>(),
+    );
+  } catch (error) {
+    console.warn("Failed to fetch daily writings from Supabase", error);
     loadedAllWritingEntries = false;
     return;
   }
 
-  (data ?? []).forEach((row) => {
+  rows.forEach((row) => {
     const remoteEntry = mapWritingEntryRow(row);
-    const localEntry = readWritingEntryFromLocalStorage(remoteEntry.date);
+    const localEntry = readWritingEntry(remoteEntry.date);
 
     loadedWritingDates.add(remoteEntry.date);
 
@@ -268,6 +374,7 @@ async function syncAllWritingEntriesFromSupabase() {
       hasWritingContent(localEntry) &&
       (!hasWritingContent(remoteEntry) || localEntry.updatedAt > remoteEntry.updatedAt)
     ) {
+      void enqueueSyncOperation("writing-upsert", remoteEntry.date, localEntry);
       return;
     }
 
@@ -294,12 +401,88 @@ async function persistWritingEntryToSupabase(
   return { ok: true };
 }
 
+async function syncRecentWritingSummariesFromSupabase(count: number) {
+  if (!supabase) {
+    return;
+  }
+
+  await hydrateWritingEntries();
+  const { data, error } = await supabase
+    .from("daily_writings")
+    .select("id,date,title,created_at,updated_at")
+    .order("date", { ascending: false })
+    .limit(count)
+    .returns<WritingEntrySummaryRow[]>();
+
+  if (error) {
+    console.warn("Failed to fetch recent writing summaries", error.message);
+    return;
+  }
+
+  (data ?? []).forEach((row) => {
+    const current = writingEntriesCache.get(row.date);
+
+    if (!current) {
+      writingEntriesCache.set(row.date, {
+        id: row.id,
+        date: row.date,
+        title: row.title?.slice(0, 120) ?? "",
+        content: "",
+        contentJson: null,
+        contentMarkdown: "",
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+      });
+    }
+  });
+  emitWritingStoreChange();
+}
+
+export async function loadWritingEntry(date: string) {
+  await hydrateWritingEntries();
+  const remoteEntry = await fetchWritingEntryFromSupabase(date);
+  const localEntry = readWritingEntry(date);
+
+  if (remoteEntry) {
+    if (
+      hasWritingContent(localEntry) &&
+      (!hasWritingContent(remoteEntry) || localEntry.updatedAt > remoteEntry.updatedAt)
+    ) {
+      void enqueueSyncOperation("writing-upsert", date, localEntry);
+      return localEntry;
+    }
+
+    writeWritingEntryLocally(date, remoteEntry);
+    return remoteEntry;
+  }
+
+  return localEntry;
+}
+
+async function deleteAllWritingEntriesFromSupabase(): Promise<SupabaseMutationResult> {
+  if (!supabase) {
+    return { ok: true };
+  }
+
+  const { error } = await supabase
+    .from("daily_writings")
+    .delete()
+    .neq("id", "00000000-0000-0000-0000-000000000000");
+
+  if (error) {
+    console.warn("Failed to delete daily writings from Supabase", error.message);
+    return { ok: false, message: error.message };
+  }
+
+  return { ok: true };
+}
+
 export function readWritingEntry(date: string): WritingEntry {
   if (typeof window === "undefined") {
     return createDefaultWritingEntry(date);
   }
 
-  return readWritingEntryFromLocalStorage(date);
+  return writingEntriesCache.get(date) ?? readWritingEntryFromLocalStorage(date);
 }
 
 function readAllWritingEntries() {
@@ -307,25 +490,9 @@ function readAllWritingEntries() {
     return [];
   }
 
-  const entries: WritingEntry[] = [];
-
-  for (let index = 0; index < window.localStorage.length; index += 1) {
-    const key = window.localStorage.key(index);
-
-    if (!key?.startsWith(writingStoragePrefix)) {
-      continue;
-    }
-
-    const date = key.slice(writingStoragePrefix.length);
-
-    if (!writingDatePattern.test(date)) {
-      continue;
-    }
-
-    entries.push(readWritingEntryFromLocalStorage(date));
-  }
-
-  return entries.sort((first, second) => second.date.localeCompare(first.date));
+  return [...writingEntriesCache.values()].sort((first, second) =>
+    second.date.localeCompare(first.date),
+  );
 }
 
 export function writeWritingEntry(date: string, nextContent: string | WritingEntryDraft) {
@@ -367,70 +534,79 @@ export function writeWritingEntry(date: string, nextContent: string | WritingEnt
     updatedAt: now,
   });
 
-  void retrySupabaseMutation(() => persistWritingEntryToSupabase(nextEntry)).then((result) => {
+  void enqueueSyncOperation("writing-upsert", date, nextEntry).then((result) => {
     setWritingSyncStatus(date, {
-      status: result.ok ? "saved" : "error",
-      message: result.ok ? "저장됨" : "저장 실패 · 잠시 후 다시 시도하세요",
+      status: result.ok ? "saved" : result.queued ? "local-only" : "error",
+      message: result.ok ? "저장됨" : result.queued ? "동기화 대기 중" : "저장 실패",
       updatedAt: new Date().toISOString(),
     });
   });
 }
 
-export function writeWritingEntries(entries: WritingEntry[]) {
-  entries.forEach((entry) => {
+export async function writeWritingEntries(entries: WritingEntry[]) {
+  const results = await Promise.all(entries.map(async (entry) => {
     const normalizedEntry = normalizeWritingEntry(entry, entry.date);
 
     writeWritingEntryLocally(normalizedEntry.date, normalizedEntry);
+    await writeWritingEntryToDatabase(normalizedEntry);
 
     if (isSupabaseConfigured) {
-      void retrySupabaseMutation(() => persistWritingEntryToSupabase(normalizedEntry));
+      return enqueueSyncOperation("writing-upsert", normalizedEntry.date, normalizedEntry);
     }
-  });
+
+    return { ok: true, queued: false };
+  }));
+
+  return results;
 }
 
-export function clearAllWritingEntries() {
-  if (typeof window !== "undefined") {
-    const keysToRemove: string[] = [];
+export async function clearAllWritingEntries({ syncRemote = true } = {}) {
+  const result = supabase && syncRemote
+    ? await replaceDomainWithDeleteOperation(["writing-upsert"], "writing-delete-all")
+    : { ok: true, queued: false };
 
-    for (let index = 0; index < window.localStorage.length; index += 1) {
-      const key = window.localStorage.key(index);
-      const date = key?.slice(writingStoragePrefix.length);
-
-      if (key?.startsWith(writingStoragePrefix) && date && writingDatePattern.test(date)) {
-        keysToRemove.push(key);
-      }
-    }
-
-    keysToRemove.forEach((key) => window.localStorage.removeItem(key));
+  if (result.ok || result.queued) {
+    writingEntriesCache.clear();
+    await deleteAllWritingEntriesFromDatabase();
     emitWritingStoreChange();
+    broadcastWritingStoreChange();
   }
 
-  if (supabase) {
-    const client = supabase;
-
-    void retrySupabaseMutation(async () => {
-      const { error } = await client
-        .from("daily_writings")
-        .delete()
-        .neq("id", "00000000-0000-0000-0000-000000000000");
-
-      if (error) {
-        console.warn("Failed to delete daily writings from Supabase", error.message);
-        return { ok: false, message: error.message };
-      }
-
-      return { ok: true };
-    });
-  }
+  return result;
 }
 
 function subscribeToWritingEntry(onStoreChange: () => void) {
+  const channel =
+    typeof BroadcastChannel === "undefined" ? null : new BroadcastChannel(writingStoreEventName);
+  const handleBroadcast = (event: MessageEvent<{ date?: string }>) => {
+    const date = event.data?.date;
+
+    void (async () => {
+      if (date && date !== "all") {
+        const entry = await readWritingEntryFromDatabase(date);
+
+        if (entry) {
+          writingEntriesCache.set(date, normalizeWritingEntry(entry, date));
+        }
+      } else {
+        const entries = await readAllWritingEntriesFromDatabase();
+        writingEntriesCache.clear();
+        entries.forEach((entry) => writingEntriesCache.set(entry.date, entry));
+      }
+
+      writingSnapshotVersion += 1;
+      onStoreChange();
+    })();
+  };
+
+  if (channel) {
+    channel.onmessage = handleBroadcast;
+  }
   window.addEventListener(writingStoreEventName, onStoreChange);
-  window.addEventListener("storage", onStoreChange);
 
   return () => {
+    channel?.close();
     window.removeEventListener(writingStoreEventName, onStoreChange);
-    window.removeEventListener("storage", onStoreChange);
   };
 }
 
@@ -445,7 +621,7 @@ function getWritingSnapshot() {
     return "server";
   }
 
-  return `${writingSnapshotVersion}:${window.localStorage.length}`;
+  return `${writingSnapshotVersion}:${writingEntriesCache.size}`;
 }
 
 function getWritingSyncSnapshot() {
@@ -467,7 +643,7 @@ export function useWritingEntry(date = getTodayDateKey()) {
     getServerSnapshot,
   );
   useEffect(() => {
-    void syncWritingEntryFromSupabase(date);
+    void hydrateWritingEntries().then(() => syncWritingEntryFromSupabase(date));
   }, [date]);
 
   return snapshot === "server" ? createDefaultWritingEntry(date) : readWritingEntry(date);
@@ -480,7 +656,7 @@ export function useWritingEntries() {
     getServerSnapshot,
   );
   useEffect(() => {
-    void syncAllWritingEntriesFromSupabase();
+    void hydrateWritingEntries().then(syncAllWritingEntriesFromSupabase);
   }, []);
 
   return snapshot === "server" ? [] : readAllWritingEntries();
@@ -495,3 +671,23 @@ export function useWritingSyncStatus(date: string) {
 
   return snapshot === "server" ? defaultWritingSyncStatus : readWritingSyncStatus(date);
 }
+
+export function useRecentWritingEntries(count: number) {
+  const snapshot = useSyncExternalStore(
+    subscribeToWritingEntry,
+    getWritingSnapshot,
+    getServerSnapshot,
+  );
+  useEffect(() => {
+    void syncRecentWritingSummariesFromSupabase(count);
+  }, [count]);
+
+  return snapshot === "server" ? [] : readAllWritingEntries().slice(0, count);
+}
+
+registerSyncHandler("writing-upsert", (payload) =>
+  retrySupabaseMutation(() => persistWritingEntryToSupabase(payload as WritingEntry)),
+);
+registerSyncHandler("writing-delete-all", () =>
+  retrySupabaseMutation(deleteAllWritingEntriesFromSupabase),
+);

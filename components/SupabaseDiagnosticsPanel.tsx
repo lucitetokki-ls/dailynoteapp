@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Activity, CheckCircle2, Database, Play, XCircle } from "lucide-react";
 
 import { useStoredDays } from "@/lib/daily-store";
+import { readAllSyncQueueRecords } from "@/lib/client-db";
 import {
   isSupabaseConfigured,
   requiredSupabaseTables,
@@ -55,6 +56,9 @@ export function SupabaseDiagnosticsPanel() {
 
   async function runDiagnostics() {
     setIsRunning(true);
+    const pendingSyncCount = await readAllSyncQueueRecords()
+      .then((records) => records.length)
+      .catch(() => 0);
 
     const nextItems: DiagnosticItem[] = [
       {
@@ -66,7 +70,7 @@ export function SupabaseDiagnosticsPanel() {
       },
       {
         label: "LOCAL",
-        message: `${localSummary.days} days · ${localSummary.writings} writings · ${localSummary.weeks} weeks`,
+        message: `${localSummary.days} days · ${localSummary.writings} writings · ${localSummary.weeks} weeks · ${pendingSyncCount} queued`,
         status: "ok",
       },
     ];

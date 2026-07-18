@@ -3,6 +3,12 @@
 import { useEffect, useSyncExternalStore } from "react";
 
 import { isSupabaseConfigured, retrySupabaseMutation, supabase } from "@/lib/supabase";
+import {
+  enqueueSyncOperation,
+  registerSyncHandler,
+  replaceDomainWithDeleteOperation,
+} from "@/lib/sync-engine";
+import { collectSupabasePages } from "@/lib/supabase-pagination";
 import { createStableUuid, getWeekKey } from "@/lib/utils";
 import type { WeeklyReflection } from "@/types/weekly-reflection";
 
@@ -24,6 +30,9 @@ type WeeklyReflectionRow = {
   created_at: string;
   updated_at: string;
 };
+
+const weeklyReflectionColumns =
+  "id,week_key,wins,blockers,next_focus,created_at,updated_at";
 
 function getStorageKey(weekKey: string) {
   return `${storagePrefix}${weekKey}`;
@@ -51,8 +60,13 @@ function canReadBrowserWeeklyStore() {
 }
 
 function writeWeeklyReflectionLocally(reflection: WeeklyReflection) {
-  window.localStorage.setItem(getStorageKey(reflection.weekKey), JSON.stringify(reflection));
-  emitStoreChange();
+  try {
+    window.localStorage.setItem(getStorageKey(reflection.weekKey), JSON.stringify(reflection));
+    emitStoreChange();
+  } catch (error) {
+    console.warn("Failed to save weekly reflection to browser storage", error);
+    throw error;
+  }
 }
 
 function hasWeeklyReflectionContent(reflection: WeeklyReflection) {
@@ -97,12 +111,21 @@ function mapWeeklyReflectionToRow(reflection: WeeklyReflection): WeeklyReflectio
 }
 
 function subscribeToWeeklyReflections(onStoreChange: () => void) {
+  const handleStorageChange = (event: StorageEvent) => {
+    if (!event.key?.startsWith(storagePrefix)) {
+      return;
+    }
+
+    snapshotVersion += 1;
+    onStoreChange();
+  };
+
   window.addEventListener(storeEventName, onStoreChange);
-  window.addEventListener("storage", onStoreChange);
+  window.addEventListener("storage", handleStorageChange);
 
   return () => {
     window.removeEventListener(storeEventName, onStoreChange);
-    window.removeEventListener("storage", onStoreChange);
+    window.removeEventListener("storage", handleStorageChange);
   };
 }
 
@@ -150,24 +173,28 @@ function readWeeklyReflection(weekKey: string) {
   }
 }
 
+async function persistWeeklyReflectionToSupabase(reflection: WeeklyReflection) {
+  if (!supabase) {
+    return { ok: true };
+  }
+
+  const { error } = await supabase
+    .from("weekly_reflections")
+    .upsert(mapWeeklyReflectionToRow(reflection), { onConflict: "week_key" });
+
+  if (error) {
+    console.warn("Failed to save weekly reflection to Supabase", error.message);
+    return { ok: false, message: error.message };
+  }
+
+  return { ok: true };
+}
+
 function writeWeeklyReflection(reflection: WeeklyReflection) {
   writeWeeklyReflectionLocally(reflection);
 
   if (supabase) {
-    const client = supabase;
-
-    void retrySupabaseMutation(async () => {
-      const { error } = await client
-        .from("weekly_reflections")
-        .upsert(mapWeeklyReflectionToRow(reflection), { onConflict: "week_key" });
-
-      if (error) {
-        console.warn("Failed to save weekly reflection to Supabase", error.message);
-        return { ok: false, message: error.message };
-      }
-
-      return { ok: true };
-    });
+    void enqueueSyncOperation("weekly-upsert", reflection.weekKey, reflection);
   }
 }
 
@@ -214,7 +241,7 @@ async function syncWeeklyReflectionFromSupabase(weekKey: string) {
 
   const { data, error } = await supabase
     .from("weekly_reflections")
-    .select("*")
+    .select(weeklyReflectionColumns)
     .eq("week_key", weekKey)
     .maybeSingle<WeeklyReflectionRow>();
 
@@ -229,6 +256,7 @@ async function syncWeeklyReflectionFromSupabase(weekKey: string) {
     const localReflection = readWeeklyReflection(weekKey);
 
     if (shouldKeepLocalWeeklyReflection(localReflection, remoteReflection)) {
+      void enqueueSyncOperation("weekly-upsert", weekKey, localReflection);
       return;
     }
 
@@ -242,26 +270,33 @@ async function syncAllWeeklyReflectionsFromSupabase() {
   }
 
   loadedAllWeeklyReflections = true;
+  const client = supabase;
 
-  const { data, error } = await supabase
-    .from("weekly_reflections")
-    .select("*")
-    .order("week_key", { ascending: false })
-    .returns<WeeklyReflectionRow[]>();
+  let rows: WeeklyReflectionRow[];
 
-  if (error) {
-    console.warn("Failed to fetch weekly reflections from Supabase", error.message);
+  try {
+    rows = await collectSupabasePages<WeeklyReflectionRow>((from, to) =>
+      client
+        .from("weekly_reflections")
+        .select(weeklyReflectionColumns)
+        .order("week_key", { ascending: false })
+        .range(from, to)
+        .returns<WeeklyReflectionRow[]>(),
+    );
+  } catch (error) {
+    console.warn("Failed to fetch weekly reflections from Supabase", error);
     loadedAllWeeklyReflections = false;
     return;
   }
 
-  (data ?? []).forEach((row) => {
+  rows.forEach((row) => {
     const remoteReflection = mapWeeklyReflectionRow(row);
     const localReflection = readWeeklyReflection(row.week_key);
 
     loadedWeekKeys.add(row.week_key);
 
     if (shouldKeepLocalWeeklyReflection(localReflection, remoteReflection)) {
+      void enqueueSyncOperation("weekly-upsert", row.week_key, localReflection);
       return;
     }
 
@@ -287,11 +322,44 @@ export function useWeeklyReflections() {
   return readAllWeeklyReflections();
 }
 
-export function writeWeeklyReflections(reflections: WeeklyReflection[]) {
-  reflections.forEach((reflection) => writeWeeklyReflection(reflection));
+export async function writeWeeklyReflections(reflections: WeeklyReflection[]) {
+  return Promise.all(
+    reflections.map(async (reflection) => {
+      writeWeeklyReflectionLocally(reflection);
+      return supabase
+        ? enqueueSyncOperation("weekly-upsert", reflection.weekKey, reflection)
+        : { ok: true, queued: false };
+    }),
+  );
 }
 
-export function clearAllWeeklyReflections() {
+async function deleteAllWeeklyReflectionsFromSupabase() {
+  if (!supabase) {
+    return { ok: true };
+  }
+
+  const { error } = await supabase
+    .from("weekly_reflections")
+    .delete()
+    .neq("id", "00000000-0000-0000-0000-000000000000");
+
+  if (error) {
+    console.warn("Failed to delete weekly reflections from Supabase", error.message);
+    return { ok: false, message: error.message };
+  }
+
+  return { ok: true };
+}
+
+export async function clearAllWeeklyReflections({ syncRemote = true } = {}) {
+  const result = supabase && syncRemote
+    ? await replaceDomainWithDeleteOperation(["weekly-upsert"], "weekly-delete-all")
+    : { ok: true, queued: false };
+
+  if (!result.ok && !result.queued) {
+    return result;
+  }
+
   const keysToRemove: string[] = [];
 
   for (let index = 0; index < window.localStorage.length; index += 1) {
@@ -306,21 +374,12 @@ export function clearAllWeeklyReflections() {
   keysToRemove.forEach((key) => window.localStorage.removeItem(key));
   emitStoreChange();
 
-  if (supabase) {
-    const client = supabase;
-
-    void retrySupabaseMutation(async () => {
-      const { error } = await client
-        .from("weekly_reflections")
-        .delete()
-        .neq("id", "00000000-0000-0000-0000-000000000000");
-
-      if (error) {
-        console.warn("Failed to delete weekly reflections from Supabase", error.message);
-        return { ok: false, message: error.message };
-      }
-
-      return { ok: true };
-    });
-  }
+  return result;
 }
+
+registerSyncHandler("weekly-upsert", (payload) =>
+  retrySupabaseMutation(() => persistWeeklyReflectionToSupabase(payload as WeeklyReflection)),
+);
+registerSyncHandler("weekly-delete-all", () =>
+  retrySupabaseMutation(deleteAllWeeklyReflectionsFromSupabase),
+);

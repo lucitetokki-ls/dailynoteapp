@@ -16,8 +16,14 @@ import {
   readStoredDay,
   updateStoredDay,
   useStoredDays,
-  writeStoredDay,
+  writeStoredDays,
 } from "@/lib/daily-store";
+import { clearAllRemoteData } from "@/lib/data-maintenance";
+import {
+  decryptDailyNoteBackup,
+  encryptDailyNoteBackup,
+  isEncryptedDailyNoteBackup,
+} from "@/lib/encrypted-backup";
 import { readActionTemplates, writeActionTemplates } from "@/lib/template-store";
 import { createId, getDateKeyFromOffset, getTodayDateKey } from "@/lib/utils";
 import {
@@ -56,6 +62,8 @@ export function SettingsPanel() {
   const [pendingDelete, setPendingDelete] = useState<DeleteScope | null>(null);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
   const [feedback, setFeedback] = useState<SettingsFeedback | null>(null);
+  const [isWorking, setIsWorking] = useState(false);
+  const [backupPassphrase, setBackupPassphrase] = useState("");
 
   function handleSeedSampleData() {
     Array.from({ length: 7 }, (_, index) => getDateKeyFromOffset(-index)).forEach(
@@ -112,28 +120,58 @@ export function SettingsPanel() {
     setDeleteConfirmation("");
   }
 
-  function confirmDelete() {
+  async function confirmDelete() {
     if (pendingDelete === "all" && deleteConfirmation !== "DELETE") {
       setFeedback({ tone: "error", message: "전체 삭제를 진행하려면 DELETE를 정확히 입력하세요." });
       return;
     }
 
-    if (pendingDelete === "today") {
-      clearStoredDay(getTodayDateKey());
-      setFeedback({ tone: "success", message: "오늘 기록 삭제를 요청했습니다." });
-    }
+    setIsWorking(true);
 
-    if (pendingDelete === "all") {
-      clearAllStoredDays();
-      clearAllWritingEntries();
-      clearAllWeeklyReflections();
-      setFeedback({ tone: "success", message: "전체 기록 삭제를 요청했습니다." });
-    }
+    try {
+      if (pendingDelete === "today") {
+        const result = await clearStoredDay(getTodayDateKey());
+        setFeedback({
+          tone: result.ok || result.queued ? "success" : "error",
+          message: result.ok
+            ? "오늘 기록을 삭제했습니다."
+            : result.queued
+              ? "로컬 기록을 삭제했고 원격 삭제는 재연결 후 처리합니다."
+              : "오늘 기록을 삭제하지 못했습니다.",
+        });
+      }
 
-    cancelDelete();
+      if (pendingDelete === "all") {
+        const result = await clearAllRemoteData();
+
+        if (!result.ok && !result.queued) {
+          throw new Error(
+            "message" in result ? String(result.message ?? "Remote delete failed.") : "Remote delete failed.",
+          );
+        }
+
+        await Promise.all([
+          clearAllStoredDays({ syncRemote: false }),
+          clearAllWritingEntries({ syncRemote: false }),
+          clearAllWeeklyReflections({ syncRemote: false }),
+        ]);
+        setFeedback({
+          tone: "success",
+          message: result.ok
+            ? "전체 기록을 삭제했습니다."
+            : "로컬 기록을 삭제했고 원격 삭제는 재연결 후 처리합니다.",
+        });
+      }
+
+      cancelDelete();
+    } catch {
+      setFeedback({ tone: "error", message: "삭제를 완료하지 못했습니다. 잠시 후 다시 시도하세요." });
+    } finally {
+      setIsWorking(false);
+    }
   }
 
-  function handleExportBackup() {
+  async function handleExportBackup() {
     const backup: DailyNoteBackup = {
       app: "daily-note-app",
       version: 3,
@@ -143,17 +181,37 @@ export function SettingsPanel() {
       templates: readActionTemplates(),
       weeklyReflections,
     };
-    const blob = new Blob([JSON.stringify(backup, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
+    if (backupPassphrase && backupPassphrase.length < 8) {
+      setFeedback({ tone: "error", message: "암호화 비밀번호는 8자 이상 입력하세요." });
+      return;
+    }
 
-    link.href = url;
-    link.download = `daily-note-backup-${getTodayDateKey()}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
-    setFeedback({ tone: "success", message: "백업 파일을 만들었습니다." });
+    setIsWorking(true);
+    try {
+      const exportValue = backupPassphrase
+        ? await encryptDailyNoteBackup(backup, backupPassphrase)
+        : backup;
+      const blob = new Blob([JSON.stringify(exportValue, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = `daily-note-backup-${getTodayDateKey()}${backupPassphrase ? "-encrypted" : ""}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+      setFeedback({
+        tone: "success",
+        message: backupPassphrase
+          ? "암호화된 백업 파일을 만들었습니다. 비밀번호를 잊지 마세요."
+          : "백업 파일을 만들었습니다. 민감한 기록이 포함되므로 안전하게 보관하세요.",
+      });
+    } catch {
+      setFeedback({ tone: "error", message: "백업 파일을 만들지 못했습니다." });
+    } finally {
+      setIsWorking(false);
+    }
   }
 
   async function handleImportBackup(event: ChangeEvent<HTMLInputElement>) {
@@ -168,31 +226,47 @@ export function SettingsPanel() {
         throw new Error("Backup file is too large.");
       }
 
-      const parsed = parseDailyNoteBackup(JSON.parse(await file.text()));
+      const rawBackup = JSON.parse(await file.text()) as unknown;
+      const decryptedBackup = isEncryptedDailyNoteBackup(rawBackup)
+        ? await decryptDailyNoteBackup(rawBackup, backupPassphrase)
+        : rawBackup;
+      const parsed = parseDailyNoteBackup(decryptedBackup);
 
-      parsed.days.forEach((day) => {
-        writeStoredDay(day.dailyLog.date, day);
+      setIsWorking(true);
+      const resultGroups = await Promise.all([
+        writeStoredDays(parsed.days),
+        parsed.templates.length > 0
+          ? writeActionTemplates(parsed.templates).then((result) => [result])
+          : Promise.resolve([]),
+        parsed.writingEntries.length > 0
+          ? writeWritingEntries(parsed.writingEntries)
+          : Promise.resolve([]),
+        parsed.weeklyReflections.length > 0
+          ? writeWeeklyReflections(parsed.weeklyReflections)
+          : Promise.resolve([]),
+      ]);
+      const results = resultGroups.flat();
+      const queuedCount = results.filter((result) => "queued" in result && result.queued).length;
+      const failedCount = results.filter((result) => !result.ok && !("queued" in result && result.queued)).length;
+
+      if (failedCount > 0) {
+        throw new Error("One or more backup records failed to import.");
+      }
+
+      setFeedback({
+        tone: "success",
+        message:
+          queuedCount > 0
+            ? `백업을 가져왔습니다. ${queuedCount}건은 재연결 후 동기화됩니다.`
+            : "백업을 로컬과 Supabase에 모두 가져왔습니다.",
       });
-
-      if (parsed.templates.length > 0) {
-        writeActionTemplates(parsed.templates);
-      }
-
-      if (parsed.writingEntries.length > 0) {
-        writeWritingEntries(parsed.writingEntries);
-      }
-
-      if (parsed.weeklyReflections.length > 0) {
-        writeWeeklyReflections(parsed.weeklyReflections);
-      }
-
-      setFeedback({ tone: "success", message: "백업을 가져왔습니다." });
     } catch {
       setFeedback({
         tone: "error",
         message: "백업 파일의 형식이 올바르지 않거나 허용 크기를 초과했습니다.",
       });
     } finally {
+      setIsWorking(false);
       event.target.value = "";
     }
   }
@@ -212,6 +286,25 @@ export function SettingsPanel() {
       <SupabaseStatusCard />
       <SupabaseDiagnosticsPanel />
 
+      <section className="survey-card rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+        <label className="grid max-w-xl gap-2 text-sm font-semibold text-zinc-800">
+          백업 암호화 비밀번호 (선택)
+          <input
+            autoComplete="new-password"
+            className="survey-control h-11 rounded-md border border-zinc-200 bg-white px-3 text-base text-zinc-950 outline-none focus:border-emerald-400"
+            disabled={isWorking}
+            minLength={8}
+            onChange={(event) => setBackupPassphrase(event.target.value)}
+            placeholder="8자 이상 입력하면 내보내기 파일을 암호화합니다"
+            type="password"
+            value={backupPassphrase}
+          />
+        </label>
+        <p className="mt-2 text-sm leading-6 text-zinc-500">
+          암호화 백업을 가져올 때도 같은 비밀번호를 먼저 입력하세요. 비밀번호는 저장되지 않습니다.
+        </p>
+      </section>
+
       <section className="grid gap-4 lg:grid-cols-3">
         <ActionPanel
           description="최근 7일에 6슬롯 구조 예시 데이터를 채웁니다."
@@ -222,7 +315,7 @@ export function SettingsPanel() {
         <ActionPanel
           description="일일 기록, 작문, 주간 회고를 JSON 파일로 내보냅니다."
           icon={Download}
-          onClick={handleExportBackup}
+          onClick={() => void handleExportBackup()}
           title="백업 내보내기"
         />
         <ActionPanel
@@ -300,10 +393,11 @@ export function SettingsPanel() {
             <div className="mt-4 flex flex-wrap gap-2">
               <button
                 className="survey-control min-h-11 rounded-md border border-red-300 bg-red-600 px-4 text-base font-semibold text-white transition hover:bg-red-700"
-                onClick={confirmDelete}
+                disabled={isWorking}
+                onClick={() => void confirmDelete()}
                 type="button"
               >
-                삭제 실행
+                {isWorking ? "처리 중" : "삭제 실행"}
               </button>
               <button
                 className="survey-control min-h-11 rounded-md border border-zinc-200 bg-white px-4 text-base font-semibold text-zinc-700 transition hover:bg-zinc-50"

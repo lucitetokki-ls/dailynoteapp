@@ -60,6 +60,18 @@ alter table daily_actions drop constraint if exists daily_actions_slot_check;
 alter table daily_actions add constraint daily_actions_slot_check
 check (slot in ('diet', 'fitness', 'vibe_coding', 'writing', 'organization', 'relationships'));
 
+alter table daily_actions alter column slot set not null;
+
+alter table daily_actions drop constraint if exists daily_actions_slot_category_check;
+alter table daily_actions add constraint daily_actions_slot_category_check
+check (
+  (slot in ('diet', 'fitness') and category = 'diet_fitness')
+  or (slot = 'vibe_coding' and category = 'vibe_coding')
+  or (slot = 'writing' and category = 'writing')
+  or (slot = 'organization' and category = 'organization')
+  or (slot = 'relationships' and category = 'relationships')
+);
+
 alter table daily_actions drop constraint if exists daily_actions_category_check;
 alter table daily_actions add constraint daily_actions_category_check
 check (category in ('diet_fitness', 'vibe_coding', 'writing', 'organization', 'relationships'));
@@ -137,6 +149,22 @@ begin
   return new;
 end;
 $$;
+
+create or replace function clear_daily_note_data()
+returns void
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+begin
+  delete from public.daily_logs;
+  delete from public.weekly_reflections;
+  delete from public.daily_writings;
+end;
+$$;
+
+revoke all on function clear_daily_note_data() from public;
+grant execute on function clear_daily_note_data() to anon, authenticated;
 
 drop trigger if exists daily_logs_set_updated_at on daily_logs;
 create trigger daily_logs_set_updated_at

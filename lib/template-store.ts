@@ -1,6 +1,7 @@
 "use client";
 
 import { retrySupabaseMutation, supabase, type SupabaseMutationResult } from "@/lib/supabase";
+import { enqueueSyncOperation, registerSyncHandler } from "@/lib/sync-engine";
 import type { ActionTemplate } from "@/types/action-template";
 import type { ActionCategory } from "@/types/daily-action";
 
@@ -75,12 +76,19 @@ export function readActionTemplates() {
   }
 }
 
-export function writeActionTemplates(templates: ActionTemplate[]) {
-  window.localStorage.setItem(templateStorageKey, JSON.stringify(templates));
+export async function writeActionTemplates(templates: ActionTemplate[]) {
+  try {
+    window.localStorage.setItem(templateStorageKey, JSON.stringify(templates));
+  } catch (error) {
+    console.warn("Failed to save action templates to browser storage", error);
+    throw error;
+  }
 
   if (supabase) {
-    void retrySupabaseMutation(() => syncTemplatesToSupabase(templates));
+    return enqueueSyncOperation("templates-sync", "all", templates);
   }
+
+  return { ok: true, queued: false };
 }
 
 function canReadBrowserTemplateStore() {
@@ -132,3 +140,7 @@ async function syncTemplatesToSupabase(
 
   return { ok: true };
 }
+
+registerSyncHandler("templates-sync", (payload) =>
+  retrySupabaseMutation(() => syncTemplatesToSupabase(payload as ActionTemplate[])),
+);

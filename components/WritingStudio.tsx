@@ -17,7 +17,8 @@ import {
 import { WritingEntryDialog } from "@/components/WritingEntryDialog";
 import {
   readWritingEntry,
-  useWritingEntries,
+  loadWritingEntry,
+  useRecentWritingEntries,
   useWritingEntry,
   useWritingSyncStatus,
   writeWritingEntry,
@@ -54,7 +55,7 @@ export function WritingStudio() {
   const [todayDate] = useState(() => getTodayDateKey());
   const [selectedDate, setSelectedDate] = useState(todayDate);
   const writingEntry = useWritingEntry(selectedDate);
-  const writingEntries = useWritingEntries();
+  const writingEntries = useRecentWritingEntries(6);
   const syncStatus = useWritingSyncStatus(selectedDate);
   const saveTimerRef = useRef<number | null>(null);
   const pendingSaveRef = useRef<{ date: string; draft: WritingStudioDraft } | null>(null);
@@ -64,7 +65,7 @@ export function WritingStudio() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const isToday = selectedDate === todayDate;
   const writingSourceKey = `${selectedDate}:${writingEntry.updatedAt}`;
-  const recentEntries = writingEntries.filter(hasEntryContent).slice(0, 6);
+  const recentEntries = writingEntries.filter(hasEntryContent);
   const writingStats = useMemo(() => {
     const contentMarkdown = draft.contentMarkdown;
     const plainText = contentMarkdown
@@ -318,7 +319,9 @@ export function WritingStudio() {
                 aria-label={`${entry.title.trim() || "제목 없는 작문"} 전체 글 보기`}
                 className="writing-recent-title survey-control flex min-h-14 w-full items-center px-4 py-3 text-left text-base font-semibold text-zinc-900 transition hover:bg-zinc-50 focus-visible:bg-zinc-50 sm:min-h-16 sm:px-5 sm:text-lg"
                 key={entry.id}
-                onClick={() => setPreviewEntry(entry)}
+                onClick={() => {
+                  void loadWritingEntry(entry.date).then(setPreviewEntry);
+                }}
                 type="button"
               >
                 {entry.title.trim() || "제목 없는 작문"}

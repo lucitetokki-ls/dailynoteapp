@@ -7,8 +7,13 @@
     "dev:local": "next dev -p 3000",
     "build": "next build",
     "check": "npm run lint && npm run build",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
     "start": "next start",
     "lint": "eslint"
+  },
+  "engines": {
+    "node": ">=22"
   },
   "dependencies": {
     "@fontsource/inter": "^5.2.8",
@@ -25,6 +30,7 @@
     "@tiptap/pm": "^3.23.1",
     "@tiptap/react": "^3.23.1",
     "@tiptap/starter-kit": "^3.23.1",
+    "idb": "8.0.3",
     "lucide-react": "^1.14.0",
     "next": "16.2.10",
     "react": "19.2.7",
@@ -37,6 +43,7 @@
     "ws": "8.21.1"
   },
   "devDependencies": {
+    "@playwright/test": "1.61.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -44,7 +51,9 @@
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "fake-indexeddb": "6.2.5",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "4.1.10"
   }
 }

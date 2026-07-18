@@ -92,6 +92,14 @@ function asArray(value: unknown, path: string, maximum: number) {
   return value;
 }
 
+function assertUnique<T>(items: T[], path: string, getKey: (item: T) => string) {
+  const keys = items.map(getKey);
+
+  if (new Set(keys).size !== keys.length) {
+    fail(path);
+  }
+}
+
 function asString(value: unknown, path: string, maximum: number, allowEmpty = true) {
   if (
     typeof value !== "string" ||
@@ -399,6 +407,19 @@ export function parseDailyNoteBackup(value: unknown): DailyNoteBackup {
     "weeklyReflections",
     maxEntries.weeklyReflections,
   ).map(parseWeeklyReflection);
+
+  assertUnique(days, "days.date", (day) => day.dailyLog.date);
+  assertUnique(days, "days.id", (day) => day.dailyLog.id);
+  assertUnique(
+    days.flatMap((day) => day.actions),
+    "days.actions.id",
+    (action) => action.id,
+  );
+  assertUnique(writingEntries, "writingEntries.date", (entry) => entry.date);
+  assertUnique(writingEntries, "writingEntries.id", (entry) => entry.id);
+  assertUnique(templates, "templates.id", (template) => template.id);
+  assertUnique(weeklyReflections, "weeklyReflections.weekKey", (reflection) => reflection.weekKey);
+  assertUnique(weeklyReflections, "weeklyReflections.id", (reflection) => reflection.id);
 
   return {
     app: "daily-note-app",
