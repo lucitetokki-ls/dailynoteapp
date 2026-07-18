@@ -1,7 +1,7 @@
 "use client";
 
 import { ChangeEvent, useRef, useState } from "react";
-import { Database, Download, LogOut, RotateCcw, ShieldAlert, Trash2, Upload } from "lucide-react";
+import { Download, LogOut, RotateCcw, ShieldAlert, Trash2, Upload } from "lucide-react";
 
 import { useAppAuth } from "@/components/AuthGate";
 import { SupabaseDiagnosticsPanel } from "@/components/SupabaseDiagnosticsPanel";
@@ -14,8 +14,6 @@ import {
 import {
   clearAllStoredDays,
   clearStoredDay,
-  readStoredDay,
-  updateStoredDay,
   useStoredDays,
   writeStoredDays,
 } from "@/lib/daily-store";
@@ -27,7 +25,7 @@ import {
 } from "@/lib/encrypted-backup";
 import { supabase } from "@/lib/supabase";
 import { readActionTemplates, writeActionTemplates } from "@/lib/template-store";
-import { createId, getDateKeyFromOffset, getTodayDateKey } from "@/lib/utils";
+import { getTodayDateKey } from "@/lib/utils";
 import {
   clearAllWeeklyReflections,
   useWeeklyReflections,
@@ -38,16 +36,6 @@ import {
   useWritingEntries,
   writeWritingEntries,
 } from "@/lib/writing-store";
-import { dailyActionSlots, slotMeta, type DailyAction } from "@/types/daily-action";
-
-const sampleDescriptions = {
-  diet: "단백질 중심으로 식사 구성",
-  fitness: "퇴근 후 30분 걷기",
-  vibe_coding: "작게 고치고 바로 확인",
-  writing: "생각 정리용 초안 작성",
-  organization: "미뤄둔 파일과 메일 한 묶음 정리",
-  relationships: "먼저 안부를 묻고 대화 나누기",
-} as const;
 
 type DeleteScope = "today" | "all";
 
@@ -88,50 +76,6 @@ export function SettingsPanel() {
     setNewPassword("");
     setPasswordConfirmation("");
     setFeedback({ tone: "success", message: "새 비밀번호로 변경했습니다." });
-  }
-
-  function handleSeedSampleData() {
-    Array.from({ length: 7 }, (_, index) => getDateKeyFromOffset(-index)).forEach(
-      (date, dayIndex) => {
-        const existingDay = readStoredDay(date);
-
-        if (existingDay.actions.length > 0) {
-          return;
-        }
-
-        const now = new Date().toISOString();
-        const actions: DailyAction[] = dailyActionSlots.map((slot, actionIndex) => ({
-          id: createId(),
-          dailyLogId: existingDay.dailyLog.id,
-          slot,
-          category: slotMeta[slot].category,
-          title: slotMeta[slot].label,
-          description:
-            actionIndex < dailyActionSlots.length - (dayIndex % 3)
-              ? sampleDescriptions[slot]
-              : "",
-          status: "done",
-          satisfaction: Math.max(3, 5 - ((dayIndex + actionIndex) % 3)),
-          reflection: actionIndex === 0 ? "작게라도 실행했다." : "",
-          createdAt: now,
-          updatedAt: now,
-        }));
-
-        updateStoredDay(date, () => ({
-          dailyLog: {
-            ...existingDay.dailyLog,
-            dailyMood: "steady",
-            dailyReflection:
-              dayIndex % 2 === 0
-                ? "완벽하지 않아도 고정 슬롯 중 일부를 유지했다."
-                : "오늘 채운 슬롯과 비운 슬롯을 분명히 확인했다.",
-            updatedAt: now,
-          },
-          actions,
-        }));
-      },
-    );
-    setFeedback({ tone: "success", message: "최근 7일 샘플 데이터를 확인했습니다." });
   }
 
   function requestDelete(scope: DeleteScope) {
@@ -382,13 +326,7 @@ export function SettingsPanel() {
         </p>
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-3">
-        <ActionPanel
-          description="최근 7일에 6슬롯 구조 예시 데이터를 채웁니다."
-          icon={Database}
-          onClick={handleSeedSampleData}
-          title="샘플 7일 추가"
-        />
+      <section className="grid gap-4 lg:grid-cols-2">
         <ActionPanel
           description="일일 기록, 작문, 주간 회고를 JSON 파일로 내보냅니다."
           icon={Download}

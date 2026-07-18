@@ -15,6 +15,7 @@ import {
   replaceDomainWithDeleteOperation,
 } from "@/lib/sync-engine";
 import { collectSupabasePages } from "@/lib/supabase-pagination";
+import { isLegacySampleDay } from "@/lib/sample-data";
 import { createEmptyDailyLog, getRecentDateKeys, getTodayDateKey } from "@/lib/utils";
 import { normalizeActionTitle } from "@/types/daily-action";
 import type {
@@ -124,8 +125,40 @@ function markClientStoreReady() {
     return;
   }
 
+  removeLegacySampleDaysFromLocalStorage();
   isClientStoreReady = true;
   emitStoreChange();
+}
+
+function removeLegacySampleDaysFromLocalStorage() {
+  const keysToRemove: string[] = [];
+
+  for (let index = 0; index < window.localStorage.length; index += 1) {
+    const key = window.localStorage.key(index);
+    const date = key?.slice(storagePrefix.length);
+
+    if (!key?.startsWith(storagePrefix) || !date || !dailyDatePattern.test(date)) {
+      continue;
+    }
+
+    const raw = window.localStorage.getItem(key);
+
+    if (!raw) {
+      continue;
+    }
+
+    try {
+      const storedDay = JSON.parse(raw) as StoredDay;
+
+      if (isLegacySampleDay(storedDay)) {
+        keysToRemove.push(key);
+      }
+    } catch {
+      // Invalid entries are handled by the normal storage reader.
+    }
+  }
+
+  keysToRemove.forEach((key) => window.localStorage.removeItem(key));
 }
 
 function canReadBrowserStore() {

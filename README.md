@@ -10,7 +10,7 @@
 - **Category**: 카테고리별 기록 히스토리
 - **Calendar**: 월간 날짜 기반 기록 탐색
 - **Search**: 행동 내용, 짧은 회고, 오늘 회고 검색
-- **Settings**: Supabase 상태 확인, 샘플 데이터, 백업/복원, 삭제 작업
+- **Settings**: Supabase 상태 확인, 백업/복원, 삭제 작업
 
 ## 실행
 
