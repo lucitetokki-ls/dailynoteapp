@@ -165,7 +165,7 @@ function FilterGroup({ activeValue, items, onChange }: FilterGroupProps) {
           className={cn(
             "min-h-12 rounded-md border px-2 text-sm font-semibold transition",
             activeValue === item.value
-              ? "survey-chip-active border-zinc-950 bg-zinc-950 text-white"
+              ? "survey-chip-active border-zinc-950 bg-zinc-950 text-zinc-950"
               : "survey-chip border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50",
           )}
           key={item.value}

@@ -72,7 +72,7 @@ export function CategoryHistory() {
             className={cn(
               "min-h-14 rounded-md border px-3 text-base font-semibold transition",
               selectedCategory === category
-                ? "survey-chip-active border-zinc-950 bg-zinc-950 text-white"
+                ? "survey-chip-active border-zinc-950 bg-zinc-950 text-zinc-950"
                 : "survey-chip border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50",
             )}
             key={category}

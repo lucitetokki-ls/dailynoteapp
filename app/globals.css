@@ -828,6 +828,10 @@ input:focus {
   background: var(--acid) !important;
 }
 
+.survey-chip-active {
+  color: var(--line) !important;
+}
+
 .daily-slot-card {
   gap: 0 !important;
   padding: 0 !important;
