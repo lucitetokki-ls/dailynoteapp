@@ -25,6 +25,7 @@ import {
   encryptDailyNoteBackup,
   isEncryptedDailyNoteBackup,
 } from "@/lib/encrypted-backup";
+import { supabase } from "@/lib/supabase";
 import { readActionTemplates, writeActionTemplates } from "@/lib/template-store";
 import { createId, getDateKeyFromOffset, getTodayDateKey } from "@/lib/utils";
 import {
@@ -66,6 +67,28 @@ export function SettingsPanel() {
   const [feedback, setFeedback] = useState<SettingsFeedback | null>(null);
   const [isWorking, setIsWorking] = useState(false);
   const [backupPassphrase, setBackupPassphrase] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = useState("");
+
+  async function handlePasswordChange() {
+    if (!supabase || newPassword.length < 12 || newPassword !== passwordConfirmation) {
+      setFeedback({ tone: "error", message: "12자 이상의 같은 비밀번호를 두 번 입력하세요." });
+      return;
+    }
+
+    setIsWorking(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setIsWorking(false);
+
+    if (error) {
+      setFeedback({ tone: "error", message: "비밀번호를 변경하지 못했습니다. 다시 시도하세요." });
+      return;
+    }
+
+    setNewPassword("");
+    setPasswordConfirmation("");
+    setFeedback({ tone: "success", message: "새 비밀번호로 변경했습니다." });
+  }
 
   function handleSeedSampleData() {
     Array.from({ length: 7 }, (_, index) => getDateKeyFromOffset(-index)).forEach(
@@ -289,20 +312,54 @@ export function SettingsPanel() {
       <SupabaseDiagnosticsPanel />
 
       {session ? (
-        <section className="survey-card flex flex-wrap items-center justify-between gap-4 rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
-          <div>
-            <p className="survey-kicker">계정</p>
-            <p className="mt-1 text-base font-semibold text-zinc-950">{session.user.email}</p>
-            <p className="mt-1 text-sm text-zinc-500">이 브라우저에 로그인 세션이 유지됩니다.</p>
+        <section className="survey-card grid gap-5 rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="survey-kicker">계정</p>
+              <p className="mt-1 text-base font-semibold text-zinc-950">{session.user.email}</p>
+              <p className="mt-1 text-sm text-zinc-500">이 브라우저에 로그인 세션이 유지됩니다.</p>
+            </div>
+            <button
+              className="survey-control flex min-h-11 items-center gap-2 rounded-md border border-zinc-200 bg-white px-4 text-base font-semibold text-zinc-700 transition hover:bg-zinc-50"
+              onClick={() => void signOut()}
+              type="button"
+            >
+              <LogOut aria-hidden="true" size={17} />
+              로그아웃
+            </button>
           </div>
-          <button
-            className="survey-control flex min-h-11 items-center gap-2 rounded-md border border-zinc-200 bg-white px-4 text-base font-semibold text-zinc-700 transition hover:bg-zinc-50"
-            onClick={() => void signOut()}
-            type="button"
-          >
-            <LogOut aria-hidden="true" size={17} />
-            로그아웃
-          </button>
+          <div className="grid max-w-2xl gap-3 border-t border-zinc-100 pt-5 sm:grid-cols-2">
+            <label className="grid gap-2 text-sm font-semibold text-zinc-700">
+              새 비밀번호
+              <input
+                autoComplete="new-password"
+                className="survey-control h-11 rounded-md border border-zinc-200 bg-zinc-50 px-3 text-base outline-none focus:border-emerald-400 focus:bg-white"
+                minLength={12}
+                onChange={(event) => setNewPassword(event.target.value)}
+                type="password"
+                value={newPassword}
+              />
+            </label>
+            <label className="grid gap-2 text-sm font-semibold text-zinc-700">
+              새 비밀번호 확인
+              <input
+                autoComplete="new-password"
+                className="survey-control h-11 rounded-md border border-zinc-200 bg-zinc-50 px-3 text-base outline-none focus:border-emerald-400 focus:bg-white"
+                minLength={12}
+                onChange={(event) => setPasswordConfirmation(event.target.value)}
+                type="password"
+                value={passwordConfirmation}
+              />
+            </label>
+            <button
+              className="survey-control min-h-11 rounded-md bg-zinc-950 px-4 text-base font-semibold text-white disabled:cursor-wait disabled:opacity-60 sm:col-span-2 sm:justify-self-start"
+              disabled={isWorking || !newPassword || !passwordConfirmation}
+              onClick={() => void handlePasswordChange()}
+              type="button"
+            >
+              비밀번호 변경
+            </button>
+          </div>
         </section>
       ) : null}
 
